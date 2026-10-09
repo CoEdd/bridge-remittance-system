@@ -190,3 +190,75 @@ def ledger_is_consistent(session: Session) -> bool:
     return all(total == 0 for _, total in totals) and all(
         account.balance_minor == sums.get(account.id, 0) for account in accounts
     )
+
+
+# ---------------------------------------------------------------- chat turns through the API
+
+
+def read_events(client: Any, stream_id: str) -> list[tuple[str, dict[str, Any]]]:
+    """Every Server-Sent Event of one turn, as (event name, data)."""
+    import json
+
+    response = client.get(f"/chat/stream/{stream_id}")
+    assert response.status_code == 200
+    assert response.headers["content-type"].startswith("text/event-stream")
+    events, name = [], ""
+    for line in response.text.splitlines():
+        if line.startswith("event:"):
+            name = line[6:].strip()
+        elif line.startswith("data:"):
+            events.append((name, json.loads(line[5:])))
+    return events
+
+
+def say(client: Any, text: str) -> list[tuple[str, dict[str, Any]]]:
+    """Send a chat message and collect the whole turn."""
+    return read_events(client, client.post("/chat", json={"text": text}).json()["stream_id"])
+
+
+def only(events: list[tuple[str, dict[str, Any]]], name: str) -> list[dict[str, Any]]:
+    return [data for event, data in events if event == name]
+
+
+def wallet_balances(client: Any) -> dict[str, int]:
+    return {account["currency"]: account["balance_minor"] for account in client.get("/accounts").json()["accounts"]}
+
+
+def all_audit_events(client: Any) -> list[dict[str, Any]]:
+    """The whole audit log through the API, oldest first."""
+    entries: list[dict[str, Any]] = []
+    page = 1
+    while True:
+        body = client.get("/audit", params={"page": page, "page_size": 200}).json()
+        entries += body["entries"]
+        if len(entries) >= body["total"]:
+            return entries[::-1]
+        page += 1
+
+
+# ---------------------------------------------------------------- a stand-in for the Anthropic client
+
+
+class StandInClient:
+    """Answers like the Anthropic client would, with canned answers. Records what it was sent."""
+
+    def __init__(self, *answers: Any) -> None:
+        from types import SimpleNamespace
+
+        self.answers = list(answers)
+        self.requests: list[dict[str, Any]] = []
+        self.beta = SimpleNamespace(messages=self)
+        self.messages = self
+
+    def create(self, **request: Any) -> Any:
+        import json
+        from types import SimpleNamespace
+
+        # Keep the conversation as it was at this moment: the driver goes on appending to its list.
+        self.requests.append({**request, "messages": list(request.get("messages", []))})
+        answer = self.answers.pop(0)
+        if isinstance(answer, Exception):
+            raise answer
+        if isinstance(answer, SimpleNamespace):
+            return answer
+        return SimpleNamespace(stop_reason="end_turn", content=[SimpleNamespace(type="text", text=json.dumps(answer))])

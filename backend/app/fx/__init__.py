@@ -27,6 +27,9 @@ OFFLINE_SNAPSHOT: dict[str, Decimal] = {"CNY": Decimal("1.62"), "USD": Decimal("
 
 # The one simulated transfer service only sells MYR for CNY.
 SUPPORTED_CONVERSIONS = {("MYR", "CNY")}
+QUOTE_LIFETIME = timedelta(minutes=10)
+HIGH_MARKUP_PCT = Decimal(2)
+HIGH_MARKUP_WARNING = "The exchange-rate markup is above 2%. Most of this transfer's cost is hidden in the rate."
 
 _INVERSE_PLACES = Decimal("0.0000000001")
 _HUNDRED = Decimal(100)
@@ -125,6 +128,10 @@ class TransferQuote:
     received_at_mid_minor: int  # what the mid-market rate would have given
     delivery_hours: int
     arrives_at: datetime
+    quoted_at: datetime
+    expires_at: datetime  # ten minutes after quoted_at; executing later uses a fresh quote
+    warning: str | None  # set when the markup is above 2%
+    source: str = "simulated"
 
     def as_breakdown(self) -> dict[str, Any]:
         """Plain JSON form, stored with the pending action and shown on the approval sheet."""
@@ -146,6 +153,10 @@ class TransferQuote:
             "received_at_mid_minor": self.received_at_mid_minor,
             "delivery_hours": self.delivery_hours,
             "arrives_at": self.arrives_at.isoformat(),
+            "source": self.source,
+            "quoted_at": self.quoted_at.isoformat(),
+            "expires_at": self.expires_at.isoformat(),
+            "warning": self.warning,
         }
 
 
@@ -181,4 +192,36 @@ def transfer_quote(
         received_at_mid_minor=convert(amount_minor, mid_rate),
         delivery_hours=provider.delivery_hours,
         arrives_at=now + timedelta(hours=provider.delivery_hours),
+        quoted_at=now,
+        expires_at=now + QUOTE_LIFETIME,
+        warning=HIGH_MARKUP_WARNING if markup_pct > HIGH_MARKUP_PCT else None,
     )
+
+
+def the_provider(session: Session) -> Provider:
+    """Bridge has one transfer service. It does not rank or compare services."""
+    provider = session.scalars(select(Provider).order_by(Provider.id).limit(1)).first()
+    if provider is None:
+        raise FxError("No transfer service is set up.")
+    return provider
+
+
+def get_transfer_quote(
+    session: Session, amount_source_minor: int, from_currency: str, to_currency: str, now: datetime
+) -> TransferQuote:
+    """A quote from the one simulated transfer service for sending `amount_source_minor`."""
+    return transfer_quote(session, the_provider(session), from_currency, to_currency, amount_source_minor, now)
+
+
+def quote_to_receive(
+    session: Session, target_minor: int, from_currency: str, to_currency: str, now: datetime
+) -> TransferQuote:
+    """The smallest amount to send so that the amount received covers `target_minor`."""
+    provider = the_provider(session)
+    rate = transfer_quote(session, provider, from_currency, to_currency, 1, now).offered_rate
+    amount = int((Decimal(target_minor) / rate).to_integral_value(rounding=ROUND_UP))
+    quote = transfer_quote(session, provider, from_currency, to_currency, amount, now)
+    while quote.amount_received_minor < target_minor:  # rounding down can leave it one unit short
+        amount += 1
+        quote = transfer_quote(session, provider, from_currency, to_currency, amount, now)
+    return quote

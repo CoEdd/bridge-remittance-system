@@ -10,6 +10,8 @@ export type FxSource = "frankfurter" | "offline_snapshot";
 export interface Health {
   status: "ok";
   agent_mode: AgentMode;
+  /** Why the mode differs from the one asked for, e.g. "no API key". Otherwise null. */
+  agent_note: string | null;
   /** Demo business date, YYYY-MM-DD. */
   demo_today: string;
   version: string;

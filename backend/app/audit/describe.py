@@ -86,6 +86,8 @@ def summarise(event_type: str, payload: Any) -> str:
     if reasons:
         more = f" +{len(reasons) - 1} more" if len(reasons) > 1 else ""
         parts.append(f"{reasons[0]}{more}")
+    if event_type == "agent.declined" and payload.get("reason"):
+        parts.append(str(payload["reason"]))
     if "attempt" in payload:
         parts.append(f"attempt {payload['attempt']} of {payload.get('max_attempts')}")
     if payload.get("cause") == "otp_attempts_exhausted":

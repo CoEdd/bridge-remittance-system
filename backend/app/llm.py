@@ -33,6 +33,27 @@ def get_client() -> Any:
     return anthropic.Anthropic(api_key=key) if key else anthropic.Anthropic()
 
 
+def create_message(client: Any = None, **request: Any) -> Any:
+    """
+    One Messages API request with the configured model. Raises LlmUnavailable on any
+    API error or a safety refusal, so callers can fall back to plain code.
+    """
+    import anthropic
+
+    client = client or get_client()
+    model = model_name()
+    try:
+        if model in _FALLBACK_MODELS:
+            response = client.beta.messages.create(model=model, betas=[_FALLBACK_BETA], fallbacks="default", **request)
+        else:
+            response = client.messages.create(model=model, **request)
+    except anthropic.APIError as error:
+        raise LlmUnavailable(f"The Claude API call failed: {error}") from error
+    if response.stop_reason == "refusal":
+        raise LlmUnavailable("Claude declined this request.")
+    return response
+
+
 def complete_json(
     *, system: str, user: str, schema: dict[str, Any], client: Any = None, max_tokens: int = 4000
 ) -> dict[str, Any]:
@@ -42,27 +63,15 @@ def complete_json(
     Raises LlmUnavailable on any API error, a refusal, or a truncated answer, so the
     caller can fall back to its deterministic path.
     """
-    import anthropic
-
-    client = client or get_client()
-    model = model_name()
-    request: dict[str, Any] = {
-        "model": model,
-        "max_tokens": max_tokens,
-        "system": system,
-        "messages": [{"role": "user", "content": user}],
-        "output_config": {"format": {"type": "json_schema", "schema": schema}},
-    }
-    try:
-        if model in _FALLBACK_MODELS:
-            response = client.beta.messages.create(betas=[_FALLBACK_BETA], fallbacks="default", **request)
-        else:
-            response = client.messages.create(**request)
-    except anthropic.APIError as error:
-        raise LlmUnavailable(f"The Claude API call failed: {error}") from error
-
-    if response.stop_reason in ("refusal", "max_tokens"):
-        raise LlmUnavailable(f"Claude stopped early ({response.stop_reason}).")
+    response = create_message(
+        client,
+        max_tokens=max_tokens,
+        system=system,
+        messages=[{"role": "user", "content": user}],
+        output_config={"format": {"type": "json_schema", "schema": schema}},
+    )
+    if response.stop_reason == "max_tokens":
+        raise LlmUnavailable("Claude's answer was cut off.")
     text = next((block.text for block in response.content if block.type == "text"), None)
     if text is None:
         raise LlmUnavailable("Claude returned no text.")

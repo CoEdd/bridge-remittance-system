@@ -24,6 +24,8 @@ class Settings(BaseModel):
     cooling_off_seconds: int = Field(default=60, ge=0)
     fx_offline: bool = False
     database_url: str = "sqlite:///./data/bridge.db"
+    # CNY the funding planner keeps spare on top of the bills it counts, in fen.
+    funding_buffer_minor: int = Field(default=50_000, ge=0)
 
 
 def load_settings(env: Mapping[str, str] | None = None) -> Settings:
@@ -40,3 +42,17 @@ def load_settings(env: Mapping[str, str] | None = None) -> Settings:
 @lru_cache
 def get_settings() -> Settings:
     return load_settings()
+
+
+def effective_agent_mode() -> AgentMode:
+    """Live needs an API key. Without one the app runs scripted, and says so."""
+    settings = get_settings()
+    has_key = bool(settings.anthropic_api_key.get_secret_value())
+    return "live" if settings.agent_mode == "live" and has_key else "scripted"
+
+
+def agent_note() -> str | None:
+    """Why the agent is not in the mode that was asked for, if that is the case."""
+    if get_settings().agent_mode == "live" and effective_agent_mode() == "scripted":
+        return "no API key"
+    return None

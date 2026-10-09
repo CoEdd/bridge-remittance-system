@@ -57,6 +57,12 @@ class Context:
     today: date  # demo clock: business dates
     now: datetime  # real UTC
     action_id: int | None = None  # set when re-checking an existing pending action
+    # Set when an action is proposed as part of a plan. Money that the plan's own waiting
+    # conversions will bring in then counts as funds for its payment. At execution time
+    # this is never set, so only money really in the wallet counts.
+    plan_id: str | None = None
+    # Planner dry runs only: funds a not-yet-proposed conversion would bring, by currency.
+    planned_proceeds: dict[str, int] = field(default_factory=dict)
 
 
 @dataclass
@@ -195,7 +201,7 @@ def _pay_bill(user: User, raw_args: dict[str, Any], ctx: Context) -> Verdict:
     limits: list[str] = []
     if _paid_out_today(user, ctx) + amount_home > user.daily_limit_minor:
         limits.append("DAILY_LIMIT")
-    if account.balance_minor < bill.amount_minor:
+    if account.balance_minor + _planned_proceeds(user, ctx, bill.currency) < bill.amount_minor:
         limits.append("INSUFFICIENT_FUNDS")
     new_payee = payee.first_paid_at is None
     if new_payee and amount_home > user.new_payee_limit_minor:
@@ -272,6 +278,26 @@ def _is_first_time_sender(session: Session, user: User, posting: Posting) -> boo
         .limit(1)
     )
     return earlier is None
+
+
+def _planned_proceeds(user: User, ctx: Context, currency: str) -> int:
+    """Money the same plan's waiting conversions will add to a wallet (zero outside a plan)."""
+    total = ctx.planned_proceeds.get(currency, 0)
+    if ctx.plan_id is None:
+        return total
+    waiting = ctx.session.scalars(
+        select(PendingAction).where(
+            PendingAction.user_id == user.id,
+            PendingAction.plan_id == ctx.plan_id,
+            PendingAction.tool == "convert_currency",
+            PendingAction.status.in_(("awaiting_confirm", "awaiting_otp", "cooling_off")),
+        )
+    )
+    for action in waiting:
+        breakdown = action.cost_breakdown or {}
+        if breakdown.get("to_currency") == currency:
+            total += int(breakdown.get("amount_received_minor", 0))
+    return total
 
 
 def _paid_out_today(user: User, ctx: Context) -> int:

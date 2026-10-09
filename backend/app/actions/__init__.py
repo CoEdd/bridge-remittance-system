@@ -80,7 +80,7 @@ def propose(
     """
     now = now or now_utc()
     with write_lock:
-        verdict = evaluate(user, tool, args, Context(session, demo_today(), now))
+        verdict = evaluate(user, tool, args, Context(session, demo_today(), now, plan_id=plan_id))
         audit.append(session, "agent.proposed", "agent", {"tool": tool, "args": args, "plan_id": plan_id}, now=now)
 
         if verdict.tier in ("T0", "T1"):
@@ -157,6 +157,17 @@ def confirm(session: Session, user: User, action_id: int, *, now: datetime | Non
     now = now or now_utc()
     with write_lock:
         action = _load(session, user, action_id, ("awaiting_confirm",), now)
+        if action.plan_id is not None:
+            # A plan's steps run in order: the conversion must finish before its payment.
+            earlier = session.scalars(
+                select(PendingAction.id).where(
+                    PendingAction.plan_id == action.plan_id,
+                    PendingAction.id < action.id,
+                    PendingAction.status.in_(OPEN_STATUSES),
+                )
+            ).first()
+            if earlier is not None:
+                raise ActionError("Finish the earlier step of this plan first.")
         audit.append(session, "user.confirmed", "user", {"action_id": action.id, "tool": action.tool}, now=now)
         _run(session, user, action, {"confirm"}, now)
         session.commit()

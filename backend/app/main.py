@@ -11,12 +11,13 @@ from sqlalchemy.orm import Session
 
 from app import actions, documents
 from app.clock import demo_today
-from app.config import get_settings
+from app.config import agent_note, effective_agent_mode, get_settings
 from app.db import get_engine
 from app.documents.index import index
 from app.routers import accounts, demo, me, payments
 from app.routers import actions as actions_router
 from app.routers import audit as audit_router
+from app.routers import chat as chat_router
 from app.routers import documents as documents_router
 from app.schemas import HealthResponse
 from app.seed import ensure_seeded
@@ -81,6 +82,7 @@ for router in (
     actions_router.router,
     audit_router.router,
     documents_router.router,
+    chat_router.router,
     demo.router,
 ):
     app.include_router(router)
@@ -90,7 +92,8 @@ for router in (
 def health() -> HealthResponse:
     return HealthResponse(
         status="ok",
-        agent_mode=get_settings().agent_mode,
+        agent_mode=effective_agent_mode(),
+        agent_note=agent_note(),
         demo_today=demo_today(),
         version=VERSION,
     )

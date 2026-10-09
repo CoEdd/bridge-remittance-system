@@ -14,7 +14,9 @@ FxSource = Literal["frankfurter", "offline_snapshot"]
 
 class HealthResponse(BaseModel):
     status: Literal["ok"]
-    agent_mode: AgentMode
+    agent_mode: AgentMode  # the mode in effect
+    # Set when the mode in effect is not the one asked for, e.g. "no API key".
+    agent_note: str | None = None
     demo_today: date
     version: str
 
@@ -301,3 +303,30 @@ class DocumentOut(DocumentSummaryOut):
     risk_signals: list[RiskSignalOut]
     explanation: dict[str, str]  # by language: ms, en, zh
     bill: BillOut | None
+
+
+class ChatIn(BaseModel):
+    text: str = Field(min_length=1, max_length=2000)
+
+
+class ChatStartOut(BaseModel):
+    stream_id: str  # follow the turn at GET /chat/stream/{stream_id}
+
+
+class ChatMessageOut(BaseModel):
+    id: int
+    role: Literal["user", "assistant"]
+    text: str
+    text_en: str | None
+    language: str
+    created_at: datetime
+
+
+class MuleEventOut(BaseModel):
+    """The money-mule demo event: an inbound transfer from a stranger, then their message."""
+
+    posting_id: int
+    sender: str
+    amount_minor: int
+    currency: Currency
+    document: DocumentOut

@@ -125,6 +125,10 @@ def execute(
         posting_id, receipt = _pay_bill(session, user, action, today, now)
     elif action.tool == "convert_currency":
         posting_id, receipt = _convert_currency(session, user, action, breakdown, today, now)
+        # The approved quote lasts ten minutes. After that the fresh quote above is the one used;
+        # it was already checked to give the same amounts the student approved.
+        approved_until = (action.cost_breakdown or {}).get("expires_at")
+        receipt["requoted"] = bool(approved_until) and now > datetime.fromisoformat(approved_until)
     elif action.tool == "add_payee":
         receipt = _add_payee(session, user, breakdown, now)
     else:

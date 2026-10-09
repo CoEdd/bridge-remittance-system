@@ -21,7 +21,7 @@ from app.documents.reader import read_message, read_pdf
 from app.llm import LlmUnavailable, complete_json
 from app.models import Bill, Document
 from app.seed.demo_docs import DEMO_DOCUMENTS, HIDDEN_INSTRUCTION, demo_docs_dir
-from tests.helpers import NOW, last_audit, the_user
+from tests.helpers import NOW, StandInClient, last_audit, the_user
 
 live = pytest.mark.skipif(not os.environ.get("ANTHROPIC_API_KEY"), reason="needs ANTHROPIC_API_KEY")
 
@@ -42,25 +42,6 @@ TUITION_FIELDS = {
 EMPTY = {"value": "", "source": ""}
 
 
-class StandInClient:
-    """Answers like the Anthropic client would, with canned JSON. Records what it was sent."""
-
-    def __init__(self, *answers: Any) -> None:
-        self.answers = list(answers)
-        self.requests: list[dict[str, Any]] = []
-        self.messages = self.beta = SimpleNamespace(messages=self)
-        self.messages = self
-
-    def create(self, **request: Any) -> Any:
-        self.requests.append(request)
-        answer = self.answers.pop(0)
-        if isinstance(answer, Exception):
-            raise answer
-        if isinstance(answer, SimpleNamespace):
-            return answer
-        return SimpleNamespace(stop_reason="end_turn", content=[SimpleNamespace(type="text", text=json.dumps(answer))])
-
-
 def fields_answer(overrides: dict[str, tuple[str, str]] | None = None, base: dict[str, tuple[str, str]] = TUITION_FIELDS) -> dict[str, Any]:
     merged = {**base, **(overrides or {})}
     names = ("issuer", "issuer_local_name", "payee_name", "payee_account", "bank_name", "amount", "currency", "due_date", "late_fee_terms")
@@ -74,6 +55,8 @@ def explanation_answer(text: str = "CNY 12,000.00") -> dict[str, str]:
 @pytest.fixture
 def live_mode(monkeypatch: pytest.MonkeyPatch) -> None:
     monkeypatch.setenv("AGENT_MODE", "live")
+    if not os.environ.get("ANTHROPIC_API_KEY"):
+        monkeypatch.setenv("ANTHROPIC_API_KEY", "stand-in-key")  # live mode needs a key to be in effect
     get_settings.cache_clear()
 
 

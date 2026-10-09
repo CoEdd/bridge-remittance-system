@@ -27,5 +27,16 @@ def detect_languages(text: str) -> list[str]:
     return found or ["en"]
 
 
+def main_language(text: str, default: str) -> str:
+    """The one language of a short chat message. `default` is used when the words do not say."""
+    if _CJK.search(text):
+        return "zh"
+    words = {word.lower() for word in _WORD.findall(text)}
+    malay, english = len(words & MALAY_WORDS), len(words & ENGLISH_WORDS)
+    if malay == english:
+        return default
+    return "ms" if malay > english else "en"
+
+
 def has_cjk(text: str) -> bool:
     return bool(_CJK.search(text))

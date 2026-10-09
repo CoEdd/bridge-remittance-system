@@ -18,7 +18,7 @@ from sqlalchemy.orm import Session
 
 from app import audit
 from app.clock import now_utc
-from app.config import get_settings
+from app.config import effective_agent_mode
 from app.db import write_lock
 from app.documents import explain, injection, risk
 from app.documents.extract import Field, digits_of, extract_scripted
@@ -62,7 +62,7 @@ def bill_is_flagged(bill: Bill) -> bool:
 
 def _extract(visible: str, raw: str, kind: str, institutions: list[Institution], llm_client: Any) -> tuple[dict[str, Field], str]:
     names = [(item.name, item.name_local) for item in institutions]
-    if get_settings().agent_mode == "live":
+    if effective_agent_mode() == "live":
         from app.documents.live import extract_live
         from app.llm import LlmUnavailable
 
@@ -147,7 +147,7 @@ def _explain(
         payable=payable,
         institution_names=(named.name, named.name_local) if named else None,
     )
-    if get_settings().agent_mode != "live":
+    if effective_agent_mode() != "live":
         return templates
 
     from app.documents.live import explain_live

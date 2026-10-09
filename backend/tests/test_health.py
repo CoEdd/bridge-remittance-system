@@ -14,6 +14,7 @@ def test_health_reports_status_mode_date_and_version() -> None:
     assert response.json() == {
         "status": "ok",
         "agent_mode": "scripted",
+        "agent_note": None,
         "demo_today": "2026-10-15",
         "version": "0.1.0",
     }
@@ -24,9 +25,14 @@ def test_health_follows_the_environment(monkeypatch: pytest.MonkeyPatch) -> None
     monkeypatch.setenv("DEMO_TODAY", "2026-11-01")
     get_settings.cache_clear()
 
+    without_key = client.get("/health").json()
+    monkeypatch.setenv("ANTHROPIC_API_KEY", "stand-in-key")
+    get_settings.cache_clear()
     body = client.get("/health").json()
 
-    assert body["agent_mode"] == "live"
+    # Live mode without a key falls back to scripted, and says why.
+    assert (without_key["agent_mode"], without_key["agent_note"]) == ("scripted", "no API key")
+    assert (body["agent_mode"], body["agent_note"]) == ("live", None)
     assert body["demo_today"] == "2026-11-01"
 
 

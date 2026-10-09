@@ -33,6 +33,8 @@ CATEGORY_LABELS = {
     "subscriptions": "Subscriptions",
     "opening_balance": "Opening balance",
     "conversion": "Currency conversion",
+    "bill_payment": "Bill payment",
+    "transfer_in": "Money received",
     "fees": "Fees",
 }
 
