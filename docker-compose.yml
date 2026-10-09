@@ -14,6 +14,13 @@ services:
       - "127.0.0.1:8000:8000"
     volumes:
       - bridge-data:/app/data
+    # Healthy once /health answers. The frontend waits for this before it starts.
+    healthcheck:
+      test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://127.0.0.1:8000/health', timeout=2)"]
+      interval: 2s
+      timeout: 3s
+      retries: 30
+      start_period: 5s
 
   frontend:
     build:
@@ -23,8 +30,10 @@ services:
         NEXT_PUBLIC_API_URL: ${NEXT_PUBLIC_API_URL:-http://localhost:8000}
     ports:
       - "127.0.0.1:3000:3000"
+    # Start only when the backend is ready, so the first page never shows "could not be reached".
     depends_on:
-      - backend
+      backend:
+        condition: service_healthy
 
 volumes:
   # Holds the SQLite file (DATABASE_URL points at ./data inside the backend container).
