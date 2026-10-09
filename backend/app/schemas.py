@@ -1,9 +1,9 @@
 """Request and response models for the HTTP API."""
 
 from datetime import date, datetime
-from typing import Literal
+from typing import Any, Literal
 
-from pydantic import BaseModel, ConfigDict
+from pydantic import BaseModel, ConfigDict, Field
 
 from app.config import AgentMode
 from app.money import Currency
@@ -142,3 +142,87 @@ class ResetOut(BaseModel):
     status: Literal["reset"]
     demo_today: date
     fx_source: FxSource
+
+
+class ReasonOut(BaseModel):
+    code: str
+    severity: Literal["info", "warn", "block"]
+    title: dict[str, str]  # by language: en, ms, zh
+    text: dict[str, str]
+
+
+class ActionOut(BaseModel):
+    id: int
+    plan_id: str | None
+    tool: str
+    args: dict[str, Any]
+    tier: Literal["T2", "T3", "REFUSED"]
+    status: str
+    requires: list[str]  # subset of confirm, otp, cooling_off
+    reasons: list[ReasonOut]
+    cost_breakdown: dict[str, Any] | None
+    otp_attempts: int
+    otp_attempts_left: int
+    created_at: datetime
+    expires_at: datetime | None  # approval deadline while waiting for the student
+    cooling_off_until: datetime | None  # when a cooling-off action will run
+    executed_posting_id: int | None
+
+
+class OtpIn(BaseModel):
+    code: str = Field(min_length=1, max_length=12)
+
+
+class OtpOut(BaseModel):
+    accepted: bool
+    attempts_left: int
+    action: ActionOut
+
+
+class AuditEntryOut(BaseModel):
+    seq: int
+    created_at: datetime
+    event_type: str
+    label: str
+    actor: str
+    summary: str
+    payload: Any
+    prev_hash: str
+    hash: str
+
+
+class EventTypeOut(BaseModel):
+    code: str
+    label: str
+
+
+class AuditPageOut(BaseModel):
+    total: int
+    page: int
+    page_size: int
+    event_types: list[EventTypeOut]  # every event type, for the filter
+    entries: list[AuditEntryOut]
+
+
+class AuditVerifyOut(BaseModel):
+    ok: bool
+    entries: int | None = None
+    broken_at: int | None = None
+    expected_hash: str | None = None
+    stored_hash: str | None = None
+
+
+class TamperIn(BaseModel):
+    seq: int | None = None
+
+
+class TamperOut(BaseModel):
+    """What changing one field does, on a copy. The real log is not changed."""
+
+    seq: int
+    event_type: str
+    field: str
+    original: Any
+    tampered: Any
+    verification: AuditVerifyOut
+    entries: list[AuditEntryOut]  # the copy, around the changed entry

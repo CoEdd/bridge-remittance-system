@@ -1,17 +1,18 @@
 """Deterministic demo data. reset() rebuilds the whole database from scratch."""
 
+import logging
 from datetime import date, datetime, timedelta, timezone
 
-from sqlalchemy import select
+from sqlalchemy import Engine, inspect, select
 from sqlalchemy.orm import Session
 
-from app import models  # noqa: F401  (registers every table on Base.metadata)
+from app import audit, models  # noqa: F401  (models registers every table on Base.metadata)
 from app.clock import demo_today, now_utc
 from app.config import get_settings
-from app.db import Base, get_engine
+from app.db import Base, get_engine, write_lock
 from app.fx import freeze_rates
 from app.ledger import SYSTEM_ROLES, income_legs, payment_legs, post, user_account
-from app.models import Account, Bill, Institution, Payee, Provider, User
+from app.models import Account, AuditLog, Bill, Institution, Payee, Provider, User
 from app.money import CURRENCIES, to_minor
 from app.seed.history import (
     HISTORY_DAYS,
@@ -22,6 +23,8 @@ from app.seed.history import (
     HistoryItem,
     build_history,
 )
+
+logger = logging.getLogger(__name__)
 
 DEMO_USER_ID = 1
 UNIVERSITY_PAYEE_ID = 1
@@ -220,37 +223,56 @@ def _add_bills(session: Session) -> None:
     session.flush()
 
 
-def _write_audit_genesis(session: Session) -> None:
-    """
-    HOOK FOR STEP 4. The audit module does not exist yet, so this does nothing.
-    Step 4 should write the audit log's genesis entry here, inside reset()'s transaction.
-    """
+def _start_audit_log(session: Session, today: date, fx_source: str) -> None:
+    """The first two entries of every chain: the genesis entry, then this reset."""
+    audit.append(session, "system.genesis", "system", {"chain": "bridge-audit", "version": 1})
+    audit.append(session, "system.reset", "system", {"demo_today": today, "fx_source": fx_source})
 
 
 def reset() -> str:
     """
-    Drop and recreate every table, seed the demo data and freeze the FX rates.
-    Returns the FX source ("frankfurter" or "offline_snapshot").
+    Drop and recreate every table, seed the demo data, freeze the FX rates and start
+    a new audit chain. Returns the FX source ("frankfurter" or "offline_snapshot").
     """
     engine = get_engine()
-    Base.metadata.drop_all(engine)
-    Base.metadata.create_all(engine)
-    today = demo_today()
-    with Session(engine) as session:
-        _add_reference_data(session, today)
-        _add_history(session, today)
-        _add_bills(session)
-        source = freeze_rates(session, offline=get_settings().fx_offline, now=now_utc())
-        _write_audit_genesis(session)
-        session.commit()
+    with write_lock:
+        Base.metadata.drop_all(engine)
+        Base.metadata.create_all(engine)
+        today = demo_today()
+        with Session(engine) as session:
+            _add_reference_data(session, today)
+            _add_history(session, today)
+            _add_bills(session)
+            source = freeze_rates(session, offline=get_settings().fx_offline, now=now_utc())
+            _start_audit_log(session, today, source)
+            session.commit()
     return source
 
 
-def ensure_seeded() -> None:
-    """Create the tables and seed them if the database is empty (first start)."""
-    engine = get_engine()
-    Base.metadata.create_all(engine)
+def _is_current(engine: Engine) -> bool:
+    """
+    True when the database matches this code: every table and column exists, the demo
+    user is there, and the audit chain has been started.
+    """
+    inspector = inspect(engine)
+    existing_tables = set(inspector.get_table_names())
+    for table in Base.metadata.sorted_tables:
+        if table.name not in existing_tables:
+            return False
+        existing_columns = {column["name"] for column in inspector.get_columns(table.name)}
+        if not {column.name for column in table.columns} <= existing_columns:
+            return False
     with Session(engine) as session:
-        seeded = session.scalar(select(User.id).limit(1)) is not None
-    if not seeded:
+        has_user = session.scalar(select(User.id).limit(1)) is not None
+        has_audit = session.scalar(select(AuditLog.seq).limit(1)) is not None
+    return has_user and has_audit
+
+
+def ensure_seeded() -> None:
+    """
+    Called at start-up. A new, empty or out-of-date database (for example a volume left
+    by an earlier version of the app) is rebuilt from the seed data. A current one is kept.
+    """
+    if not _is_current(get_engine()):
+        logger.warning("The database is missing or out of date; rebuilding the demo data.")
         reset()

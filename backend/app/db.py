@@ -1,6 +1,7 @@
 """Database engine, sessions and the declarative base."""
 
 import os
+import threading
 from collections.abc import Iterator
 from datetime import datetime, timezone
 from functools import lru_cache
@@ -16,6 +17,12 @@ from app.config import get_settings
 
 class Base(DeclarativeBase):
     pass
+
+
+# One writer at a time. Everything that changes money, actions or the audit log runs
+# under this lock, so the hash chain and the balances can never be updated by two
+# threads at once (request handlers and the background sweep share one process).
+write_lock = threading.RLock()
 
 
 class UtcDateTime(TypeDecorator[datetime]):

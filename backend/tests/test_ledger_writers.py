@@ -8,11 +8,13 @@ from pathlib import Path
 
 APP_DIR = Path(__file__).resolve().parent.parent / "app"
 
-ALLOWED_WRITERS = {
-    "ledger/__init__.py",  # defines post()
-    "seed/__init__.py",  # seed and reset
-    "actions/executor.py",  # arrives in a later step
-}
+LEDGER_ITSELF = "ledger/__init__.py"  # defines post()
+EXECUTOR = "actions/executor.py"
+SEED_DIR = "seed/"
+
+
+def _allowed(module: str) -> bool:
+    return module in (LEDGER_ITSELF, EXECUTOR) or module.startswith(SEED_DIR)
 
 
 def _uses_ledger_post(tree: ast.AST) -> bool:
@@ -35,8 +37,8 @@ def test_only_seed_and_the_executor_can_post_to_the_ledger() -> None:
         if _uses_ledger_post(ast.parse(path.read_text(encoding="utf-8")))
     }
 
-    assert "seed/__init__.py" in writers  # the scan really finds callers
-    assert writers <= ALLOWED_WRITERS, f"Not allowed to post: {sorted(writers - ALLOWED_WRITERS)}"
+    assert {"seed/__init__.py", EXECUTOR} <= writers  # the scan really finds the two callers
+    assert [module for module in sorted(writers) if not _allowed(module)] == []
 
 
 def test_the_scan_catches_both_ways_of_calling_post() -> None:

@@ -30,7 +30,7 @@ export function UpcomingBills() {
   const result = useApi(api.bills);
 
   return (
-    <Card title="Upcoming bills" className="h-full">
+    <Card title="Upcoming bills">
       <Loadable
         result={result}
         loadingLabel="Loading bills"

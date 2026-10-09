@@ -1,10 +1,14 @@
 import type {
   Accounts,
+  AuditFilters,
+  AuditPage,
+  AuditVerify,
   Bill,
   Health,
   Language,
   Payee,
   SpendingInsights,
+  TamperResult,
   Transaction,
   TransactionFilters,
   User,
@@ -76,4 +80,10 @@ export const api = {
   spending: (signal?: AbortSignal) => request<SpendingInsights>("/insights/spending", { signal }),
   bills: (signal?: AbortSignal) => request<Bill[]>("/bills", { signal }),
   payees: (signal?: AbortSignal) => request<Payee[]>("/payees", { signal }),
+  audit: (filters: AuditFilters = {}, signal?: AbortSignal) =>
+    request<AuditPage>(withQuery("/audit", filters), { signal }),
+  verifyAudit: () => request<AuditVerify>("/audit/verify"),
+  simulateTamper: () => request<TamperResult>("/audit/simulate-tamper", { method: "POST" }),
+  /** Link to download the whole audit log. */
+  auditExportUrl: (format: "json" | "csv") => `${BASE_URL}/audit/export?format=${format}`,
 };

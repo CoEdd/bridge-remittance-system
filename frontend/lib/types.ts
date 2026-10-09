@@ -138,3 +138,58 @@ export interface Payee {
   first_paid_at: string | null;
   cooling_off_until: string | null;
 }
+
+export interface AuditEntry {
+  seq: number;
+  /** Real UTC time. */
+  created_at: string;
+  event_type: string;
+  /** Readable name of the event type. */
+  label: string;
+  actor: "agent" | "policy" | "user" | "system";
+  summary: string;
+  payload: unknown;
+  prev_hash: string;
+  hash: string;
+}
+
+export interface AuditEventType {
+  code: string;
+  label: string;
+}
+
+/** Response of GET /audit: newest first. */
+export interface AuditPage {
+  total: number;
+  page: number;
+  page_size: number;
+  event_types: AuditEventType[];
+  entries: AuditEntry[];
+}
+
+export interface AuditFilters {
+  page?: number;
+  page_size?: number;
+  event_type?: string;
+}
+
+/** Response of GET /audit/verify. */
+export interface AuditVerify {
+  ok: boolean;
+  entries: number | null;
+  broken_at: number | null;
+  expected_hash: string | null;
+  stored_hash: string | null;
+}
+
+/** Response of POST /audit/simulate-tamper: what one changed field does, on a copy. */
+export interface TamperResult {
+  seq: number;
+  event_type: string;
+  field: string;
+  original: unknown;
+  tampered: unknown;
+  verification: AuditVerify;
+  /** The copy, around the changed entry, newest first. */
+  entries: AuditEntry[];
+}

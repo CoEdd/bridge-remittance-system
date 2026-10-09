@@ -4,7 +4,7 @@ from datetime import date, datetime
 from decimal import Decimal
 from typing import Any
 
-from sqlalchemy import JSON, CheckConstraint, ForeignKey, Text
+from sqlalchemy import DDL, JSON, CheckConstraint, ForeignKey, Text, event
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from app.db import Base, UtcDateTime
@@ -202,6 +202,8 @@ class PendingAction(Base):
     cost_breakdown: Mapped[Any] = mapped_column(JSON)
     otp_attempts: Mapped[int] = mapped_column(default=0)
     created_at: Mapped[datetime] = mapped_column(UtcDateTime)
+    # When the current state ends. While awaiting confirmation or a code: the approval
+    # deadline. While cooling off: the moment the wait is over and the action runs.
     expires_at: Mapped[datetime | None] = mapped_column(UtcDateTime)
     # Id of the posting that executed this action. Postings point back with action_id;
     # this side has no foreign key so the two tables do not depend on each other.
@@ -219,6 +221,18 @@ class AuditLog(Base):
     payload: Mapped[Any] = mapped_column(JSON)
     prev_hash: Mapped[str]
     hash: Mapped[str]
+
+
+# The database itself refuses to change or remove audit entries.
+for _operation in ("UPDATE", "DELETE"):
+    event.listen(
+        AuditLog.__table__,
+        "after_create",
+        DDL(
+            f"CREATE TRIGGER audit_log_no_{_operation.lower()} BEFORE {_operation} ON audit_log "
+            "BEGIN SELECT RAISE(ABORT, 'audit_log is append-only'); END"
+        ),
+    )
 
 
 class ChatMessage(Base):

@@ -1,18 +1,24 @@
 from datetime import date, timedelta
 from typing import Any
 
-from sqlalchemy import func, select
+from sqlalchemy import func, select, text
 from sqlalchemy.orm import Session
 
 from app.db import Base, get_engine
-from app.models import Account, Bill, Entry, Institution, Payee, Posting, Provider, User
+from app.models import Account, AuditLog, Bill, Entry, Institution, Payee, Posting, Provider, User
 from app.planner.spending import analyse_spending
-from app.seed import DEMO_USER_ID, reset
+from app.seed import DEMO_USER_ID, ensure_seeded, reset
 
 TODAY = date(2026, 10, 15)
 
-# Wall-clock columns: the only values allowed to differ between two resets.
-REAL_TIME_COLUMNS = {("fx_quotes", "fetched_at")}
+# Wall-clock columns: the only values allowed to differ between two resets. Audit entries
+# carry real UTC time by design, and their hashes cover that time.
+REAL_TIME_COLUMNS = {
+    ("fx_quotes", "fetched_at"),
+    ("audit_log", "created_at"),
+    ("audit_log", "prev_hash"),
+    ("audit_log", "hash"),
+}
 
 
 def wallet_balances(session: Session) -> dict[str, int]:
@@ -55,6 +61,7 @@ def test_reset_is_repeatable() -> None:
     assert first == second
     assert len(first["postings"]) > 60
     assert len(first["accounts"]) == 15
+    assert [row[1:3] for row in first["audit_log"]] == [("system.genesis", "system"), ("system.reset", "system")]
 
 
 def test_reset_restores_changed_data(session: Session) -> None:
@@ -168,3 +175,48 @@ def test_insight_is_computed_from_the_data(session: Session) -> None:
 
     assert eating_out.change_pct is not None and eating_out.change_pct > 0
     assert insights.insight == f"Eating out is up {eating_out.change_pct}% compared with the previous 30 days."
+
+
+def test_start_up_keeps_a_current_database(session: Session) -> None:
+    session.get_one(User, DEMO_USER_ID).preferred_language = "zh"
+    session.commit()
+    session.close()
+
+    ensure_seeded()
+
+    with Session(get_engine()) as fresh:
+        assert fresh.get_one(User, DEMO_USER_ID).preferred_language == "zh"
+
+
+def test_start_up_rebuilds_a_database_from_before_the_audit_log(session: Session) -> None:
+    # A volume seeded by an earlier version: data is there, but the chain was never started.
+    session.execute(text("DROP TABLE audit_log"))
+    session.execute(text("CREATE TABLE audit_log (seq INTEGER PRIMARY KEY, created_at DATETIME, event_type VARCHAR, "
+                         "actor VARCHAR, payload JSON, prev_hash VARCHAR, hash VARCHAR)"))
+    session.get_one(User, DEMO_USER_ID).preferred_language = "zh"
+    session.commit()
+    session.close()
+
+    ensure_seeded()
+
+    with Session(get_engine()) as fresh:
+        assert fresh.get_one(User, DEMO_USER_ID).preferred_language == "ms"
+        assert [row.event_type for row in fresh.query(AuditLog).order_by(AuditLog.seq)] == ["system.genesis", "system.reset"]
+        # The rebuilt table has its append-only protection again.
+        triggers = fresh.execute(text("SELECT name FROM sqlite_master WHERE type = 'trigger' ORDER BY name")).scalars().all()
+        assert triggers == ["audit_log_no_delete", "audit_log_no_update"]
+
+
+def test_start_up_rebuilds_a_database_with_a_missing_column_or_table(session: Session) -> None:
+    session.close()
+    with get_engine().begin() as connection:
+        connection.execute(text("ALTER TABLE providers DROP COLUMN delivery_hours"))
+    ensure_seeded()
+    with Session(get_engine()) as fresh:
+        assert fresh.get_one(Provider, 1).delivery_hours == 4
+
+    with get_engine().begin() as connection:
+        connection.execute(text("DROP TABLE chat_messages"))
+    ensure_seeded()
+    with get_engine().connect() as connection:
+        assert connection.execute(text("SELECT count(*) FROM chat_messages")).scalar() == 0

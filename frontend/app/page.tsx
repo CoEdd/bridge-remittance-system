@@ -1,4 +1,5 @@
 import { RecentActivity } from "@/components/features/home/RecentActivity";
+import { RecentAudit } from "@/components/features/home/RecentAudit";
 import { SpendingCard } from "@/components/features/home/SpendingCard";
 import { UpcomingBills } from "@/components/features/home/UpcomingBills";
 import { WalletCards } from "@/components/features/home/WalletCards";
@@ -13,8 +14,9 @@ export default function HomePage() {
         <div className="col-span-7">
           <SpendingCard />
         </div>
-        <div className="col-span-5">
+        <div className="col-span-5 flex flex-col gap-6">
           <UpcomingBills />
+          <RecentAudit />
         </div>
       </div>
       <div className="mt-6">

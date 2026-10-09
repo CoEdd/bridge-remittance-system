@@ -1,28 +1,55 @@
 """Bridge backend: FastAPI application entry point."""
 
+import asyncio
+import logging
 from collections.abc import AsyncIterator
 from contextlib import asynccontextmanager
 
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
+from sqlalchemy.orm import Session
 
+from app import actions
 from app.clock import demo_today
 from app.config import get_settings
+from app.db import get_engine
 from app.routers import accounts, demo, me, payments
+from app.routers import actions as actions_router
+from app.routers import audit as audit_router
 from app.schemas import HealthResponse
 from app.seed import ensure_seeded
 
 VERSION = "0.1.0"
 FRONTEND_ORIGINS = ["http://localhost:3000"]
+SWEEP_SECONDS = 2
+
+logger = logging.getLogger(__name__)
 
 # Read the environment at import time so a bad value stops the server from starting.
 get_settings()
 
 
+def run_due_actions() -> None:
+    """One sweep: run cooling-off actions whose wait is over and expire stale approvals."""
+    with Session(get_engine()) as session:
+        actions.sweep(session)
+
+
+async def _sweep_forever() -> None:
+    while True:
+        await asyncio.sleep(SWEEP_SECONDS)
+        try:
+            await asyncio.to_thread(run_due_actions)
+        except Exception:
+            logger.exception("The background sweep failed; it will try again.")
+
+
 @asynccontextmanager
 async def lifespan(_: FastAPI) -> AsyncIterator[None]:
     ensure_seeded()  # first start: create the tables and load the demo data
+    sweeper = asyncio.create_task(_sweep_forever())
     yield
+    sweeper.cancel()
 
 
 app = FastAPI(title="Bridge API", version=VERSION, lifespan=lifespan)
@@ -31,8 +58,16 @@ app.add_middleware(
     allow_origins=FRONTEND_ORIGINS,
     allow_methods=["GET", "POST", "PATCH"],
     allow_headers=["*"],
+    expose_headers=["Content-Disposition"],
 )
-for router in (me.router, accounts.router, payments.router, demo.router):
+for router in (
+    me.router,
+    accounts.router,
+    payments.router,
+    actions_router.router,
+    audit_router.router,
+    demo.router,
+):
     app.include_router(router)
 
 
