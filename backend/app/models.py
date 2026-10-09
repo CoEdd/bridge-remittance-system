@@ -14,6 +14,7 @@ ACCOUNT_KINDS = ("user", "system")
 POSTING_KINDS = ("income", "expense", "conversion", "payment", "fee", "seed")
 VERIFIED_SOURCES = ("institution_registry", "past_payment", "manual")
 TRUST_FLAGS = ("trusted", "untrusted")
+DOCUMENT_KINDS = ("invoice", "message")
 BILL_STATUSES = ("open", "paid", "cancelled")
 FX_SOURCES = ("frankfurter", "offline_snapshot")
 ACTION_STATUSES = (
@@ -125,12 +126,13 @@ class Payee(Base):
 
 class Document(Base):
     __tablename__ = "documents"
-    __table_args__ = (one_of("trust_flag", TRUST_FLAGS),)
+    __table_args__ = (one_of("trust_flag", TRUST_FLAGS), one_of("kind", DOCUMENT_KINDS))
 
     id: Mapped[int] = mapped_column(primary_key=True)
     user_id: Mapped[int] = mapped_column(ForeignKey("users.id"))
     filename: Mapped[str]
-    source_language: Mapped[str]
+    kind: Mapped[str]  # invoice (a file) or message (pasted text)
+    source_language: Mapped[str]  # every language detected, comma-separated: "en,zh"
     raw_text: Mapped[str] = mapped_column(Text)
     chars_meta: Mapped[Any] = mapped_column(JSON)
     extracted_fields: Mapped[Any] = mapped_column(JSON)
@@ -150,11 +152,12 @@ class Bill(Base):
     payee_id: Mapped[int] = mapped_column(ForeignKey("payees.id"))
     amount_minor: Mapped[int]
     currency: Mapped[str]
-    due_date: Mapped[date]
+    due_date: Mapped[date | None]  # a payment request in a message may have none
     late_fee_terms: Mapped[str | None] = mapped_column(Text)
     status: Mapped[str]
 
     payee: Mapped[Payee] = relationship()
+    document: Mapped[Document | None] = relationship()
 
 
 class FxQuote(Base):

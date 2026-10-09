@@ -115,7 +115,7 @@ def test_bills_count_days_from_the_demo_date(client: TestClient) -> None:
 
     assert [(bill["payee_name"], bill["amount_minor"], bill["due_date"], bill["due_in_days"]) for bill in bills] == [
         ("PearlTel Mobile", 9_800, "2026-10-28", 13),
-        ("Nanshan Student Residence", 280_000, "2026-11-01", 17),
+        ("Lingnan Student Housing", 280_000, "2026-11-01", 17),
     ]
     assert {bill["status"] for bill in bills} == {"open"}
 

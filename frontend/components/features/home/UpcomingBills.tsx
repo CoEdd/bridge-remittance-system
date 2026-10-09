@@ -42,7 +42,8 @@ export function UpcomingBills() {
         }
       >
         {(bills) => {
-          const open = bills.filter((bill) => bill.status === "open");
+          // Bills from untrusted or risky documents, and requests with no date, are not listed here.
+          const open = bills.filter((bill) => bill.status === "open" && !bill.flagged && bill.due_date !== null);
           if (open.length === 0) {
             return (
               <EmptyState
@@ -60,7 +61,7 @@ export function UpcomingBills() {
           return (
             <ul className="flex flex-col">
               {open.map((bill) => {
-                const due = dueLabel(bill.due_in_days);
+                const due = dueLabel(bill.due_in_days ?? 0);
                 return (
                   <li
                     key={bill.id}
@@ -68,7 +69,7 @@ export function UpcomingBills() {
                   >
                     <div>
                       <p className="text-15 font-medium text-ink">{bill.payee_name}</p>
-                      <p className="text-13 text-muted">Due {formatDate(bill.due_date)}</p>
+                      <p className="text-13 text-muted">Due {formatDate(bill.due_date ?? "")}</p>
                     </div>
                     <div className="flex flex-col items-end gap-1">
                       <Amount

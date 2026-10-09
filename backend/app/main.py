@@ -9,13 +9,15 @@ from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from sqlalchemy.orm import Session
 
-from app import actions
+from app import actions, documents
 from app.clock import demo_today
 from app.config import get_settings
 from app.db import get_engine
+from app.documents.index import index
 from app.routers import accounts, demo, me, payments
 from app.routers import actions as actions_router
 from app.routers import audit as audit_router
+from app.routers import documents as documents_router
 from app.schemas import HealthResponse
 from app.seed import ensure_seeded
 
@@ -44,12 +46,24 @@ async def _sweep_forever() -> None:
             logger.exception("The background sweep failed; it will try again.")
 
 
+def warm_up_index() -> None:
+    """Re-index stored documents and load the embedding model, so the first upload is not slow."""
+    try:
+        with Session(get_engine()) as session:
+            documents.reindex(session)
+        index.warm_up()
+    except Exception:
+        logger.exception("The passage index could not be warmed up; it will load on first use.")
+
+
 @asynccontextmanager
 async def lifespan(_: FastAPI) -> AsyncIterator[None]:
     ensure_seeded()  # first start: create the tables and load the demo data
     sweeper = asyncio.create_task(_sweep_forever())
+    warm_up = asyncio.create_task(asyncio.to_thread(warm_up_index))
     yield
     sweeper.cancel()
+    warm_up.cancel()
 
 
 app = FastAPI(title="Bridge API", version=VERSION, lifespan=lifespan)
@@ -66,6 +80,7 @@ for router in (
     payments.router,
     actions_router.router,
     audit_router.router,
+    documents_router.router,
     demo.router,
 ):
     app.include_router(router)

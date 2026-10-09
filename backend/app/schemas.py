@@ -119,10 +119,12 @@ class BillOut(BaseModel):
     payee_name: str
     amount_minor: int
     currency: Currency
-    due_date: date
-    due_in_days: int  # counted from the demo date; negative when overdue
+    due_date: date | None  # a payment request from a message may have none
+    due_in_days: int | None  # counted from the demo date; negative when overdue
     late_fee_terms: str | None
     status: Literal["open", "paid", "cancelled"]
+    document_id: int | None
+    flagged: bool  # its document is untrusted or carries a risk signal
 
 
 class PayeeOut(BaseModel):
@@ -226,3 +228,76 @@ class TamperOut(BaseModel):
     tampered: Any
     verification: AuditVerifyOut
     entries: list[AuditEntryOut]  # the copy, around the changed entry
+
+
+DocumentStatus = Literal["verified", "needs_review", "untrusted", "risk_found"]
+
+
+class DemoDocumentOut(BaseModel):
+    key: str
+    filename: str
+    kind: Literal["invoice", "message"]
+    label: str
+
+
+class MessageIn(BaseModel):
+    text: str = Field(min_length=1, max_length=20_000)
+
+
+class DocumentSummaryOut(BaseModel):
+    id: int
+    filename: str
+    kind: Literal["invoice", "message"]
+    languages: list[str]
+    created_at: datetime
+    status: DocumentStatus
+
+
+class FieldOut(BaseModel):
+    name: str
+    value: str
+    source: str  # the exact text the value came from
+    start: int  # offsets of `source` in the document's raw text
+    end: int
+    verified: bool
+    note: str | None  # why it is unverified
+
+
+class HiddenTextOut(BaseModel):
+    kind: str  # hidden_text | tiny_text | instruction_phrase | invisible_characters
+    text: str
+
+
+class ClauseVersionOut(BaseModel):
+    text: str
+    title: str | None
+    file: str
+
+
+class PolicyClauseOut(BaseModel):
+    """The policy clause found by retrieval, plus the same clause in each published language."""
+
+    text: str
+    title: str | None
+    file: str
+    language: str
+    institution: str | None = None
+    versions: dict[str, ClauseVersionOut] = {}
+
+
+class RiskSignalOut(BaseModel):
+    code: str
+    title: dict[str, str]  # by language: en, ms, zh
+    text: dict[str, str]
+    evidence: list[str]
+    policy_clause: PolicyClauseOut | None = None
+
+
+class DocumentOut(DocumentSummaryOut):
+    raw_text: str
+    trust_flag: Literal["trusted", "untrusted"]
+    fields: list[FieldOut]
+    hidden_text: list[HiddenTextOut]
+    risk_signals: list[RiskSignalOut]
+    explanation: dict[str, str]  # by language: ms, en, zh
+    bill: BillOut | None

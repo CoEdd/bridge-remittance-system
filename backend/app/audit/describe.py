@@ -67,6 +67,16 @@ def summarise(event_type: str, payload: Any) -> str:
         parts.append(f"Action #{payload['action_id']}")
     if "tool" in payload:
         parts.append(TOOL_LABELS.get(payload["tool"], str(payload["tool"])))
+    if "filename" in payload:
+        parts.append(str(payload["filename"]))
+    if payload.get("trust_flag") == "untrusted":
+        parts.append("untrusted")
+    signals = payload.get("signals") or []
+    if signals:
+        more = f" +{len(signals) - 1} more" if len(signals) > 1 else ""
+        parts.append(f"{signals[0]}{more}")
+    if event_type == "document.uploaded" and payload.get("source"):
+        parts.append(str(payload["source"]))
     amount = _amount(payload)
     if amount:
         parts.append(amount)

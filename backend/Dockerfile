@@ -1,3 +1,4 @@
+# Build from the repository root:  docker build -f backend/Dockerfile .
 FROM python:3.11-slim
 
 ENV PYTHONDONTWRITEBYTECODE=1 \
@@ -19,7 +20,7 @@ WORKDIR /app
 # sentence-transformers needs torch. The CPU-only build avoids several GB of GPU libraries.
 RUN pip install torch==2.14.1 --index-url https://download.pytorch.org/whl/cpu
 
-COPY requirements-ml.txt .
+COPY backend/requirements-ml.txt .
 RUN pip install -r requirements-ml.txt
 
 # Download the embedding model now, then forbid network lookups so the app runs offline.
@@ -28,14 +29,16 @@ ENV HF_HUB_OFFLINE=1 \
     TRANSFORMERS_OFFLINE=1
 
 # The small packages come last, so adding one does not repeat the large downloads above.
-COPY requirements.txt .
+COPY backend/requirements.txt .
 RUN pip install -r requirements.txt
 
 # Run as an unprivileged user. /app/data is where the SQLite volume is mounted.
 RUN useradd --create-home --uid 1000 bridge \
     && mkdir -p /app/data \
     && chown -R bridge:bridge /app
-COPY --chown=bridge:bridge . .
+COPY --chown=bridge:bridge backend/ .
+# The bundled demo documents, read by POST /demo/documents/{key}.
+COPY --chown=bridge:bridge demo-docs/ ./demo-docs/
 USER bridge
 
 EXPOSE 8000

@@ -4,6 +4,7 @@ import type { ReactNode } from "react";
 import { PageHeader } from "@/components/features/shell/PageHeader";
 import {
   ErrorStateDemo,
+  MenuDemo,
   SheetDemo,
   TooltipDemo,
 } from "@/components/features/styleguide/InteractiveDemos";
@@ -216,6 +217,10 @@ export default function StyleguidePage() {
 
       <Section title="Tooltip">
         <TooltipDemo />
+      </Section>
+
+      <Section title="Menu">
+        <MenuDemo />
       </Section>
 
       <Section title="Sheet">

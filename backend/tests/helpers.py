@@ -110,6 +110,7 @@ def new_document(session: Session, trust_flag: str = "trusted", risk_signals: li
     document = Document(
         user_id=DEMO_USER_ID,
         filename="fixture.txt",
+        kind="message",
         source_language="en",
         raw_text="fixture",
         chars_meta=[],

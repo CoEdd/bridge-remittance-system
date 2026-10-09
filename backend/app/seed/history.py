@@ -10,7 +10,9 @@ TUITION_DAYS_AGO = 60  # last semester's tuition
 RECENT_DAYS = 30  # the window the Home page compares with the 30 days before it
 
 UNIVERSITY_NAME = "Shenzhen Polytechnic International University"
-LANDLORD_NAME = "Nanshan Student Residence"
+# The landlord and account on the demo rent invoice (demo-docs/invoice_injection_en.pdf).
+LANDLORD_NAME = "Lingnan Student Housing"
+LANDLORD_ACCOUNT = "3300 1188 2026 0042"
 PHONE_COMPANY_NAME = "PearlTel Mobile"
 
 # Everyday spending in CNY. Each list is used in order and repeats. Food costs more

@@ -3,19 +3,21 @@
 import logging
 from datetime import date, datetime, timedelta, timezone
 
-from sqlalchemy import Engine, inspect, select
+from sqlalchemy import Engine, inspect, select, text
 from sqlalchemy.orm import Session
 
 from app import audit, models  # noqa: F401  (models registers every table on Base.metadata)
 from app.clock import demo_today, now_utc
 from app.config import get_settings
 from app.db import Base, get_engine, write_lock
+from app.documents.index import index
 from app.fx import freeze_rates
 from app.ledger import SYSTEM_ROLES, income_legs, payment_legs, post, user_account
 from app.models import Account, AuditLog, Bill, Institution, Payee, Provider, User
 from app.money import CURRENCIES, to_minor
 from app.seed.history import (
     HISTORY_DAYS,
+    LANDLORD_ACCOUNT,
     LANDLORD_NAME,
     PHONE_COMPANY_NAME,
     TUITION_DAYS_AGO,
@@ -25,6 +27,9 @@ from app.seed.history import (
 )
 
 logger = logging.getLogger(__name__)
+
+# Bump whenever a table changes. A database stamped with another number is rebuilt at start-up.
+SCHEMA_VERSION = 5
 
 DEMO_USER_ID = 1
 UNIVERSITY_PAYEE_ID = 1
@@ -119,7 +124,7 @@ def _add_reference_data(session: Session, today: date) -> None:
                 id=LANDLORD_PAYEE_ID,
                 user_id=DEMO_USER_ID,
                 name=LANDLORD_NAME,
-                account_ref="6230 5500 0031 7742",
+                account_ref=LANDLORD_ACCOUNT,
                 bank_name=BANK_NAME,
                 verified_source="past_payment",
                 created_at=_seed_time(start, 0),
@@ -236,8 +241,11 @@ def reset() -> str:
     """
     engine = get_engine()
     with write_lock:
+        index.reset()
         Base.metadata.drop_all(engine)
         Base.metadata.create_all(engine)
+        with engine.begin() as connection:
+            connection.execute(text(f"PRAGMA user_version = {SCHEMA_VERSION}"))
         today = demo_today()
         with Session(engine) as session:
             _add_reference_data(session, today)
@@ -251,9 +259,12 @@ def reset() -> str:
 
 def _is_current(engine: Engine) -> bool:
     """
-    True when the database matches this code: every table and column exists, the demo
-    user is there, and the audit chain has been started.
+    True when the database matches this code: it carries this schema version, every
+    table and column exists, the demo user is there, and the audit chain has been started.
     """
+    with engine.connect() as connection:
+        if connection.execute(text("PRAGMA user_version")).scalar() != SCHEMA_VERSION:
+            return False
     inspector = inspect(engine)
     existing_tables = set(inspector.get_table_names())
     for table in Base.metadata.sorted_tables:

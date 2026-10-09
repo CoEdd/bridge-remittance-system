@@ -2,7 +2,10 @@ name: bridge
 
 services:
   backend:
-    build: ./backend
+    # Built from the repo root so the image can include demo-docs/.
+    build:
+      context: .
+      dockerfile: backend/Dockerfile
     # .env is optional: without it the backend uses the defaults shown in .env.example.
     env_file:
       - path: .env

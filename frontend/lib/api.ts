@@ -4,6 +4,9 @@ import type {
   AuditPage,
   AuditVerify,
   Bill,
+  DemoDocument,
+  DocumentDetail,
+  DocumentSummary,
   Health,
   Language,
   Payee,
@@ -86,4 +89,19 @@ export const api = {
   simulateTamper: () => request<TamperResult>("/audit/simulate-tamper", { method: "POST" }),
   /** Link to download the whole audit log. */
   auditExportUrl: (format: "json" | "csv") => `${BASE_URL}/audit/export?format=${format}`,
+  documents: (signal?: AbortSignal) => request<DocumentSummary[]>("/documents", { signal }),
+  document: (id: number, signal?: AbortSignal) => request<DocumentDetail>(`/documents/${id}`, { signal }),
+  demoDocuments: (signal?: AbortSignal) => request<DemoDocument[]>("/demo/documents", { signal }),
+  ingestDemoDocument: (key: string) => request<DocumentDetail>(`/demo/documents/${key}`, { method: "POST" }),
+  uploadDocument: (file: File) => {
+    const form = new FormData();
+    form.append("file", file);
+    return request<DocumentDetail>("/documents", { method: "POST", body: form });
+  },
+  pasteMessage: (text: string) =>
+    request<DocumentDetail>("/documents/message", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ text }),
+    }),
 };

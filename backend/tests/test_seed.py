@@ -154,7 +154,7 @@ def test_upcoming_bills(session: Session) -> None:
 
     assert [(bill.payee.name, bill.amount_minor, bill.currency, bill.due_date, bill.status) for bill in bills] == [
         ("PearlTel Mobile", 9_800, "CNY", date(2026, 10, 28), "open"),
-        ("Nanshan Student Residence", 280_000, "CNY", date(2026, 11, 1), "open"),
+        ("Lingnan Student Housing", 280_000, "CNY", date(2026, 11, 1), "open"),
     ]
 
 

@@ -6,6 +6,7 @@ import { Amount } from "@/components/ui/Amount";
 import { TierBadge } from "@/components/ui/Badge";
 import { Button } from "@/components/ui/Button";
 import { ErrorState } from "@/components/ui/ErrorState";
+import { Menu } from "@/components/ui/Menu";
 import { Sheet } from "@/components/ui/Sheet";
 import { Tooltip } from "@/components/ui/Tooltip";
 
@@ -30,6 +31,24 @@ export function ErrorStateDemo() {
       />
       <p className="text-center text-13 text-muted">Sample only. Try again pressed: {retries}</p>
     </>
+  );
+}
+
+export function MenuDemo() {
+  const [chosen, setChosen] = useState("nothing yet");
+
+  return (
+    <div className="flex items-center gap-4">
+      <Menu
+        label="Use a demo document"
+        items={[
+          { key: "Tuition invoice", label: "Tuition invoice", hint: "tuition_invoice.pdf" },
+          { key: "Agent offer", label: "Agent offer (Malay)", hint: "agent_offer_message_ms.txt" },
+        ]}
+        onSelect={setChosen}
+      />
+      <span className="text-13 text-muted">Sample only. Chosen: {chosen}</span>
+    </div>
   );
 }
 

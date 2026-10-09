@@ -2,9 +2,9 @@ from fastapi import APIRouter
 from sqlalchemy import select
 from sqlalchemy.orm import selectinload
 
-from app.clock import demo_today
 from app.models import Bill, Payee
 from app.routers.deps import SessionDep, UserDep
+from app.routers.documents import bill_out
 from app.schemas import BillOut, PayeeOut
 
 router = APIRouter(tags=["payments"])
@@ -12,28 +12,14 @@ router = APIRouter(tags=["payments"])
 
 @router.get("/bills")
 def list_bills(session: SessionDep, user: UserDep) -> list[BillOut]:
-    """The user's bills, soonest due first."""
-    today = demo_today()
+    """The user's bills, soonest due first. Bills from risky documents are marked `flagged`."""
     bills = session.scalars(
         select(Bill)
         .where(Bill.user_id == user.id)
-        .options(selectinload(Bill.payee))
-        .order_by(Bill.due_date, Bill.id)
+        .options(selectinload(Bill.payee), selectinload(Bill.document))
+        .order_by(Bill.due_date.is_(None), Bill.due_date, Bill.id)
     )
-    return [
-        BillOut(
-            id=bill.id,
-            payee_id=bill.payee_id,
-            payee_name=bill.payee.name,
-            amount_minor=bill.amount_minor,
-            currency=bill.currency,
-            due_date=bill.due_date,
-            due_in_days=(bill.due_date - today).days,
-            late_fee_terms=bill.late_fee_terms,
-            status=bill.status,
-        )
-        for bill in bills
-    ]
+    return [bill_out(bill) for bill in bills]
 
 
 @router.get("/payees")

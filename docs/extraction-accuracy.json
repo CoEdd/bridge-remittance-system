@@ -1,0 +1,84 @@
+{
+  "what": "Field extraction on the six bundled demo documents, scripted (regex) extractor. A field counts as correct when its value, its cited source text and its offset all match.",
+  "per_document": {
+    "tuition_invoice": {
+      "file": "tuition_invoice.pdf",
+      "languages": [
+        "en",
+        "zh"
+      ],
+      "fields_expected": 9,
+      "fields_correct": 9,
+      "fields_unexpected": 0,
+      "accuracy": 1.0
+    },
+    "agent_offer": {
+      "file": "agent_offer_message_ms.txt",
+      "languages": [
+        "ms"
+      ],
+      "fields_expected": 6,
+      "fields_correct": 6,
+      "fields_unexpected": 0,
+      "accuracy": 1.0
+    },
+    "changed_details": {
+      "file": "changed_details_invoice.pdf",
+      "languages": [
+        "en",
+        "zh"
+      ],
+      "fields_expected": 9,
+      "fields_correct": 9,
+      "fields_unexpected": 0,
+      "accuracy": 1.0
+    },
+    "urgent_notice": {
+      "file": "urgent_notice_message_zh.txt",
+      "languages": [
+        "zh"
+      ],
+      "fields_expected": 6,
+      "fields_correct": 6,
+      "fields_unexpected": 0,
+      "accuracy": 1.0
+    },
+    "invoice_injection": {
+      "file": "invoice_injection_en.pdf",
+      "languages": [
+        "en"
+      ],
+      "fields_expected": 7,
+      "fields_correct": 7,
+      "fields_unexpected": 0,
+      "accuracy": 1.0
+    },
+    "mule_message": {
+      "file": "mule_message_en.txt",
+      "languages": [
+        "en"
+      ],
+      "fields_expected": 5,
+      "fields_correct": 5,
+      "fields_unexpected": 0,
+      "accuracy": 1.0
+    }
+  },
+  "per_language": {
+    "en": {
+      "fields_correct": 30,
+      "fields_expected": 30,
+      "accuracy": 1.0
+    },
+    "ms": {
+      "fields_correct": 6,
+      "fields_expected": 6,
+      "accuracy": 1.0
+    },
+    "zh": {
+      "fields_correct": 24,
+      "fields_expected": 24,
+      "accuracy": 1.0
+    }
+  }
+}

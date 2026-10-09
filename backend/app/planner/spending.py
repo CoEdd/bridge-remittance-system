@@ -8,6 +8,7 @@ from decimal import ROUND_HALF_UP, Decimal
 from sqlalchemy import func, select
 from sqlalchemy.orm import Session
 
+from app.documents import bill_is_flagged
 from app.fx import get_mid_rate
 from app.ledger import user_account
 from app.models import Account, Bill, Entry, Posting, User
@@ -142,23 +143,25 @@ def _forecast(session: Session, user: User, today: date) -> Forecast:
     )
     days_left = (month_end - today).days
     projected = -(-everyday * days_left // PERIOD_DAYS)  # rounded up
-    bills_due = session.scalar(
-        select(func.coalesce(func.sum(Bill.amount_minor), 0)).where(
+    open_bills = session.scalars(
+        select(Bill).where(
             Bill.user_id == user.id,
             Bill.status == "open",
             Bill.currency == FORECAST_CURRENCY,
             Bill.due_date.between(today, month_end),
         )
     )
+    # A bill from an untrusted or risky document is not something to plan for.
+    bills_due = sum(bill.amount_minor for bill in open_bills if not bill_is_flagged(bill))
     balance = user_account(session, user.id, FORECAST_CURRENCY).balance_minor
     return Forecast(
         currency=FORECAST_CURRENCY,
         as_of=today,
         month_end=month_end,
         balance_minor=balance,
-        bills_due_minor=int(bills_due or 0),
+        bills_due_minor=bills_due,
         projected_spending_minor=projected,
-        forecast_minor=balance - int(bills_due or 0) - projected,
+        forecast_minor=balance - bills_due - projected,
     )
 
 

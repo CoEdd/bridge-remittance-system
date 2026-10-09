@@ -1,0 +1,14 @@
+# Used when building the backend image from the repo root.
+.git/
+doc/
+docs/
+evidence/
+frontend/
+**/__pycache__/
+**/*.py[cod]
+**/.pytest_cache/
+**/.venv/
+backend/data/
+**/*.db
+.env
+.env.*

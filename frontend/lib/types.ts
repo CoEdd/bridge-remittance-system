@@ -119,11 +119,15 @@ export interface Bill {
   payee_name: string;
   amount_minor: number;
   currency: Currency;
-  due_date: string;
+  /** null for a payment request that names no date. */
+  due_date: string | null;
   /** Counted from the demo date; negative when overdue. */
-  due_in_days: number;
+  due_in_days: number | null;
   late_fee_terms: string | null;
   status: "open" | "paid" | "cancelled";
+  document_id: number | null;
+  /** Its document is untrusted or carries a risk signal. */
+  flagged: boolean;
 }
 
 export interface Payee {
@@ -192,4 +196,69 @@ export interface TamperResult {
   verification: AuditVerify;
   /** The copy, around the changed entry, newest first. */
   entries: AuditEntry[];
+}
+
+export type DocumentKind = "invoice" | "message";
+export type DocumentStatus = "verified" | "needs_review" | "untrusted" | "risk_found";
+
+/** One bundled demo document, for the "Use a demo document" menu. */
+export interface DemoDocument {
+  key: string;
+  filename: string;
+  kind: DocumentKind;
+  label: string;
+}
+
+export interface DocumentSummary {
+  id: number;
+  filename: string;
+  kind: DocumentKind;
+  languages: Language[];
+  created_at: string;
+  status: DocumentStatus;
+}
+
+export interface DocumentField {
+  name: string;
+  value: string;
+  /** The exact text the value came from. */
+  source: string;
+  /** Offsets of `source` in the document's raw text. */
+  start: number;
+  end: number;
+  verified: boolean;
+  /** Why it is unverified. */
+  note: string | null;
+}
+
+export interface PolicyClause {
+  /** The clause as retrieval found it. */
+  text: string;
+  title: string | null;
+  file: string;
+  language: Language;
+  institution: string | null;
+  /** The same clause in each language the policy is published in. */
+  versions: Partial<Record<Language, { text: string; title: string | null; file: string }>>;
+}
+
+/** Text by language. */
+export type Translations = Record<Language, string>;
+
+export interface RiskSignal {
+  code: string;
+  title: Translations;
+  text: Translations;
+  evidence: string[];
+  policy_clause: PolicyClause | null;
+}
+
+export interface DocumentDetail extends DocumentSummary {
+  raw_text: string;
+  trust_flag: "trusted" | "untrusted";
+  fields: DocumentField[];
+  hidden_text: { kind: string; text: string }[];
+  risk_signals: RiskSignal[];
+  explanation: Translations;
+  bill: Bill | null;
 }
