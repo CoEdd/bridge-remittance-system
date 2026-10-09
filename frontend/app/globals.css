@@ -1,0 +1,77 @@
+@import "tailwindcss";
+
+/*
+ * Design tokens from the "Design system" section of CLAUDE.md.
+ * Tailwind's default colours and font sizes are removed, so these are the only ones.
+ */
+@theme {
+  --color-*: initial;
+  --color-ink: #0f1e2e;
+  --color-paper: #f6f4ee;
+  --color-surface: #fffffc;
+  --color-line: #ddd9cc;
+  --color-body: #4a5568;
+  --color-muted: #5a6573;
+  --color-teal: #12806f;
+  --color-teal-bright: #2bb3a3;
+  --color-teal-tint: #e3f3ef;
+  --color-amber-line: #d98a1f;
+  --color-amber-ink: #8a4b00;
+  --color-amber-tint: #fbebdd;
+  --color-danger: #a1261b;
+  --color-danger-tint: #fbe4e1;
+
+  /* Hover shades for filled buttons: the palette colour mixed with ink. */
+  --color-teal-hover: color-mix(in srgb, #12806f 85%, #0f1e2e);
+  --color-danger-hover: color-mix(in srgb, #a1261b 85%, #0f1e2e);
+
+  /* One type scale: 32 / 24 / 18 / 15 / 13 px. */
+  --text-*: initial;
+  --text-32: 2rem;
+  --text-32--line-height: 2.5rem;
+  --text-24: 1.5rem;
+  --text-24--line-height: 2rem;
+  --text-18: 1.125rem;
+  --text-18--line-height: 1.5rem;
+  --text-15: 0.9375rem;
+  --text-15--line-height: 1.5rem;
+  --text-13: 0.8125rem;
+  --text-13--line-height: 1.25rem;
+
+  --radius-card: 0.75rem;
+  --radius-control: 0.5rem;
+
+  /* Shadows are for overlays only (sheet, tooltip). */
+  --shadow-*: initial;
+  --shadow-overlay: 0 12px 32px rgb(15 30 46 / 0.18);
+
+  --animate-sheet-in: sheet-in 200ms ease-out;
+
+  @keyframes sheet-in {
+    from {
+      transform: translateX(24px);
+      opacity: 0;
+    }
+    to {
+      transform: translateX(0);
+      opacity: 1;
+    }
+  }
+}
+
+/* Font families point at the variables next/font sets on <html>. */
+@theme inline {
+  --font-sans: var(--font-plex-sans), ui-sans-serif, system-ui, sans-serif;
+  --font-heading: var(--font-space-grotesk), ui-sans-serif, system-ui, sans-serif;
+}
+
+@layer base {
+  html {
+    color-scheme: light;
+  }
+
+  :focus-visible {
+    outline: 2px solid var(--color-teal);
+    outline-offset: 2px;
+  }
+}

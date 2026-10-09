@@ -1,0 +1,28 @@
+name: bridge
+
+services:
+  backend:
+    build: ./backend
+    # .env is optional: without it the backend uses the defaults shown in .env.example.
+    env_file:
+      - path: .env
+        required: false
+    ports:
+      - "127.0.0.1:8000:8000"
+    volumes:
+      - bridge-data:/app/data
+
+  frontend:
+    build:
+      context: ./frontend
+      args:
+        # Next.js inlines NEXT_PUBLIC_* values when it builds, so this is a build argument.
+        NEXT_PUBLIC_API_URL: ${NEXT_PUBLIC_API_URL:-http://localhost:8000}
+    ports:
+      - "127.0.0.1:3000:3000"
+    depends_on:
+      - backend
+
+volumes:
+  # Holds the SQLite file (DATABASE_URL points at ./data inside the backend container).
+  bridge-data:
