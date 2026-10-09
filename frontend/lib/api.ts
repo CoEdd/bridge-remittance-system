@@ -1,4 +1,14 @@
-import type { Health } from "./types";
+import type {
+  Accounts,
+  Bill,
+  Health,
+  Language,
+  Payee,
+  SpendingInsights,
+  Transaction,
+  TransactionFilters,
+  User,
+} from "./types";
 
 const BASE_URL = process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:8000";
 
@@ -42,6 +52,28 @@ async function request<T>(path: string, init?: RequestInit): Promise<T> {
   return (await response.json()) as T;
 }
 
+function withQuery(path: string, params: object): string {
+  const query = new URLSearchParams();
+  for (const [key, value] of Object.entries(params)) {
+    if (value !== undefined) query.set(key, String(value));
+  }
+  const text = query.toString();
+  return text ? `${path}?${text}` : path;
+}
+
 export const api = {
   health: (signal?: AbortSignal) => request<Health>("/health", { signal }),
+  me: (signal?: AbortSignal) => request<User>("/me", { signal }),
+  updateLanguage: (language: Language) =>
+    request<User>("/me", {
+      method: "PATCH",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ preferred_language: language }),
+    }),
+  accounts: (signal?: AbortSignal) => request<Accounts>("/accounts", { signal }),
+  transactions: (filters: TransactionFilters = {}, signal?: AbortSignal) =>
+    request<Transaction[]>(withQuery("/transactions", filters), { signal }),
+  spending: (signal?: AbortSignal) => request<SpendingInsights>("/insights/spending", { signal }),
+  bills: (signal?: AbortSignal) => request<Bill[]>("/bills", { signal }),
+  payees: (signal?: AbortSignal) => request<Payee[]>("/payees", { signal }),
 };

@@ -1,6 +1,7 @@
+-r requirements-ml.txt
 fastapi==0.143.0
 uvicorn==0.54.0
 pydantic==2.14.0
+sqlalchemy==2.1.4
 httpx==0.28.1
-sentence-transformers==6.1.0
 pytest==9.1.1

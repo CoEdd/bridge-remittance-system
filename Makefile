@@ -12,9 +12,11 @@ down:
 test:
 	docker compose run --rm --build backend pytest
 
-# Placeholder: the one-click demo reset is built in a later step.
+# Restore the demo: rebuild the database from the seed data and freeze fresh FX rates.
+# The app must be running (make up).
 reset:
-	@echo "make reset does nothing yet. The demo reset is built in a later step."
+	@curl -fsS -X POST http://localhost:8000/demo/reset && echo \
+		|| (echo "Reset failed. Start the app first with: make up"; exit 1)
 
 # Follow the logs of both services.
 logs:

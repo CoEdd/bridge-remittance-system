@@ -5,6 +5,7 @@ import { useState } from "react";
 import { Amount } from "@/components/ui/Amount";
 import { TierBadge } from "@/components/ui/Badge";
 import { Button } from "@/components/ui/Button";
+import { ErrorState } from "@/components/ui/ErrorState";
 import { Sheet } from "@/components/ui/Sheet";
 import { Tooltip } from "@/components/ui/Tooltip";
 
@@ -15,6 +16,20 @@ export function TooltipDemo() {
         Hover or focus me
       </Button>
     </Tooltip>
+  );
+}
+
+export function ErrorStateDemo() {
+  const [retries, setRetries] = useState(0);
+
+  return (
+    <>
+      <ErrorState
+        message="The backend could not be reached."
+        onRetry={() => setRetries((count) => count + 1)}
+      />
+      <p className="text-center text-13 text-muted">Sample only. Try again pressed: {retries}</p>
+    </>
   );
 }
 

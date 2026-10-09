@@ -1,6 +1,6 @@
 import { CircleUserRound, Info, Play } from "lucide-react";
 import { Button } from "@/components/ui/Button";
-import { AgentModeLabel } from "./AgentModeLabel";
+import { HeaderStatus } from "./HeaderStatus";
 import { LanguageSwitcher } from "./LanguageSwitcher";
 
 export function Header() {
@@ -11,7 +11,7 @@ export function Header() {
         Sandbox demo: no real money moves
       </p>
       <div className="flex h-16 items-center gap-6 px-8">
-        <AgentModeLabel />
+        <HeaderStatus />
         <div className="ml-auto flex items-center gap-4">
           <LanguageSwitcher />
           <Button variant="secondary" icon={Play} disabled>

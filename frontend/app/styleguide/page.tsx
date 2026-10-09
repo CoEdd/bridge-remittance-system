@@ -2,7 +2,11 @@ import { BadgeCheck, FileText, Upload } from "lucide-react";
 import type { Metadata } from "next";
 import type { ReactNode } from "react";
 import { PageHeader } from "@/components/features/shell/PageHeader";
-import { SheetDemo, TooltipDemo } from "@/components/features/styleguide/InteractiveDemos";
+import {
+  ErrorStateDemo,
+  SheetDemo,
+  TooltipDemo,
+} from "@/components/features/styleguide/InteractiveDemos";
 import { Amount } from "@/components/ui/Amount";
 import { Badge, TierBadge, type Tier } from "@/components/ui/Badge";
 import { Button, type ButtonSize, type ButtonVariant } from "@/components/ui/Button";
@@ -195,6 +199,10 @@ export default function StyleguidePage() {
           message="No documents have been uploaded yet."
           action={<Button icon={Upload}>Upload document</Button>}
         />
+      </Section>
+
+      <Section title="ErrorState">
+        <ErrorStateDemo />
       </Section>
 
       <Section title="Skeleton">

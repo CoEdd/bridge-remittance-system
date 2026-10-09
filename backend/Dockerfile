@@ -19,13 +19,17 @@ WORKDIR /app
 # sentence-transformers needs torch. The CPU-only build avoids several GB of GPU libraries.
 RUN pip install torch==2.14.1 --index-url https://download.pytorch.org/whl/cpu
 
-COPY requirements.txt .
-RUN pip install -r requirements.txt
+COPY requirements-ml.txt .
+RUN pip install -r requirements-ml.txt
 
 # Download the embedding model now, then forbid network lookups so the app runs offline.
 RUN python -c "from sentence_transformers import SentenceTransformer; SentenceTransformer('sentence-transformers/paraphrase-multilingual-MiniLM-L12-v2')"
 ENV HF_HUB_OFFLINE=1 \
     TRANSFORMERS_OFFLINE=1
+
+# The small packages come last, so adding one does not repeat the large downloads above.
+COPY requirements.txt .
+RUN pip install -r requirements.txt
 
 # Run as an unprivileged user. /app/data is where the SQLite volume is mounted.
 RUN useradd --create-home --uid 1000 bridge \
