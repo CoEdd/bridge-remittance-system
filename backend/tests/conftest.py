@@ -16,6 +16,7 @@ def demo_env(monkeypatch: pytest.MonkeyPatch, tmp_path: Path) -> Iterator[None]:
     a private empty database per test, and no network (offline FX snapshot).
     """
     monkeypatch.setenv("AGENT_MODE", "scripted")
+    monkeypatch.delenv("LLM_MODEL", raising=False)
     monkeypatch.setenv("DEMO_TODAY", "2026-10-15")
     monkeypatch.setenv("FX_OFFLINE", "true")
     monkeypatch.setenv("DATABASE_URL", f"sqlite:///{tmp_path}/test.db")

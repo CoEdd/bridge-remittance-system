@@ -154,13 +154,15 @@ def test_ingestion_shows_up_in_the_audit_log(client: TestClient) -> None:
 
     entries = client.get("/audit").json()["entries"]
 
-    assert [(entry["event_type"], entry["label"]) for entry in entries[:2]] == [
+    assert [(entry["event_type"], entry["label"]) for entry in entries[:3]] == [
         ("document.flagged", "Document flagged"),
+        ("claims.checked", "Claims checked"),
         ("document.uploaded", "Document uploaded"),
     ]
     assert entries[0]["summary"] == "invoice_injection_en.pdf · untrusted"
-    assert entries[1]["summary"] == "invoice_injection_en.pdf · demo bundle"
-    assert entries[1]["payload"]["source"] == "demo bundle"
+    assert entries[1]["summary"] == "6 claims · no rule fired"
+    assert entries[2]["summary"] == "invoice_injection_en.pdf · demo bundle"
+    assert entries[2]["payload"]["source"] == "demo bundle"
     assert client.get("/audit/verify").json()["ok"] is True
 
 

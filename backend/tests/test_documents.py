@@ -701,7 +701,7 @@ def test_ingestion_is_logged_with_its_source(session: Session) -> None:
 
     document = ingest_demo(session, "tuition_invoice")
 
-    assert audit_events(session, before) == ["document.uploaded"]
+    assert audit_events(session, before) == ["document.uploaded", "claims.checked"]
     payload = last_audit(session, "document.uploaded").payload
     assert (payload["document_id"], payload["filename"], payload["source"]) == (document.id, "tuition_invoice.pdf", "demo bundle")
     assert (payload["kind"], payload["languages"], payload["extractor"]) == ("invoice", ["en", "zh"], "scripted")
@@ -717,9 +717,9 @@ def test_risky_documents_get_a_flagged_event(session: Session, key: str) -> None
     events = audit_events(session, before)
 
     if key in ("tuition_invoice", "mule_message"):
-        assert events == ["document.uploaded"]
+        assert events == ["document.uploaded", "claims.checked"]
     else:
-        assert events == ["document.uploaded", "document.flagged"]
+        assert events == ["document.uploaded", "claims.checked", "document.flagged"]
         payload = last_audit(session, "document.flagged").payload
         assert payload["signals"] == EXPECTED_SIGNALS[key]
         assert payload["trust_flag"] == ("untrusted" if key == "invoice_injection" else "trusted")
@@ -753,7 +753,9 @@ def test_the_agent_offer_is_refused_with_its_three_fraud_reasons(session: Sessio
 @pytest.mark.parametrize(
     "key, reasons",
     [
-        ("changed_details", ["BANK_DETAILS_CHANGED"]),
+        # The claim check adds a reason the keyword rules did not give: the invoice speaks for the
+        # university, yet the account is not the university's registered one.
+        ("changed_details", ["PAYEE_NOT_OFFICIAL", "BANK_DETAILS_CHANGED"]),
         ("urgent_notice", ["PAYEE_NOT_OFFICIAL", "SCAM_PATTERN"]),
         ("invoice_injection", ["UNTRUSTED_DOCUMENT"]),
     ],

@@ -8,9 +8,11 @@ from starlette.concurrency import iterate_in_threadpool
 from app import redteam
 from app.config import get_settings
 from app.policy.describe import describe_limits, describe_safeguards, describe_tiers
+from app.claims.evaluation import load_results
 from app.redteam.cases import CASES
+from app.rules.core_rules import CORE_RULES
 from app.routers.deps import UserDep
-from app.schemas import RedTeamCaseOut, SecurityPolicyOut
+from app.schemas import ClaimCheckOverviewOut, RedTeamCaseOut, RuleOut, SecurityPolicyOut
 
 router = APIRouter(prefix="/security", tags=["security"])
 
@@ -23,6 +25,18 @@ def security_policy(user: UserDep) -> SecurityPolicyOut:
         currency=user.home_currency,
         limits=describe_limits(user, get_settings().cooling_off_seconds),
         safeguards=describe_safeguards(),
+    )
+
+
+@router.get("/claim-check")
+def claim_check_overview() -> ClaimCheckOverviewOut:
+    """The claim check in brief: its eight rules and, when it has been run, its measured results."""
+    return ClaimCheckOverviewOut(
+        rules=[
+            RuleOut(id=rule.id, severity=rule.severity, raises=rule.raises, title=rule.title, text=rule.text)
+            for rule in CORE_RULES
+        ],
+        evaluation=load_results(),
     )
 
 

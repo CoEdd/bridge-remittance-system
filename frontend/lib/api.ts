@@ -7,6 +7,7 @@ import type {
   Bill,
   ChatMessage,
   ChatStart,
+  ClaimCheckOverview,
   DemoDocument,
   DemoSettings,
   DocumentDetail,
@@ -171,6 +172,7 @@ export const api = {
   strangerTransfer: () => postJson<MuleEvent>("/demo/events/mule"),
   securityPolicy: (signal?: AbortSignal) => request<SecurityPolicy>("/security/policy", { signal }),
   redTeamCases: (signal?: AbortSignal) => request<RedTeamCase[]>("/security/redteam", { signal }),
+  claimCheckOverview: (signal?: AbortSignal) => request<ClaimCheckOverview>("/security/claim-check", { signal }),
   /** Runs the red-team suite on isolated copies of the database, reporting each case as it starts and ends. */
   runRedTeam: (onEvent: (event: RedTeamEvent) => void, signal?: AbortSignal) =>
     postForEvents("/security/redteam/run", (name, data) => onEvent({ event: name, data } as RedTeamEvent), signal),

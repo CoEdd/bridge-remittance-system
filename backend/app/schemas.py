@@ -306,6 +306,8 @@ class DocumentOut(DocumentSummaryOut):
     risk_signals: list[RiskSignalOut]
     explanation: dict[str, str]  # by language: ms, en, zh
     bill: BillOut | None
+    # The neuro-symbolic claim check: origin, claims with status and evidence, conclusions with reasoning.
+    claim_check: dict[str, Any] = {}
 
 
 class ChatIn(BaseModel):
@@ -392,4 +394,20 @@ class RedTeamCaseOut(BaseModel):
     title: str  # a name of two or three words
     attack: str  # what is tried, in one line
     expected: str
+
+
+class RuleOut(BaseModel):
+    """One rule of the claim check, in words."""
+
+    id: str
+    severity: Literal["block", "warn"]
+    raises: str  # the policy reason it adds
+    title: dict[str, str]  # by language: en, ms, zh
+    text: dict[str, str]
+
+
+class ClaimCheckOverviewOut(BaseModel):
+    rules: list[RuleOut]
+    # The latest results of `make eval-claims`, or None when it has not been run.
+    evaluation: dict[str, Any] | None
 

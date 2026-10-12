@@ -71,6 +71,7 @@ class ScriptedDriver:
         """After an upload or a pasted message: read it, check the payee, explain it."""
         read = yield ToolCall("read_document", {"document_id": document_id})
         document = read.data
+        yield ToolCall("check_claims", {"document_id": document_id})
         if document.get("bill"):
             yield ToolCall("verify_payee", {"payee_id": document["bill"]["payee_id"]})
         explanation = document.get("explanation") or {}

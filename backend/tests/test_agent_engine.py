@@ -29,6 +29,7 @@ from app.models import ChatMessage, Document, PendingAction
 from app.policy import BASE_TIERS
 from app.seed.demo_docs import DEMO_DOCUMENTS, HIDDEN_INSTRUCTION, demo_docs_dir
 from tests.helpers import (
+    CHOSEN_MODEL,
     CNY_WALLET,
     NOW,
     PHONE_BILL,
@@ -82,7 +83,7 @@ def respond(text: str = "Baik.", text_en: str = "All right.") -> ToolCall:
 
 def test_the_registry_has_every_tool_with_a_label_a_schema_and_a_tier() -> None:
     assert list(TOOLS) == [
-        "get_balances", "get_transactions", "analyse_spending", "read_document", "get_fx_rate",
+        "get_balances", "get_transactions", "analyse_spending", "read_document", "check_claims", "get_fx_rate",
         "get_transfer_quote", "plan_funding", "verify_payee", "convert_currency", "pay_bill",
         "add_payee", "explain_decision", "respond_to_user",
     ]  # fmt: skip
@@ -331,6 +332,8 @@ def live_mode(monkeypatch: pytest.MonkeyPatch) -> None:
     monkeypatch.setenv("AGENT_MODE", "live")
     if not os.environ.get("ANTHROPIC_API_KEY"):
         monkeypatch.setenv("ANTHROPIC_API_KEY", "stand-in-key")  # live mode needs a key to be in effect
+    if CHOSEN_MODEL:
+        monkeypatch.setenv("LLM_MODEL", CHOSEN_MODEL)
     get_settings.cache_clear()
 
 

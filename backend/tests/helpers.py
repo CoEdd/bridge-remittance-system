@@ -12,6 +12,10 @@ from app.money import to_minor
 from app.policy import Context
 from app.seed import DEMO_USER_ID
 
+# The model named in the developer's .env, read before the fixtures clear it. The tests that
+# call the real API use it; every other test sees the built-in default.
+CHOSEN_MODEL = __import__("os").environ.get("LLM_MODEL")
+
 TODAY = date(2026, 10, 15)
 NOW = datetime(2026, 10, 15, 8, 0, tzinfo=timezone.utc)
 LONG_AGO = datetime(2026, 9, 1, 8, 0, tzinfo=timezone.utc)

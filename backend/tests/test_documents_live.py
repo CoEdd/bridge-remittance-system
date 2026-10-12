@@ -21,7 +21,7 @@ from app.documents.reader import read_message, read_pdf
 from app.llm import LlmUnavailable, complete_json
 from app.models import Bill, Document
 from app.seed.demo_docs import DEMO_DOCUMENTS, HIDDEN_INSTRUCTION, demo_docs_dir
-from tests.helpers import NOW, StandInClient, last_audit, the_user
+from tests.helpers import CHOSEN_MODEL, NOW, StandInClient, last_audit, the_user
 
 live = pytest.mark.skipif(not os.environ.get("ANTHROPIC_API_KEY"), reason="needs ANTHROPIC_API_KEY")
 
@@ -48,6 +48,17 @@ def fields_answer(overrides: dict[str, tuple[str, str]] | None = None, base: dic
     return {name: {"value": merged[name][0], "source": merged[name][1]} if name in merged else EMPTY for name in names}
 
 
+def claims_answer(*claims: tuple[str, str, str, str]) -> dict[str, Any]:
+    """Claude's answer to the claims request: (type, value, detail, source) each."""
+    return {"claims": [{"type": kind, "value": value, "detail": detail, "source": source} for kind, value, detail, source in claims]}
+
+
+TUITION_CLAIMS = claims_answer(
+    ("represents_institution", "Shenzhen Polytechnic International University", "", "Shenzhen Polytechnic International University"),
+    ("payee_account", "4100 2026 0000 8815", "", "4100 2026 0000 8815"),
+)
+
+
 def explanation_answer(text: str = "CNY 12,000.00") -> dict[str, str]:
     return {"ms": f"Invois yuran. Jumlah: {text}.", "en": f"A tuition invoice. Amount: {text}.", "zh": f"学费通知。金额：{text}。"}
 
@@ -57,6 +68,8 @@ def live_mode(monkeypatch: pytest.MonkeyPatch) -> None:
     monkeypatch.setenv("AGENT_MODE", "live")
     if not os.environ.get("ANTHROPIC_API_KEY"):
         monkeypatch.setenv("ANTHROPIC_API_KEY", "stand-in-key")  # live mode needs a key to be in effect
+    if CHOSEN_MODEL:
+        monkeypatch.setenv("LLM_MODEL", CHOSEN_MODEL)
     get_settings.cache_clear()
 
 
@@ -74,7 +87,7 @@ def bill_of(session: Session, document: Document) -> Bill | None:
 
 
 def test_fields_proposed_by_claude_are_located_and_verified(session: Session, live_mode: None) -> None:
-    client = StandInClient(fields_answer(), explanation_answer())
+    client = StandInClient(fields_answer(), TUITION_CLAIMS, explanation_answer())
 
     document = ingest(session, "tuition_invoice", client)
     fields = document.extracted_fields
@@ -100,7 +113,7 @@ def test_fields_proposed_by_claude_are_located_and_verified(session: Session, li
 def test_a_wrong_proposal_is_marked_unverified_and_cannot_be_paid(
     session: Session, live_mode: None, field: str, proposed: tuple[str, str]
 ) -> None:
-    client = StandInClient(fields_answer({field: proposed}), explanation_answer())
+    client = StandInClient(fields_answer({field: proposed}), TUITION_CLAIMS, explanation_answer())
 
     document = ingest(session, "tuition_invoice", client)
 
@@ -112,7 +125,7 @@ def test_a_wrong_proposal_is_marked_unverified_and_cannot_be_paid(
 
 def test_a_paraphrased_text_field_is_unverified_but_does_not_block_the_bill(session: Session, live_mode: None) -> None:
     paraphrase = ("0.05% per day after the due date", "0.05% of the amount due per day after the due date.")
-    client = StandInClient(fields_answer({"late_fee_terms": paraphrase}), explanation_answer())
+    client = StandInClient(fields_answer({"late_fee_terms": paraphrase}), TUITION_CLAIMS, explanation_answer())
 
     document = ingest(session, "tuition_invoice", client)
     bill = bill_of(session, document)
@@ -130,7 +143,7 @@ def test_the_document_is_sent_as_data_and_hidden_text_is_never_sent(session: Ses
         "currency": ("CNY", "CNY"),
         "due_date": ("2026-11-01", "1 November 2026"),
     }
-    client = StandInClient(fields_answer(base=rent), explanation_answer("CNY 2,800.00"))
+    client = StandInClient(fields_answer(base=rent), claims_answer(), explanation_answer("CNY 2,800.00"))
 
     document = ingest(session, "invoice_injection", client)
     sent = json.dumps(client.requests, ensure_ascii=False, default=str)
@@ -152,7 +165,7 @@ def test_a_proposal_quoting_hidden_text_is_rejected(session: Session, live_mode:
         "currency": ("CNY", "CNY"),
         "due_date": ("2026-11-01", "1 November 2026"),
     }
-    client = StandInClient(fields_answer(base=tricked), explanation_answer("CNY 2,800.00"))
+    client = StandInClient(fields_answer(base=tricked), claims_answer(), explanation_answer("CNY 2,800.00"))
 
     document = ingest(session, "invoice_injection", client)
 
@@ -165,7 +178,7 @@ def test_if_claude_cannot_be_reached_the_scripted_extractor_takes_over(session: 
     import httpx2
 
     failure = anthropic.APIConnectionError(request=httpx2.Request("POST", "https://api.anthropic.com/v1/messages"))
-    client = StandInClient(failure, failure)
+    client = StandInClient(failure, failure, failure)
 
     document = ingest(session, "tuition_invoice", client)
 
@@ -184,7 +197,7 @@ def test_a_refusal_or_a_cut_off_answer_is_treated_as_unavailable(stop_reason: st
 
 
 def test_an_explanation_without_the_verified_amount_is_replaced_by_the_template(session: Session, live_mode: None) -> None:
-    client = StandInClient(fields_answer(), {"ms": "Sila bayar CNY 9.99 segera.", "en": "", "zh": "金额：CNY 12,000.00。请缴费。"})
+    client = StandInClient(fields_answer(), TUITION_CLAIMS, {"ms": "Sila bayar CNY 9.99 segera.", "en": "", "zh": "金额：CNY 12,000.00。请缴费。"})
 
     explanation = ingest(session, "tuition_invoice", client).explanation
 

@@ -160,8 +160,9 @@ def test_explaining_an_uploaded_document(client: TestClient) -> None:
 
     events = read_events(client, client.post(f"/chat/document/{invoice['id']}").json()["stream_id"])
 
-    assert tools_of(events) == [("read_document", "T0", "allowed"), ("verify_payee", "T0", "allowed")]
-    assert only(events, "step")[1]["summary"] == "Shenzhen Polytechnic International University · official account"
+    assert tools_of(events) == [("read_document", "T0", "allowed"), ("check_claims", "T0", "allowed"), ("verify_payee", "T0", "allowed")]
+    assert only(events, "step")[1]["summary"] == "6 claims · none contradicted"
+    assert only(events, "step")[2]["summary"] == "Shenzhen Polytechnic International University · official account"
     message = only(events, "message")[0]
     assert (message["text"], message["text_en"]) == (invoice["explanation"]["ms"], invoice["explanation"]["en"])
     assert only(events, "approval_required") == only(events, "blocked") == []

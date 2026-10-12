@@ -140,6 +140,8 @@ class Document(Base):
     trust_flag: Mapped[str]
     risk_signals: Mapped[Any] = mapped_column(JSON)
     explanation: Mapped[Any] = mapped_column(JSON)  # one entry per language
+    # The neuro-symbolic claim check: claims with their status, conclusions and reasoning chains.
+    claim_check: Mapped[Any] = mapped_column(JSON, default=dict)
     created_at: Mapped[datetime] = mapped_column(UtcDateTime)
 
 

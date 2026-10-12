@@ -9,6 +9,7 @@ EVENT_LABELS = {
     "system.reset": "Demo reset",
     "document.uploaded": "Document uploaded",
     "document.flagged": "Document flagged",
+    "claims.checked": "Claims checked",
     "agent.proposed": "Agent proposed",
     "agent.declined": "Agent declined",
     "policy.verdict": "Policy verdict",
@@ -29,6 +30,7 @@ TOOL_LABELS = {
     "get_transfer_quote": "Get transfer quote",
     "verify_payee": "Verify payee",
     "explain_decision": "Explain decision",
+    "check_claims": "Check claims",
     "respond_to_user": "Reply",
     "analyse_spending": "Analyse spending",
     "plan_funding": "Plan funding",
@@ -86,6 +88,10 @@ def summarise(event_type: str, payload: Any) -> str:
     if reasons:
         more = f" +{len(reasons) - 1} more" if len(reasons) > 1 else ""
         parts.append(f"{reasons[0]}{more}")
+    if event_type == "claims.checked":
+        rules = [item["rule"] for item in payload.get("conclusions") or []]
+        parts.append(f"{payload.get('claims')} claims")
+        parts.append(", ".join(rules) if rules else "no rule fired")
     if event_type == "agent.declined" and payload.get("reason"):
         parts.append(str(payload["reason"]))
     if "attempt" in payload:

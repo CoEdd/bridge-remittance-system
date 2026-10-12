@@ -1,3 +1,5 @@
+from typing import Any
+
 from pathlib import PurePath
 
 from fastapi import APIRouter, HTTPException, UploadFile
@@ -86,6 +88,7 @@ def document_out(session: Session, document: Document) -> DocumentOut:
         risk_signals=signals,
         explanation=document.explanation or {},
         bill=bill_out(bill) if bill else None,
+        claim_check=document.claim_check or {},
     )
 
 
@@ -161,3 +164,12 @@ def get_document(document_id: int, session: SessionDep, user: UserDep) -> Docume
     if document is None or document.user_id != user.id:
         raise HTTPException(status_code=404, detail="There is no such document.")
     return document_out(session, document)
+
+
+@router.get("/documents/{document_id}/claims")
+def get_claims(document_id: int, session: SessionDep, user: UserDep) -> dict[str, Any]:
+    """The neuro-symbolic claim check of one document: its claims, their status, and the reasoning."""
+    document = session.get(Document, document_id)
+    if document is None or document.user_id != user.id:
+        raise HTTPException(status_code=404, detail="There is no such document.")
+    return document.claim_check or {}

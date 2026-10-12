@@ -18,6 +18,10 @@ _FALLBACK_MODELS = frozenset({"claude-fable-5-1", "claude-opus-5-5", "claude-opu
 _FALLBACK_BETA = "server-side-fallback-2026-07-01"
 
 
+# How many requests this process has sent to the API. The evaluation reports it.
+calls = 0
+
+
 class LlmUnavailable(RuntimeError):
     """Claude could not be used for this request. Callers fall back to plain code."""
 
@@ -40,8 +44,10 @@ def create_message(client: Any = None, **request: Any) -> Any:
     """
     import anthropic
 
+    global calls
     client = client or get_client()
     model = model_name()
+    calls += 1
     try:
         if model in _FALLBACK_MODELS:
             response = client.beta.messages.create(model=model, betas=[_FALLBACK_BETA], fallbacks="default", **request)

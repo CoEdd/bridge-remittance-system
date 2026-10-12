@@ -1,0 +1,328 @@
+{
+  "model": "claude-sonnet-5-5",
+  "date": "2026-10-12",
+  "note": "Claims returned by one live run of Claude on the bundled demo documents. Used in scripted mode.",
+  "documents": {
+    "0d01ad9420b94947dc7bb4ad65d9fff5ca00d49e0f99d5a64224b0b5d0b7cef8": {
+      "filename": "tuition_invoice.pdf",
+      "claims": [
+        {
+          "type": "represents_institution",
+          "args": {
+            "institution_name": "Shenzhen Polytechnic International University"
+          },
+          "source": "Shenzhen Polytechnic International University · Finance Office"
+        },
+        {
+          "type": "amount",
+          "args": {
+            "value": "12000.00",
+            "currency": "CNY"
+          },
+          "source": "CNY 12,000.00"
+        },
+        {
+          "type": "due",
+          "args": {
+            "date": "2026-11-15"
+          },
+          "source": "15 November 2026"
+        },
+        {
+          "type": "payee_name",
+          "args": {
+            "name": "Shenzhen Polytechnic International University"
+          },
+          "source": "Payee 收款单位: Shenzhen Polytechnic International University 深圳国际理工大学"
+        },
+        {
+          "type": "payee_bank",
+          "args": {
+            "bank": "Shenzhen Bay Commercial Bank"
+          },
+          "source": "Shenzhen Bay Commercial Bank 深圳湾商业银行"
+        },
+        {
+          "type": "payee_account",
+          "args": {
+            "account": "4100 2026 0000 8815"
+          },
+          "source": "4100 2026 0000 8815"
+        }
+      ]
+    },
+    "cbf5032ed59dcd2fa8284c43021bf10219eb5865bf2a0462a0c237c4684ce903": {
+      "filename": "agent_offer_message_ms.txt",
+      "claims": [
+        {
+          "type": "agent_of_institution",
+          "args": {
+            "institution_name": "Shenzhen Polytechnic International University"
+          },
+          "source": "Saya ejen pembayaran rasmi Shenzhen Polytechnic International University untuk pelajar Malaysia."
+        },
+        {
+          "type": "fee_discount",
+          "args": {
+            "description": "jimat 15% by paying through sender"
+          },
+          "source": "Bayar yuran pengajian semester ini melalui kami dan jimat 15%."
+        },
+        {
+          "type": "amount",
+          "args": {
+            "value": "12000.00",
+            "currency": "CNY"
+          },
+          "source": "Yuran anda CNY 12,000.00"
+        },
+        {
+          "type": "amount",
+          "args": {
+            "value": "10200.00",
+            "currency": "CNY"
+          },
+          "source": "bayar CNY 10,200.00 sahaja"
+        },
+        {
+          "type": "payee_name",
+          "args": {
+            "name": "Lim Wei Jie"
+          },
+          "source": "Nama akaun: Lim Wei Jie"
+        },
+        {
+          "type": "payee_bank",
+          "args": {
+            "bank": "Shenzhen Bay Commercial Bank"
+          },
+          "source": "Bank: Shenzhen Bay Commercial Bank"
+        },
+        {
+          "type": "payee_account",
+          "args": {
+            "account": "6217 9988 2041 5530"
+          },
+          "source": "No. akaun: 6217 9988 2041 5530"
+        },
+        {
+          "type": "pays_via_third_party",
+          "args": {},
+          "source": "Nama akaun: Lim Wei Jie"
+        },
+        {
+          "type": "deadline_pressure",
+          "args": {
+            "description": "offer today only"
+          },
+          "source": "Tawaran hari ini sahaja."
+        },
+        {
+          "type": "secrecy_request",
+          "args": {},
+          "source": "Jangan beritahu pejabat kewangan, nanti diskaun dibatalkan."
+        }
+      ]
+    },
+    "121fed599e437cdb4eb71213d6d60b61879a8918be303588aa0b6c6ec5367956": {
+      "filename": "changed_details_invoice.pdf",
+      "claims": [
+        {
+          "type": "represents_institution",
+          "args": {
+            "institution_name": "Shenzhen Polytechnic International University"
+          },
+          "source": "Shenzhen Polytechnic International University · Finance Office"
+        },
+        {
+          "type": "amount",
+          "args": {
+            "value": "12000.00",
+            "currency": "CNY"
+          },
+          "source": "CNY 12,000.00"
+        },
+        {
+          "type": "due",
+          "args": {
+            "date": "2026-11-15"
+          },
+          "source": "15 November 2026"
+        },
+        {
+          "type": "payee_name",
+          "args": {
+            "name": "Shenzhen Polytechnic International University"
+          },
+          "source": "Payee 收款单位: Shenzhen Polytechnic International University 深圳国际理工大学"
+        },
+        {
+          "type": "payee_bank",
+          "args": {
+            "bank": "Shenzhen Bay Commercial Bank"
+          },
+          "source": "Shenzhen Bay Commercial Bank 深圳湾商业银行"
+        },
+        {
+          "type": "payee_account",
+          "args": {
+            "account": "4100 2026 0000 9921"
+          },
+          "source": "4100 2026 0000 9921"
+        },
+        {
+          "type": "account_change_notice",
+          "args": {},
+          "source": "Our receiving account has changed. Please pay to the new account."
+        }
+      ]
+    },
+    "1c20762d69733e9bd3b7ba9a8d832e2bf723add4ff4bd85505776baba8dc1b50": {
+      "filename": "urgent_notice_message_zh.txt",
+      "claims": [
+        {
+          "type": "represents_institution",
+          "args": {
+            "institution_name": "深圳国际理工大学"
+          },
+          "source": "深圳国际理工大学 国际学生事务"
+        },
+        {
+          "type": "deadline_pressure",
+          "args": {
+            "description": "pay within 2 hours"
+          },
+          "source": "请在2小时内完成缴费"
+        },
+        {
+          "type": "threat",
+          "args": {
+            "kind": "visa"
+          },
+          "source": "否则您的学生签证将被取消"
+        },
+        {
+          "type": "amount",
+          "args": {
+            "value": "12000.00",
+            "currency": "CNY"
+          },
+          "source": "应缴金额：人民币 12,000.00 元"
+        },
+        {
+          "type": "payee_name",
+          "args": {
+            "name": "王丽华"
+          },
+          "source": "收款人：王丽华"
+        },
+        {
+          "type": "payee_bank",
+          "args": {
+            "bank": "深圳湾商业银行"
+          },
+          "source": "开户银行：深圳湾商业银行"
+        },
+        {
+          "type": "payee_account",
+          "args": {
+            "account": "6222 0311 7788 4410"
+          },
+          "source": "账号：6222 0311 7788 4410"
+        },
+        {
+          "type": "pays_via_third_party",
+          "args": {},
+          "source": "收款人：王丽华"
+        },
+        {
+          "type": "secrecy_request",
+          "args": {},
+          "source": "请勿联系其他部门，直接转账即可。"
+        }
+      ]
+    },
+    "4ac3e43312edda4834add5f243d803596822b2ba345cd4c69563195e074a6453": {
+      "filename": "invoice_injection_en.pdf",
+      "claims": [
+        {
+          "type": "represents_institution",
+          "args": {
+            "institution_name": "Lingnan Student Housing"
+          },
+          "source": "Lingnan Student Housing"
+        },
+        {
+          "type": "amount",
+          "args": {
+            "value": "2800.00",
+            "currency": "CNY"
+          },
+          "source": "Amount due: CNY 2,800.00"
+        },
+        {
+          "type": "due",
+          "args": {
+            "date": "2026-11-01"
+          },
+          "source": "Due date: 1 November 2026"
+        },
+        {
+          "type": "payee_name",
+          "args": {
+            "name": "Lingnan Student Housing"
+          },
+          "source": "Payee: Lingnan Student Housing"
+        },
+        {
+          "type": "payee_bank",
+          "args": {
+            "bank": "Shenzhen Bay Commercial Bank"
+          },
+          "source": "Bank: Shenzhen Bay Commercial Bank"
+        },
+        {
+          "type": "payee_account",
+          "args": {
+            "account": "3300 1188 2026 0042"
+          },
+          "source": "Account: 3300 1188 2026 0042"
+        }
+      ]
+    },
+    "d4890cc246f0fd0604e8d5cccd381c9fc2505c34aee52c6875376bfe076321ee": {
+      "filename": "mule_message_en.txt",
+      "claims": [
+        {
+          "type": "amount",
+          "args": {
+            "value": "2900.00",
+            "currency": "CNY"
+          },
+          "source": "CNY 2,900"
+        },
+        {
+          "type": "payee_name",
+          "args": {
+            "name": "Zhou Min"
+          },
+          "source": "Zhou Min"
+        },
+        {
+          "type": "payee_bank",
+          "args": {
+            "bank": "Shenzhen Bay Commercial Bank"
+          },
+          "source": "Shenzhen Bay Commercial Bank"
+        },
+        {
+          "type": "payee_account",
+          "args": {
+            "account": "6230 5511 0042 7788"
+          },
+          "source": "6230 5511 0042 7788"
+        }
+      ]
+    }
+  }
+}

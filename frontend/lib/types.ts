@@ -257,7 +257,44 @@ export interface RiskSignal {
   policy_clause: PolicyClause | null;
 }
 
+export type ClaimStatus = "supported" | "contradicted" | "flagged" | "unverifiable";
+
+/** One claim a document makes, as the claim check judged it. */
+export interface ClaimRow {
+  type: string;
+  /** The exact text of the document the claim was read from, in its own language. */
+  source: string;
+  /** What the claim says, in a few plain words. */
+  meaning: Translations;
+  status: ClaimStatus;
+  /** The trusted fact behind the status, and where it comes from. */
+  evidence: { words: Translations; source: string } | null;
+}
+
+/** The chain behind one conclusion of the claim check, in plain words. */
+export interface ClaimReasoning {
+  rule: string;
+  title: Translations;
+  lines: Record<Language, string[]>;
+}
+
+/** The neuro-symbolic claim check of one document. Empty when the document was never checked. */
+export interface ClaimCheck {
+  /** Who extracted the claims: Claude now, Claude in an earlier run, or the regex extractor. */
+  origin?: "live" | "cached" | "regex";
+  model?: string | null;
+  cached_on?: string | null;
+  claims?: ClaimRow[];
+  conclusions?: {
+    rule: string;
+    severity: "block" | "warn";
+    title: Translations;
+    reasoning: Record<Language, string[]>;
+  }[];
+}
+
 export interface DocumentDetail extends DocumentSummary {
+  claim_check: ClaimCheck;
   raw_text: string;
   trust_flag: "trusted" | "untrusted";
   fields: DocumentField[];
@@ -400,6 +437,8 @@ export interface BlockedEvent {
   reasons: BlockedReason[];
   advice: string;
   advice_en: string;
+  /** The claims that count against the payment and the reasoning, when the claim check found something. */
+  claim_check: { origin: ClaimCheck["origin"]; claims: ClaimRow[]; reasoning: ClaimReasoning[] } | null;
   audit_seq: number | null;
 }
 
@@ -518,4 +557,27 @@ export interface RedTeamSummary {
 
 /** The events of POST /security/redteam/run. */
 export type RedTeamEvent = { event: "case"; data: RedTeamResult } | { event: "done"; data: RedTeamSummary };
+
+/** Scams caught and legitimate messages blocked by mistake, for one way of checking. */
+export interface EvalNumbers {
+  scams: number;
+  caught: number;
+  legit: number;
+  false_blocks: number;
+}
+
+/** Response of GET /security/claim-check. */
+export interface ClaimCheckOverview {
+  rules: { id: string; severity: "block" | "warn"; title: Translations; text: Translations }[];
+  /** The latest results of `make eval-claims`; null when it has not been run. */
+  evaluation: {
+    items: number;
+    model: string;
+    date: string;
+    arms: Record<string, string>;
+    overall: Record<string, EvalNumbers>;
+    verdict: string;
+    caveat: string;
+  } | null;
+}
 

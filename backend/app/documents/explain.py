@@ -237,3 +237,11 @@ def _sentences(
             "Bridge 无法核实金额或账户，因此无法付款。",
         )
     return out
+
+
+# Added when the claim check blocks something the keyword rules did not find.
+CLAIM_CHECK_NOTE = {
+    "ms": "Semakan dakwaan menemui masalah: {titles}.",
+    "en": "The claim check found a problem: {titles}.",
+    "zh": "声明核查发现问题：{titles}。",
+}

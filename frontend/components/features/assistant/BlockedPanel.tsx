@@ -4,14 +4,16 @@ import { ArrowRight, Ban, TriangleAlert } from "lucide-react";
 import Link from "next/link";
 import { useState } from "react";
 import { lead } from "@/components/features/assistant/model";
+import { ClaimList, Reasoning } from "@/components/features/claims/Claims";
 import { PolicyQuote } from "@/components/features/documents/PolicyQuote";
 import { Button } from "@/components/ui/Button";
 import { LANGUAGE_NAMES } from "@/lib/language";
 import type { BlockedEvent, Language } from "@/lib/types";
 
 /**
- * Why a payment was refused. At a glance: the reasons by name and one line of advice.
- * "Why?" opens the explanation of each reason and the policy clause behind it.
+ * Why a payment was refused, at a glance. When the claim check found something: each claim
+ * that counts against the payment and its status, with the chain behind "Show reasoning".
+ * Otherwise the reasons by name, with "Why?" for the explanation.
  */
 export function BlockedPanel({ blocked, language }: { blocked: BlockedEvent; language: Language }) {
   const [english, setEnglish] = useState(false);
@@ -20,6 +22,7 @@ export function BlockedPanel({ blocked, language }: { blocked: BlockedEvent; lan
   // The reasons were written in the student's language when the payment was blocked.
   const translated = blocked.reasons.some((reason) => reason.text !== reason.text_en);
   const advice = english ? blocked.advice_en : blocked.advice;
+  const check = blocked.claim_check;
 
   return (
     <section
@@ -30,7 +33,13 @@ export function BlockedPanel({ blocked, language }: { blocked: BlockedEvent; lan
         <Ban aria-hidden className="size-5 shrink-0" />
         Payment blocked: no money was moved
       </h3>
-      <ul className="flex flex-col gap-2 px-4 py-3">
+      {check && (
+        <div className="flex flex-col gap-2 px-4 py-3">
+          <ClaimList claims={check.claims} shown={shown} />
+          <Reasoning items={check.reasoning} shown={shown} />
+        </div>
+      )}
+      <ul className={check ? "hidden" : "flex flex-col gap-2 px-4 py-3"}>
         {blocked.reasons.map((reason) => (
           <li key={reason.code} className="grid grid-cols-[auto_1fr] gap-x-2">
             <TriangleAlert aria-hidden className="mt-0.5 size-5 text-danger" strokeWidth={1.75} />
@@ -54,11 +63,13 @@ export function BlockedPanel({ blocked, language }: { blocked: BlockedEvent; lan
           {why ? advice : (lead(advice) ?? advice)}
         </p>
         <div className="mt-1 flex flex-wrap items-center gap-1">
-          <Button variant="ghost" size="sm" aria-expanded={why} className="-ml-3" onClick={() => setWhy(!why)}>
-            {why ? "Less" : "Why?"}
-          </Button>
+          {!check && (
+            <Button variant="ghost" size="sm" aria-expanded={why} className="-ml-3" onClick={() => setWhy(!why)}>
+              {why ? "Less" : "Why?"}
+            </Button>
+          )}
           {translated && (
-            <Button variant="ghost" size="sm" onClick={() => setEnglish(!english)}>
+            <Button variant="ghost" size="sm" className={check ? "-ml-3" : undefined} onClick={() => setEnglish(!english)}>
               {english ? `Show ${LANGUAGE_NAMES[language]}` : "Show English"}
             </Button>
           )}

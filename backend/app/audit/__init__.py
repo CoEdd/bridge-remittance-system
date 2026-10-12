@@ -29,6 +29,7 @@ EVENT_TYPES = (
     "system.reset",
     "document.uploaded",
     "document.flagged",
+    "claims.checked",
     "agent.proposed",
     "agent.declined",
     "policy.verdict",

@@ -74,6 +74,10 @@ class VerifyPayeeInput(_Input):
     payee_id: int
 
 
+class CheckClaimsInput(_Input):
+    document_id: int
+
+
 class ExplainDecisionInput(_Input):
     action_id: int
 
@@ -164,8 +168,38 @@ def _read_document(ctx: ToolContext, args: ReadDocumentInput) -> dict[str, Any]:
         "verified_fields": {name: field["value"] for name, field in fields.items() if field["verified"]},
         "unverified_fields": sorted(name for name, field in fields.items() if not field["verified"]),
         "risk_signals": [signal["code"] for signal in documents.policy_signals(document)],
+        "claim_check": {
+            "blocks": documents.claim_blocks(document),
+            "rules": [item["rule"] for item in (document.claim_check or {}).get("conclusions") or []],
+        },
         "explanation": document.explanation,
         "bill": _bill_summary(bill) if bill else None,
+    }
+
+
+def _check_claims(ctx: ToolContext, args: CheckClaimsInput) -> dict[str, Any]:
+    """The neuro-symbolic claim check of a document, as stored when the document was read."""
+    document = ctx.session.get(Document, args.document_id)
+    if document is None or document.user_id != ctx.user.id:
+        return {"error": "There is no such document."}
+    check = document.claim_check or {}
+    return {
+        "document_id": document.id,
+        "origin": check.get("origin"),
+        "claims": [
+            {
+                "type": item["type"],
+                "meaning": item["meaning"]["en"],
+                "source": item["source"],
+                "status": item["status"],
+                "evidence": item["evidence"]["words"]["en"] if item["evidence"] else None,
+            }
+            for item in check.get("claims") or []
+        ],
+        "conclusions": [
+            {"rule": item["rule"], "severity": item["severity"], "title": item["title"]["en"]}
+            for item in check.get("conclusions") or []
+        ],
     }
 
 
@@ -247,6 +281,7 @@ TOOLS: dict[str, Tool] = {
         Tool("get_transactions", "Looked at your transactions", "Recent transactions, newest first.", GetTransactionsInput, _get_transactions),
         Tool("analyse_spending", "Analysed your spending", "Spending by category for the last 30 days against the 30 before.", NoInput, _analyse_spending),
         Tool("read_document", "Read the document", "The verified fields, risk signals and explanation of an uploaded document.", ReadDocumentInput, _read_document),
+        Tool("check_claims", "Checked its claims", "The claims a document makes, each judged by fixed rules against trusted facts.", CheckClaimsInput, _check_claims),
         Tool("get_fx_rate", "Checked the exchange rate", "The frozen mid-market rate for a currency pair.", GetFxRateInput, _get_fx_rate),
         Tool("get_transfer_quote", "Checked the true cost of this transfer", "The true cost of a conversion: fee plus exchange-rate markup.", GetTransferQuoteInput, _get_transfer_quote),
         Tool("plan_funding", "Planned how to pay", "A funding plan for one bill: shortfall, conversion and payment steps.", PlanFundingInput, _plan_funding),
@@ -298,6 +333,9 @@ def result_summary(tool: str, result: dict[str, Any]) -> str:
         signals = result["risk_signals"]
         risk = f"{len(signals)} risk signals" if signals else "no risk signals"
         return f"{result['filename']} · {result['status'].replace('_', ' ')} · {risk}"
+    if tool == "check_claims":
+        against = sum(item["status"] in ("contradicted", "flagged") for item in result["claims"])
+        return f"{len(result['claims'])} claims · {against} contradicted or flagged" if against else f"{len(result['claims'])} claims · none contradicted"
     if tool == "get_fx_rate":
         return f"1 {result['base']} = {result['mid_rate']} {result['quote']}"
     if tool == "get_transfer_quote":

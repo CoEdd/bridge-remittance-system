@@ -46,18 +46,42 @@ def hidden_findings(document: Document) -> list[dict[str, Any]]:
     return [item for item in document.risk_signals or [] if item.get("code") == INJECTION_CODE]
 
 
+def claim_blocks(document: Document) -> list[str]:
+    """The reason codes of the claim check's blocking conclusions. An extra layer beside the risk signals."""
+    return list((document.claim_check or {}).get("blocks") or [])
+
+
+def claim_warns(document: Document) -> list[str]:
+    return list((document.claim_check or {}).get("warns") or [])
+
+
+def claim_summary(document: Document) -> dict[str, Any] | None:
+    """What a blocked payment shows of the claim check: the claims that count and the reasoning."""
+    check = document.claim_check or {}
+    blocking = [item for item in check.get("conclusions") or [] if item["severity"] == "block"]
+    if not blocking:
+        return None
+    return {
+        "origin": check.get("origin"),
+        "claims": [item for item in check["claims"] if item["status"] in ("contradicted", "flagged")],
+        "reasoning": [{"rule": item["rule"], "title": item["title"], "lines": item["reasoning"]} for item in blocking],
+    }
+
+
 def document_status(document: Document, has_bill: bool) -> str:
     if document.trust_flag == "untrusted":
         return "untrusted"
-    if policy_signals(document):
+    if policy_signals(document) or claim_blocks(document):
         return "risk_found"
     return "verified" if has_bill else "needs_review"
 
 
 def bill_is_flagged(bill: Bill) -> bool:
-    """True when a bill comes from a document that is untrusted or carries a risk signal."""
+    """True when a bill comes from a document that is untrusted, carries a risk signal or fails the claim check."""
     document = bill.document
-    return document is not None and (document.trust_flag == "untrusted" or bool(policy_signals(document)))
+    return document is not None and (
+        document.trust_flag == "untrusted" or bool(policy_signals(document)) or bool(claim_blocks(document))
+    )
 
 
 def _extract(
@@ -191,13 +215,18 @@ def ingest(
     llm_client: Any = None,
     passages: PassageIndex = index,
     scripted: bool = False,
+    claims_live: bool | None = None,
 ) -> Document:
     """
     Run the whole pipeline on one document and store the result. `source` says how it arrived.
 
     `passages` is the index the document joins: the live one unless the session belongs to
     an isolated copy of the database. `scripted` keeps Claude out of it whatever the agent mode.
+    `claims_live` chooses who extracts the claims, when that should differ from the rest.
     """
+    # Imported here: the claim check reads this package's word lists, so it loads after it.
+    from app.claims.check import run_check
+
     now = now or now_utc()
     live = not scripted and effective_agent_mode() == "live"
     with write_lock:
@@ -238,9 +267,22 @@ def ingest(
             *({"code": INJECTION_CODE, **asdict(finding)} for finding in findings),
             *signals,
         ]
-        document.explanation = _explain(
+        # The neuro-symbolic claim check: an extra layer beside the risk signals above. Its
+        # facts are read before this document's own payee is counted (it was never paid).
+        check = run_check(
+            session, user, visible, verified, live=live if claims_live is None else claims_live, client=llm_client
+        )
+        document.claim_check = check
+        explanation = _explain(
             document, visible, fields, signals, account_status, bill is not None, institutions, llm_client, live
         )
+        # Something only the claim check caught must not read as "all clear".
+        only_claims = [item for item in check["conclusions"] if item["severity"] == "block" and item["raises"] not in {signal["code"] for signal in signals}]
+        if only_claims:
+            for language, text in explain.CLAIM_CHECK_NOTE.items():
+                titles = "; ".join(dict.fromkeys(item["title"][language] for item in only_claims))
+                explanation[language] = f"{explanation[language]}{'' if language == 'zh' else ' '}{text.format(titles=titles)}"
+        document.explanation = explanation
 
         audit.append(
             session,
@@ -256,6 +298,23 @@ def ingest(
                 "verified_fields": sorted(name for name, field in fields.items() if field.verified),
                 "unverified_fields": sorted(name for name, field in fields.items() if not field.verified),
                 "bill_id": bill.id if bill else None,
+            },
+            now=now,
+        )
+        audit.append(
+            session,
+            "claims.checked",
+            "policy",
+            {
+                "document_id": document.id,
+                "origin": check["origin"],
+                "model": check["model"],
+                "claims": len(check["claims"]),
+                "dropped": check["dropped"],
+                "conclusions": [
+                    {"rule": item["rule"], "severity": item["severity"], "raises": item["raises"]}
+                    for item in check["conclusions"]
+                ],
             },
             now=now,
         )

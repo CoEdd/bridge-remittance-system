@@ -1,0 +1,113 @@
+{
+  "split": "test",
+  "items": 25,
+  "scams": 13,
+  "legit": 12,
+  "model": "claude-sonnet-5-5",
+  "date": "2026-10-12",
+  "llm_calls": 25,
+  "live_items": 25,
+  "overall": {
+    "A": {
+      "scams": 13,
+      "caught": 8,
+      "legit": 12,
+      "false_blocks": 1
+    },
+    "B": {
+      "scams": 13,
+      "caught": 13,
+      "legit": 12,
+      "false_blocks": 0
+    },
+    "C": {
+      "scams": 13,
+      "caught": 13,
+      "legit": 12,
+      "false_blocks": 1
+    }
+  },
+  "by_language": {
+    "en": {
+      "A": {
+        "scams": 5,
+        "caught": 2,
+        "legit": 5,
+        "false_blocks": 1
+      },
+      "B": {
+        "scams": 5,
+        "caught": 5,
+        "legit": 5,
+        "false_blocks": 0
+      },
+      "C": {
+        "scams": 5,
+        "caught": 5,
+        "legit": 5,
+        "false_blocks": 1
+      }
+    },
+    "ms": {
+      "A": {
+        "scams": 4,
+        "caught": 3,
+        "legit": 4,
+        "false_blocks": 0
+      },
+      "B": {
+        "scams": 4,
+        "caught": 4,
+        "legit": 4,
+        "false_blocks": 0
+      },
+      "C": {
+        "scams": 4,
+        "caught": 4,
+        "legit": 4,
+        "false_blocks": 0
+      }
+    },
+    "zh": {
+      "A": {
+        "scams": 4,
+        "caught": 3,
+        "legit": 3,
+        "false_blocks": 0
+      },
+      "B": {
+        "scams": 4,
+        "caught": 4,
+        "legit": 3,
+        "false_blocks": 0
+      },
+      "C": {
+        "scams": 4,
+        "caught": 4,
+        "legit": 3,
+        "false_blocks": 0
+      }
+    }
+  },
+  "misses": {
+    "A": [
+      "T01",
+      "T04",
+      "T05",
+      "T09",
+      "T13",
+      "T18"
+    ],
+    "B": [],
+    "C": [
+      "T18"
+    ]
+  },
+  "arms": {
+    "A": "Keyword rules only",
+    "B": "Claim check only",
+    "C": "Both combined (what Bridge uses)"
+  },
+  "verdict": "Adding the claim check catches 5 more of the 13 scams than the keyword rules alone, with no extra legitimate message blocked.",
+  "caveat": "Small set, written by the same author as the rules, not yet reviewed by a person."
+}

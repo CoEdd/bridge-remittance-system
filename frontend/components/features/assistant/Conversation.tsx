@@ -133,7 +133,9 @@ export function Conversation({ turns, actions, language, working, problem, retry
   }, [turns.length, eventCount, closedCount, working, problem]);
 
   return (
-    <section className="flex-1 overflow-y-auto px-4 py-4" tabIndex={0} aria-label="Conversation">
+    // "relative" keeps the screen-reader-only labels inside this scrolling box. Without it they are
+    // placed against the page and make the whole page scroll.
+    <section className="relative flex-1 overflow-y-auto px-4 py-4" tabIndex={0} aria-label="Conversation">
       {turns.length === 0 && !working ? (
         <EmptyState icon={MessageSquare} message="There is no conversation yet." action={emptyAction} />
       ) : (

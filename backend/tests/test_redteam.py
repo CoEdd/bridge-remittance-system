@@ -121,9 +121,27 @@ def test_the_tamper_case_names_the_edited_entry() -> None:
 # ---------------------------------------------------------------- the suite has teeth
 
 
-def test_a_case_fails_when_its_safeguard_is_switched_off(monkeypatch: pytest.MonkeyPatch) -> None:
-    # With no risk rules, the agent's offer carries no risk signal.
+def no_claim_check(*args: Any, **kwargs: Any) -> dict[str, Any]:
+    """The claim check switched off: no claims, no conclusions."""
+    return {"origin": "regex", "model": None, "cached_on": None, "dropped": 0, "claims": [], "conclusions": [], "blocks": [], "warns": []}
+
+
+def test_with_one_layer_switched_off_the_other_still_refuses(monkeypatch: pytest.MonkeyPatch) -> None:
+    agent_case = next(case for case in CASES if case.id == "RT-02")
+
+    # Keyword risk rules off: the claim check alone refuses the agent's offer.
+    with monkeypatch.context() as patch:
+        patch.setattr("app.documents.risk.assess", lambda *args, **kwargs: [])
+        assert run_case(agent_case)["status"] == "passed"
+    # Claim check off: the keyword rules alone refuse it.
+    with monkeypatch.context() as patch:
+        patch.setattr("app.claims.check.run_check", no_claim_check)
+        assert run_case(agent_case)["status"] == "passed"
+
+
+def test_a_case_fails_when_both_layers_are_switched_off(monkeypatch: pytest.MonkeyPatch) -> None:
     monkeypatch.setattr("app.documents.risk.assess", lambda *args, **kwargs: [])
+    monkeypatch.setattr("app.claims.check.run_check", no_claim_check)
 
     result = run_case(next(case for case in CASES if case.id == "RT-02"))
 
@@ -253,10 +271,11 @@ def test_the_api_streams_running_then_a_result_for_every_case(client: TestClient
 
 def test_the_stream_reports_a_failed_case_honestly(client: TestClient, monkeypatch: pytest.MonkeyPatch) -> None:
     monkeypatch.setattr("app.documents.risk.assess", lambda *args, **kwargs: [])
+    monkeypatch.setattr("app.claims.check.run_check", no_claim_check)
 
     events = read_stream(client)
 
     results = {data["id"]: data["status"] for name, data in events if name == "case" and data["status"] != "running"}
-    # Without the risk rules the four document attacks are no longer refused for the right reason.
+    # With neither layer, the document attacks are no longer refused for the right reason.
     assert [case_id for case_id, status in results.items() if status == "failed"] == ["RT-02", "RT-03", "RT-04"]
     assert (events[-1][1]["passed"], events[-1][1]["total"]) == (8, 11)

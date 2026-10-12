@@ -33,6 +33,7 @@ BASE_TIERS: dict[str, Tier] = {
     "get_transfer_quote": "T0",
     "verify_payee": "T0",
     "explain_decision": "T0",
+    "check_claims": "T0",
     "respond_to_user": "T0",
     # T1 Suggest: automatic, only proposes.
     "analyse_spending": "T1",
@@ -190,7 +191,9 @@ def _pay_bill(user: User, raw_args: dict[str, Any], ctx: Context) -> Verdict:
     if document is not None:
         if document.trust_flag == "untrusted":
             fraud.append("UNTRUSTED_DOCUMENT")
-        present = _signal_codes(document.risk_signals)
+        # The keyword risk signals and the claim check are two layers: a block from either one
+        # refuses the payment. The claim check can add a reason; it can never take one away.
+        present = _signal_codes(document.risk_signals) | set((document.claim_check or {}).get("blocks") or [])
         fraud += [signal for signal in DOCUMENT_RISK_SIGNALS if signal in present]
     if _is_money_mule_pattern(user, bill, ctx):
         fraud.append("MONEY_MULE_PATTERN")
@@ -216,6 +219,10 @@ def _pay_bill(user: User, raw_args: dict[str, Any], ctx: Context) -> Verdict:
         verdict.raise_to("T3", reason("OVER_TXN_LIMIT"))
     if new_payee:
         verdict.raise_to("T3", reason("NEW_PAYEE"))
+    # A warning from the claim check (a payee nobody can vouch for) forces the same step-up.
+    warnings = (document.claim_check or {}).get("warns") or [] if document is not None else []
+    for code in warnings:
+        verdict.raise_to("T3", reason(code))
     return verdict
 
 

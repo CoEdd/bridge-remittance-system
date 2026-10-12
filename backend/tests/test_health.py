@@ -23,6 +23,7 @@ def test_health_reports_status_mode_date_and_version() -> None:
 def test_health_follows_the_environment(monkeypatch: pytest.MonkeyPatch) -> None:
     monkeypatch.setenv("AGENT_MODE", "live")
     monkeypatch.setenv("DEMO_TODAY", "2026-11-01")
+    monkeypatch.delenv("ANTHROPIC_API_KEY", raising=False)  # whatever the developer's .env holds
     get_settings.cache_clear()
 
     without_key = client.get("/health").json()

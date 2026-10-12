@@ -167,6 +167,8 @@ export function resultRows(step: StepEvent): Row[] {
         ["Risk signals", signals.length > 0 ? signals.join(", ") : "None"],
       ];
     }
+    case "check_claims":
+      return list(details.claims).map((claim): Row => [text(claim.meaning), text(claim.status)]);
     case "verify_payee":
       return [
         ["Payee", text(details.name)],

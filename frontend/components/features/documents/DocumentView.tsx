@@ -3,6 +3,7 @@
 import { BadgeCheck, CircleHelp, Languages, ShieldAlert, TriangleAlert } from "lucide-react";
 import { useState } from "react";
 import { FIELD_LABELS, KIND_LABELS, STATUS, languageList } from "@/components/features/documents/labels";
+import { ClaimTable, ORIGINS, Reasoning } from "@/components/features/claims/Claims";
 import { PolicyQuote } from "@/components/features/documents/PolicyQuote";
 import { SourceText } from "@/components/features/documents/SourceText";
 import { Badge } from "@/components/ui/Badge";
@@ -122,6 +123,9 @@ export function DocumentView({ document }: { document: DocumentDetail }) {
   const shown: Language = showEnglish ? "en" : (language ?? "en");
   const toggle = () => setShowEnglish(!showEnglish);
   const status = STATUS[document.status];
+  const check = document.claim_check;
+  const claims = check.claims ?? [];
+  const against = claims.filter((claim) => claim.status === "contradicted" || claim.status === "flagged").length;
 
   return (
     <div className="flex flex-col gap-6">
@@ -157,6 +161,32 @@ export function DocumentView({ document }: { document: DocumentDetail }) {
 
       {document.risk_signals.length > 0 && (
         <RiskPanel signals={document.risk_signals} shown={shown} onToggle={toggle} />
+      )}
+
+      {claims.length > 0 && (
+        <Card>
+          {/* Open by itself when a claim is contradicted or flagged; one line otherwise. */}
+          <details open={against > 0}>
+            <summary className="flex cursor-pointer items-center justify-between gap-4 rounded-sm">
+              <span className="font-heading text-18 font-semibold text-ink">
+                Claim check{" "}
+                <span className="ml-2 font-sans text-13 font-normal text-muted">
+                  {claims.length} claims · {against > 0 ? `${against} contradicted or flagged` : "none contradicted"}
+                </span>
+              </span>
+              {check.origin && <span className="text-13 text-muted">{ORIGINS[check.origin]}</span>}
+            </summary>
+            <div className="mt-4 flex flex-col gap-3">
+              <ClaimTable claims={claims} shown={shown} />
+              <Reasoning
+                shown={shown}
+                items={(check.conclusions ?? [])
+                  .filter((item) => item.severity === "block")
+                  .map((item) => ({ rule: item.rule, title: item.title, lines: item.reasoning }))}
+              />
+            </div>
+          </details>
+        </Card>
       )}
 
       <div className="grid grid-cols-2 gap-6">

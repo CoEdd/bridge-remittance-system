@@ -147,6 +147,12 @@ def _bill_of(session: Session, action: PendingAction) -> Bill | None:
     return session.get(Bill, bill_id) if isinstance(bill_id, int) else None
 
 
+def _claim_check_of(session: Session, action: PendingAction) -> dict[str, Any] | None:
+    """The claim check of the document behind a refused payment, if it found something."""
+    bill = _bill_of(session, action)
+    return documents.claim_summary(bill.document) if bill is not None and bill.document is not None else None
+
+
 def _action_card(session: Session, action: PendingAction, language: str) -> dict[str, Any]:
     """One pending action as the approval sheet needs it."""
     breakdown = action.cost_breakdown or {}
@@ -282,6 +288,7 @@ def _run(
                 "reasons": _reasons_for_user(refused, language, _bill_of(session, refused)),
                 "advice": advice[language],
                 "advice_en": advice["en"],
+                "claim_check": _claim_check_of(session, refused),
                 "audit_seq": refusal_entry.seq if refusal_entry else None,
             },
         )
