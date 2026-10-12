@@ -2,7 +2,8 @@
 
 import { BadgeCheck, CircleHelp, Languages, ShieldAlert, TriangleAlert } from "lucide-react";
 import { useState } from "react";
-import { FIELD_LABELS, KIND_LABELS, LANGUAGE_LABELS, STATUS, languageList } from "@/components/features/documents/labels";
+import { FIELD_LABELS, KIND_LABELS, STATUS, languageList } from "@/components/features/documents/labels";
+import { PolicyQuote } from "@/components/features/documents/PolicyQuote";
 import { SourceText } from "@/components/features/documents/SourceText";
 import { Badge } from "@/components/ui/Badge";
 import { Button } from "@/components/ui/Button";
@@ -35,26 +36,6 @@ function EnglishToggle({ shown, onToggle }: { shown: Language; onToggle: () => v
   );
 }
 
-function PolicyCard({ signal, shown }: { signal: RiskSignal; shown: Language }) {
-  const clause = signal.policy_clause;
-  if (!clause) return null;
-  // The policy is published in English and Chinese: quote the Chinese file to a Chinese
-  // reader and the English file to everyone else.
-  const language: Language = shown === "zh" && clause.versions.zh ? "zh" : clause.versions.en ? "en" : clause.language;
-  const version = clause.versions[language] ?? clause;
-  return (
-    <figure className="mt-3 rounded-control border border-line bg-surface p-4">
-      <figcaption className="text-13 font-medium text-muted">University payment policy</figcaption>
-      <blockquote lang={language} className="mt-1 text-15 text-ink">
-        {version.text}
-      </blockquote>
-      <p className="mt-2 text-13 text-muted">
-        Source: {version.file} · {LANGUAGE_LABELS[language]}
-      </p>
-    </figure>
-  );
-}
-
 function RiskPanel({ signals, shown, onToggle }: { signals: RiskSignal[]; shown: Language; onToggle: () => void }) {
   return (
     <section aria-label="Risk signals" className="rounded-card border border-amber-line bg-amber-tint p-6">
@@ -83,7 +64,7 @@ function RiskPanel({ signals, shown, onToggle }: { signals: RiskSignal[]; shown:
                 ))}
               </ul>
             </details>
-            <PolicyCard signal={signal} shown={shown} />
+            {signal.policy_clause && <PolicyQuote clause={signal.policy_clause} shown={shown} />}
           </li>
         ))}
       </ul>

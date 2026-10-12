@@ -10,7 +10,7 @@ import {
   ShieldAlert,
   ShieldCheck,
 } from "lucide-react";
-import { useCallback, useId, useState } from "react";
+import { useCallback, useEffect, useId, useState } from "react";
 import { AuditTable } from "@/components/features/audit/AuditTable";
 import { EntrySheet } from "@/components/features/audit/EntrySheet";
 import { Loadable } from "@/components/features/home/Loadable";
@@ -84,7 +84,8 @@ function Simulation({
   );
 }
 
-export function AuditLog() {
+/** `initialEntry` opens one entry straight away, for links from the Assistant. */
+export function AuditLog({ initialEntry = null }: { initialEntry?: number | null }) {
   const filterId = useId();
   const [page, setPage] = useState(1);
   const [eventType, setEventType] = useState("");
@@ -99,6 +100,18 @@ export function AuditLog() {
     [page, eventType],
   );
   const result = useApi(load);
+
+  useEffect(() => {
+    if (initialEntry === null) return;
+    const controller = new AbortController();
+    api
+      .audit({ seq: initialEntry }, controller.signal)
+      .then((found) => setOpened(found.entries[0] ?? null))
+      .catch(() => {
+        // The table below still loads; only the shortcut to one entry is lost.
+      });
+    return () => controller.abort();
+  }, [initialEntry]);
 
   async function verify() {
     setCheck({ status: "running" });

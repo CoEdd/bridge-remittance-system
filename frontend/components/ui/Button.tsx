@@ -3,7 +3,7 @@ import { LoaderCircle, type LucideIcon } from "lucide-react";
 import type { ButtonHTMLAttributes } from "react";
 
 export type ButtonVariant = "primary" | "secondary" | "ghost" | "danger";
-export type ButtonSize = "md" | "lg";
+export type ButtonSize = "sm" | "md" | "lg";
 
 const BASE =
   "inline-flex items-center justify-center gap-2 rounded-control border font-medium whitespace-nowrap transition-colors duration-150";
@@ -16,6 +16,7 @@ const VARIANTS: Record<ButtonVariant, string> = {
 };
 
 const SIZES: Record<ButtonSize, string> = {
+  sm: "h-8 px-3 text-13",
   md: "h-10 px-4 text-15",
   lg: "h-12 px-6 text-18",
 };

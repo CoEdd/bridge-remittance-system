@@ -45,7 +45,7 @@ const TYPE_SCALE: { label: string; className: string }[] = [
 ];
 
 const VARIANTS: ButtonVariant[] = ["primary", "secondary", "ghost", "danger"];
-const SIZES: ButtonSize[] = ["md", "lg"];
+const SIZES: ButtonSize[] = ["sm", "md", "lg"];
 const VARIANT_LABELS: Record<ButtonVariant, string> = {
   primary: "Pay bill",
   secondary: "Cancel",

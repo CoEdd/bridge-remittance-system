@@ -2,7 +2,8 @@
 
 import { ChevronDown, type LucideIcon } from "lucide-react";
 import { useEffect, useId, useRef, useState } from "react";
-import { Button } from "./Button";
+import clsx from "clsx";
+import { Button, type ButtonSize, type ButtonVariant } from "./Button";
 
 export interface MenuItem {
   key: string;
@@ -17,10 +18,25 @@ interface MenuProps {
   items: MenuItem[];
   onSelect: (key: string) => void;
   loading?: boolean;
+  disabled?: boolean;
+  variant?: ButtonVariant;
+  size?: ButtonSize;
+  /** Where the list opens: under the button, or above it when the button sits at the bottom of the screen. */
+  placement?: "below" | "above";
 }
 
 /** A button that opens a short list of choices. Esc or a click outside closes it. */
-export function Menu({ label, icon, items, onSelect, loading = false }: MenuProps) {
+export function Menu({
+  label,
+  icon,
+  items,
+  onSelect,
+  loading = false,
+  disabled = false,
+  variant = "secondary",
+  size = "md",
+  placement = "below",
+}: MenuProps) {
   const menuId = useId();
   const [open, setOpen] = useState(false);
   const container = useRef<HTMLDivElement>(null);
@@ -47,9 +63,11 @@ export function Menu({ label, icon, items, onSelect, loading = false }: MenuProp
   return (
     <div ref={container} className="relative">
       <Button
-        variant="secondary"
+        variant={variant}
+        size={size}
         icon={icon}
         loading={loading}
+        disabled={disabled}
         aria-haspopup="menu"
         aria-expanded={open}
         aria-controls={open ? menuId : undefined}
@@ -63,7 +81,10 @@ export function Menu({ label, icon, items, onSelect, loading = false }: MenuProp
           id={menuId}
           role="menu"
           aria-label={label}
-          className="absolute right-0 z-40 mt-2 w-72 rounded-card border border-line bg-surface p-1 shadow-overlay"
+          className={clsx(
+            "absolute z-40 w-72 rounded-card border border-line bg-surface p-1 shadow-overlay",
+            placement === "above" ? "bottom-full left-0 mb-2" : "right-0 mt-2",
+          )}
         >
           {items.map((item) => (
             <li key={item.key} role="none">

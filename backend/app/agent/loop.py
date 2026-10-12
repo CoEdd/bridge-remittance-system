@@ -8,6 +8,7 @@ become pending actions under one plan and wait for the student. A refusal ends t
 as blocked. Nothing in this module can execute a payment.
 """
 
+import json
 import logging
 import uuid
 from collections.abc import Callable
@@ -165,40 +166,63 @@ def _action_card(session: Session, action: PendingAction, language: str) -> dict
     }
 
 
+def shared_line(document: Document | None) -> str:
+    """The student's side of a turn that starts with a document instead of a typed message."""
+    if document is None:
+        return "Shared a document"
+    if document.source == "paste":
+        return "Pasted a message"
+    if document.source == "demo event":
+        return f"Received a message: {document.filename}"
+    return f"Uploaded {document.filename}"
+
+
 def run_turn(session: Session, user: User, trigger: Trigger, emit: Emit, driver: Driver | None = None) -> None:
     """Run one turn and emit its events: step, message, approval_required or blocked, then done."""
     language = user.preferred_language
+    recorded: list[dict[str, Any]] = []
+
+    def record(name: str, payload: dict[str, Any]) -> None:
+        if name != "message":  # the message is the stored row itself
+            recorded.append({"event": name, "data": payload})
+        emit(name, payload)
+
     try:
-        _run(session, user, trigger, emit, driver, language)
+        answer = _run(session, user, trigger, record, driver, language)
     except LlmUnavailable as error:
         logger.warning("The live agent failed: %s", error)
         session.rollback()
         text, text_en = replies.both(replies.error_reply(), language)
-        _store(session, "assistant", text, text_en, language, now_utc())
-        emit("error", {"message": text, "message_en": text_en})
+        answer = _store(session, "assistant", text, text_en, language, now_utc())
+        record("error", {"message": text, "message_en": text_en})
         emit("message", {"text": text, "text_en": text_en, "language": language})
+    # Keep the turn's events with the reply, as plain JSON, so the chat can be shown again later.
+    answer.events = json.loads(json.dumps(recorded, ensure_ascii=False, default=str))
+    session.commit()
     emit("done", {})
 
 
-def _run(session: Session, user: User, trigger: Trigger, emit: Emit, driver: Driver | None, language: str) -> None:
+def _run(
+    session: Session, user: User, trigger: Trigger, emit: Emit, driver: Driver | None, language: str
+) -> ChatMessage:
+    """The turn itself. Returns the stored reply."""
     if trigger.kind == "document":
-        document = session.get(Document, trigger.document_id)
-        shown = f"Uploaded {document.filename}" if document else "Uploaded a document"
+        shown = shared_line(session.get(Document, trigger.document_id))
         user_message = _store(session, "user", shown, shown, "en", now_utc())
     else:
         user_message = _store(session, "user", trigger.text, None, main_language(trigger.text, language), now_utc())
 
-    def finish(texts: tuple[str, str]) -> None:
-        _store(session, "assistant", texts[0], texts[1], language, now_utc())
+    def finish(texts: tuple[str, str]) -> ChatMessage:
+        answer = _store(session, "assistant", texts[0], texts[1], language, now_utc())
         emit("message", {"text": texts[0], "text_en": texts[1], "language": language})
+        return answer
 
     # Content guard, before any driver runs: Bridge never gives investment advice.
     if trigger.kind == "message" and replies.is_investment_question(trigger.text):
         with write_lock:
             audit.append(session, "agent.declined", "agent", {"reason": "INVESTMENT_ADVICE"})
             session.commit()
-        finish(replies.both(replies.investment_declined(), language))
-        return
+        return finish(replies.both(replies.investment_declined(), language))
 
     context = build_context(session, user)
     driver = driver or make_driver(session, trigger, context, user_message.id)
@@ -240,7 +264,7 @@ def _run(session: Session, user: User, trigger: Trigger, emit: Emit, driver: Dri
             reply = replies.both(replies.too_many_steps(), language)
         else:
             reply = replies.both(replies.fallback(), language)
-    finish(reply)
+    answer = finish(reply)
 
     if refused is not None:
         codes = [item["code"] for item in refused.reasons]
@@ -267,6 +291,7 @@ def _run(session: Session, user: User, trigger: Trigger, emit: Emit, driver: Dri
             "approval_required",
             {"plan_id": plan_id, "actions": [_action_card(session, action, language) for action in waiting]},
         )
+    return answer
 
 
 def _execute(
@@ -304,6 +329,7 @@ def _execute(
             summary = f"{summary} · {codes[0]}{f' +{len(codes) - 1} more' if len(codes) > 1 else ''}" if is_money else summary
 
     if call.name != "respond_to_user":
+        why = replies.why(verdict.tier, [item.code for item in verdict.reasons])
         emit(
             "step",
             {
@@ -313,6 +339,9 @@ def _execute(
                 "tier": verdict.tier,
                 "verdict": "refused" if outcome == "refused" else "pending" if outcome == "pending" else "allowed",
                 "summary": summary,
+                "why": why[user.preferred_language],
+                "why_en": why["en"],
+                "input": call.args,
                 "details": data,
             },
         )

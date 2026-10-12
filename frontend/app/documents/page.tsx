@@ -4,11 +4,13 @@ import { PageHeader } from "@/components/features/shell/PageHeader";
 
 export const metadata: Metadata = { title: "Documents" };
 
-export default function DocumentsPage() {
+/** `/documents?id=3` opens document 3. */
+export default async function DocumentsPage({ searchParams }: { searchParams: Promise<{ id?: string }> }) {
+  const id = Number((await searchParams).id);
   return (
     <>
       <PageHeader title="Documents" description="Invoices and payment messages Bridge has read." />
-      <Documents />
+      <Documents initialId={Number.isInteger(id) && id > 0 ? id : null} />
     </>
   );
 }

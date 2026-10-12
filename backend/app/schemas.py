@@ -164,6 +164,7 @@ class ActionOut(BaseModel):
     status: str
     requires: list[str]  # subset of confirm, otp, cooling_off
     reasons: list[ReasonOut]
+    why: dict[str, str]  # why it has this tier, in plain words, by language
     cost_breakdown: dict[str, Any] | None
     otp_attempts: int
     otp_attempts_left: int
@@ -171,6 +172,8 @@ class ActionOut(BaseModel):
     expires_at: datetime | None  # approval deadline while waiting for the student
     cooling_off_until: datetime | None  # when a cooling-off action will run
     executed_posting_id: int | None
+    closed_at: datetime | None = None  # when it was executed, refused, cancelled or expired
+    audit_seq: int | None = None  # the audit entry that recorded that
 
 
 class OtpIn(BaseModel):
@@ -311,6 +314,7 @@ class ChatIn(BaseModel):
 
 class ChatStartOut(BaseModel):
     stream_id: str  # follow the turn at GET /chat/stream/{stream_id}
+    text: str  # the student's side of the turn, as it is stored
 
 
 class ChatMessageOut(BaseModel):
@@ -320,6 +324,15 @@ class ChatMessageOut(BaseModel):
     text_en: str | None
     language: str
     created_at: datetime
+    # On an assistant message: the turn's events, each {"event": name, "data": {...}}.
+    events: list[dict[str, Any]] = []
+
+
+class DemoSettingsOut(BaseModel):
+    """Sandbox settings the screens show, so nothing is hardcoded in the frontend."""
+
+    otp: str  # the one-time code Tier 3 approvals ask for in the demo
+    cooling_off_seconds: int
 
 
 class MuleEventOut(BaseModel):

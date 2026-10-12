@@ -29,7 +29,7 @@ from app.seed.history import (
 logger = logging.getLogger(__name__)
 
 # Bump whenever a table changes. A database stamped with another number is rebuilt at start-up.
-SCHEMA_VERSION = 5
+SCHEMA_VERSION = 6
 
 DEMO_USER_ID = 1
 UNIVERSITY_PAYEE_ID = 1

@@ -46,6 +46,18 @@
   --shadow-overlay: 0 12px 32px rgb(15 30 46 / 0.18);
 
   --animate-sheet-in: sheet-in 200ms ease-out;
+  --animate-step-in: step-in 200ms ease-out;
+
+  @keyframes step-in {
+    from {
+      transform: translateY(6px);
+      opacity: 0;
+    }
+    to {
+      transform: translateY(0);
+      opacity: 1;
+    }
+  }
 
   @keyframes sheet-in {
     from {

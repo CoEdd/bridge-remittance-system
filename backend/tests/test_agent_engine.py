@@ -178,6 +178,29 @@ def test_a_proposed_payment_uses_the_bills_own_amount_and_payee(session: Session
     assert (card["summary"], card["requires"]) == ("Pay CNY 98.00 to PearlTel Mobile", ["confirm"])
     assert card["expires_at"] is not None
     assert session.get_one(PendingAction, card["id"]).status == "awaiting_confirm"
+    assert only(events, "step")[0]["why_en"] == "It moves money, so it waits for your confirmation."
+
+
+def test_explain_decision_gives_the_same_why_line_as_the_step(session: Session) -> None:
+    driver = StubDriver(
+        [ToolCall("pay_bill", {"bill_id": PHONE_BILL, "from_account_id": CNY_WALLET}, "a")],
+        [ToolCall("explain_decision", {"action_id": 1}, "b")],
+        [respond()],
+    )
+
+    events = turn(session, driver)
+
+    explained = driver.seen[2][0].data
+    assert explained["why"] == only(events, "step")[0]["why_en"]
+    assert (explained["tier"], explained["status"], explained["requires"]) == ("T2", "awaiting_confirm", ["confirm"])
+
+
+def test_a_turns_events_are_stored_with_the_reply(session: Session) -> None:
+    turn(session, StubDriver([ToolCall("get_balances", {})], [respond()]))
+
+    user_row, reply = session.scalars(select(ChatMessage).order_by(ChatMessage.id)).all()
+    assert user_row.events == []
+    assert [(item["event"], item["data"].get("tool")) for item in reply.events] == [("step", "get_balances")]
 
 
 def test_after_a_refusal_nothing_else_is_proposed(session: Session) -> None:

@@ -1,14 +1,20 @@
 import type {
   Accounts,
+  Action,
   AuditFilters,
   AuditPage,
   AuditVerify,
   Bill,
+  ChatMessage,
+  ChatStart,
   DemoDocument,
+  DemoSettings,
   DocumentDetail,
   DocumentSummary,
   Health,
   Language,
+  MuleEvent,
+  OtpResult,
   Payee,
   SpendingInsights,
   TamperResult,
@@ -59,6 +65,14 @@ async function request<T>(path: string, init?: RequestInit): Promise<T> {
   return (await response.json()) as T;
 }
 
+function postJson<T>(path: string, body?: unknown): Promise<T> {
+  return request<T>(path, {
+    method: "POST",
+    headers: body === undefined ? undefined : { "Content-Type": "application/json" },
+    body: body === undefined ? undefined : JSON.stringify(body),
+  });
+}
+
 function withQuery(path: string, params: object): string {
   const query = new URLSearchParams();
   for (const [key, value] of Object.entries(params)) {
@@ -98,10 +112,19 @@ export const api = {
     form.append("file", file);
     return request<DocumentDetail>("/documents", { method: "POST", body: form });
   },
-  pasteMessage: (text: string) =>
-    request<DocumentDetail>("/documents/message", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ text }),
-    }),
+  pasteMessage: (text: string) => postJson<DocumentDetail>("/documents/message", { text }),
+  /** Every action the agent proposed that needed the student or was refused, oldest first. */
+  actions: (signal?: AbortSignal) => request<Action[]>("/actions", { signal }),
+  confirmAction: (id: number) => postJson<Action>(`/actions/${id}/confirm`),
+  submitOtp: (id: number, code: string) => postJson<OtpResult>(`/actions/${id}/otp`, { code }),
+  cancelAction: (id: number) => postJson<Action>(`/actions/${id}/cancel`),
+  chatHistory: (signal?: AbortSignal) => request<ChatMessage[]>("/chat/history", { signal }),
+  /** Start a turn. Follow it with `followTurn` from lib/chat. */
+  sendChat: (text: string) => postJson<ChatStart>("/chat", { text }),
+  /** Start a turn in which the agent reads and explains a document. */
+  chatAboutDocument: (id: number) => postJson<ChatStart>(`/chat/document/${id}`),
+  chatStreamUrl: (streamId: string) => `${BASE_URL}/chat/stream/${streamId}`,
+  demoSettings: (signal?: AbortSignal) => request<DemoSettings>("/demo/settings", { signal }),
+  /** Demo event: a stranger sends money, then their "please forward it" message arrives. */
+  strangerTransfer: () => postJson<MuleEvent>("/demo/events/mule"),
 };

@@ -132,6 +132,7 @@ class Document(Base):
     user_id: Mapped[int] = mapped_column(ForeignKey("users.id"))
     filename: Mapped[str]
     kind: Mapped[str]  # invoice (a file) or message (pasted text)
+    source: Mapped[str] = mapped_column(default="upload")  # how it arrived: upload, paste, demo bundle, demo event
     source_language: Mapped[str]  # every language detected, comma-separated: "en,zh"
     raw_text: Mapped[str] = mapped_column(Text)
     chars_meta: Mapped[Any] = mapped_column(JSON)
@@ -247,4 +248,7 @@ class ChatMessage(Base):
     text: Mapped[str] = mapped_column(Text)
     text_en: Mapped[str | None] = mapped_column(Text)
     language: Mapped[str]
+    # On an assistant message: the turn's events (steps, approval_required, blocked, error),
+    # so the conversation can be shown again exactly as it happened.
+    events: Mapped[Any] = mapped_column(JSON, default=list)
     created_at: Mapped[datetime] = mapped_column(UtcDateTime)

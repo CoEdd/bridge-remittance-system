@@ -26,14 +26,20 @@ BLOCKED_TITLE: Texts = {"ms": "Bayaran disekat", "en": "Payment blocked", "zh": 
 
 _ADVICE: dict[str, Texts] = {
     "fraud": {
-        "ms": "Bayar hanya melalui saluran rasmi, dan sahkan dengan institusi itu melalui maklumat hubungan yang anda percayai.",
-        "en": "Pay only through the official channel, and check with the institution using contact details you already trust.",
-        "zh": "请只通过官方渠道付款，并用您原本信任的联系方式向该机构核实。",
+        "ms": (
+            "Bayar hanya ke akaun pada invois rasmi anda atau melalui portal pelajar. Jika ragu-ragu, hubungi pejabat "
+            "kewangan menggunakan maklumat di portal rasmi, bukan maklumat dalam mesej ini."
+        ),
+        "en": (
+            "Pay only to the account on your official invoice or through the student portal. If unsure, contact the "
+            "finance office using the details on the official portal, not the ones in this message."
+        ),
+        "zh": "请只向正式账单上的账户付款，或通过学生门户付款。如有疑问，请使用官方门户上的联系方式联系财务处，不要使用这条消息里的联系方式。",
     },
     "MONEY_MULE_PATTERN": {
-        "ms": "Pulangkan wang yang tersilap hantar melalui bank anda, bukan ke akaun yang diberikan oleh penghantar.",
-        "en": "Return money sent by mistake through your bank, not to an account the sender names.",
-        "zh": "误汇的款项应通过您的银行退回，不要转到对方指定的账户。",
+        "ms": "Jangan pindahkan wang daripada orang yang tidak dikenali. Minta bank anda memulangkannya kepada penghantar.",
+        "en": "Do not forward money from strangers. Ask your bank to return it to the sender.",
+        "zh": "不要替陌生人转移资金。请让您的银行把这笔钱退回给汇款人。",
     },
     "DAILY_LIMIT": {
         "ms": "Cuba lagi esok, atau bayar jumlah yang lebih kecil.",
@@ -84,6 +90,43 @@ def advice_for(codes: list[str]) -> Texts:
     if any(code in FRAUD_CODES for code in codes):
         return _ADVICE["fraud"]
     return next((_ADVICE[code] for code in codes if code in _ADVICE), _ADVICE["default"])
+
+
+_WHY: dict[str, Texts] = {
+    "T0": {
+        "ms": "Bacaan sahaja. Dijalankan tanpa perlu bertanya.",
+        "en": "Reading only. It runs without asking.",
+        "zh": "仅读取信息，无需询问即可执行。",
+    },
+    "T1": {
+        "ms": "Cadangan sahaja. Tiada bayaran atau perubahan dibuat.",
+        "en": "A suggestion only. Nothing is paid or changed.",
+        "zh": "仅为建议，不会付款或更改任何内容。",
+    },
+    "T2": {
+        "ms": "Ia memindahkan wang, jadi ia menunggu pengesahan anda.",
+        "en": "It moves money, so it waits for your confirmation.",
+        "zh": "涉及资金变动，需要您确认。",
+    },
+    "T3": {
+        "ms": "Ia memerlukan pengesahan anda dan kod sekali guna.",
+        "en": "It needs your confirmation and a one-time code.",
+        "zh": "需要您确认并输入一次性验证码。",
+    },
+}
+_REFUSED: Texts = {"ms": "Ditolak", "en": "Refused", "zh": "已拒绝"}
+
+
+def why(tier: str, codes: list[str]) -> Texts:
+    """Why a tool call got its tier, in plain words: the policy's own reasons, or the tier's rule."""
+    if tier == "REFUSED":
+        return {
+            language: f"{_REFUSED[language]}: {'; '.join(reason(code).title[language] for code in codes)}."
+            for language in ("ms", "en", "zh")
+        }
+    if codes:
+        return {language: " ".join(reason(code).text[language] for code in codes) for language in ("ms", "en", "zh")}
+    return _WHY.get(tier, _WHY["T2"])
 
 
 def investment_declined() -> Texts:

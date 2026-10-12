@@ -13,6 +13,7 @@ from fastapi.testclient import TestClient
 from sqlalchemy import update
 from sqlalchemy.orm import Session
 
+from app.config import get_settings
 from app.db import get_engine
 from app.models import FxQuote
 from app.policy import _paid_out_today
@@ -214,7 +215,11 @@ def test_act_2_the_agent_offer_is_refused_and_no_money_moves(client: TestClient)
     blocked = only(events, "blocked")[0]
     assert [reason["code"] for reason in blocked["reasons"]] == ["PAYEE_NOT_OFFICIAL", "THIRD_PARTY_DISCOUNT", "SCAM_PATTERN"]
     assert (blocked["summary"], blocked["summary_en"]) == ("Bayaran disekat", "Payment blocked")
-    assert blocked["advice"].startswith("Bayar hanya melalui saluran rasmi")
+    assert blocked["advice"].startswith("Bayar hanya ke akaun pada invois rasmi anda atau melalui portal pelajar.")
+    assert blocked["advice_en"] == (
+        "Pay only to the account on your official invoice or through the student portal. If unsure, contact the "
+        "finance office using the details on the official portal, not the ones in this message."
+    )
     for reason in blocked["reasons"]:
         assert reason["title"] and reason["text"] and reason["title_en"] and reason["text_en"]
         assert reason["evidence"]
@@ -260,7 +265,8 @@ def test_act_3_forwarding_the_strangers_money_is_refused(client: TestClient) -> 
     assert tools_of(events) == [("pay_bill", "REFUSED", "refused")]
     blocked = only(events, "blocked")[0]
     assert [reason["code"] for reason in blocked["reasons"]] == ["MONEY_MULE_PATTERN"]
-    assert blocked["advice_en"] == "Return money sent by mistake through your bank, not to an account the sender names."
+    assert blocked["advice_en"] == "Do not forward money from strangers. Ask your bank to return it to the sender."
+    assert blocked["advice"] == "Jangan pindahkan wang daripada orang yang tidak dikenali. Minta bank anda memulangkannya kepada penghantar."
     message = only(events, "message")[0]
     assert "keldai wang" in message["text"] and "melalui bank anda" in message["text"] and "visa" in message["text"]
     assert "money mules" in message["text_en"] and "through your bank" in message["text_en"]
@@ -383,3 +389,126 @@ def test_the_reply_follows_the_students_language(client: TestClient) -> None:
     assert blocked["reasons"][0]["title"] == "不是官方账户" and blocked["reasons"][0]["title_en"] == "Not the official account"
     assert only(events, "message")[0]["language"] == "zh"
     assert only(events, "message")[0]["text"].startswith("我无法继续这笔付款")
+
+
+# ---------------------------------------------------------------- what the chat screen reads
+
+
+def test_each_step_says_why_it_got_its_tier(client: TestClient) -> None:
+    client.post("/demo/documents/tuition_invoice")
+
+    steps = {step["tool"]: step for step in only(say(client, DEADLINE_QUESTION), "step")}
+
+    assert steps["get_transfer_quote"]["label"] == "Checked the true cost of this transfer"
+    assert (steps["get_balances"]["why"], steps["get_balances"]["why_en"]) == (
+        "Bacaan sahaja. Dijalankan tanpa perlu bertanya.",
+        "Reading only. It runs without asking.",
+    )
+    assert steps["plan_funding"]["why_en"] == "A suggestion only. Nothing is paid or changed."
+    # A money step quotes the policy engine's own reason.
+    assert steps["convert_currency"]["why_en"].startswith("A one-time code is needed because this is above your per-payment limit")
+    assert steps["pay_bill"]["why"].startswith("Kod sekali guna diperlukan kerana jumlah ini melebihi had setiap bayaran anda")
+
+
+def test_a_refused_step_says_why(client: TestClient) -> None:
+    client.post("/demo/documents/agent_offer")
+
+    step = only(say(client, AGENT_QUESTION), "step")[0]
+
+    assert step["why_en"] == "Refused: Not the official account; Discount through a third party; Matches a known scam pattern."
+    assert step["why"] == "Ditolak: Bukan akaun rasmi; Diskaun melalui pihak ketiga; Sepadan dengan corak penipuan."
+
+
+def test_the_history_keeps_every_turns_events(client: TestClient) -> None:
+    client.post("/demo/documents/tuition_invoice")
+    first = say(client, DEADLINE_QUESTION)
+    client.post("/demo/documents/agent_offer")
+    second = say(client, AGENT_QUESTION)
+
+    history = client.get("/chat/history").json()
+
+    assert [(item["role"], len(item["events"])) for item in history] == [("user", 0), ("assistant", 6), ("user", 0), ("assistant", 2)]
+    for turn, live in ((history[1], first), (history[3], second)):
+        # Exactly what was streamed, minus the message (the row itself) and the closing "done".
+        streamed = [event for event in live if event[0] not in ("message", "done")]
+        assert [(item["event"], item["data"]) for item in turn["events"]] == streamed
+    assert [item["event"] for item in history[1]["events"]] == ["step"] * 5 + ["approval_required"]
+    assert [item["event"] for item in history[3]["events"]] == ["step", "blocked"]
+
+
+def test_the_actions_list_says_what_happened_to_each_action(client: TestClient) -> None:
+    client.post("/demo/documents/tuition_invoice")
+    convert, pay = only(say(client, DEADLINE_QUESTION), "approval_required")[0]["actions"]
+
+    waiting = client.get("/actions").json()
+    assert [(item["id"], item["status"], item["closed_at"], item["audit_seq"]) for item in waiting] == [
+        (convert["id"], "awaiting_confirm", None, None),
+        (pay["id"], "awaiting_confirm", None, None),
+    ]
+
+    approve(client, convert["id"])
+    client.post(f"/actions/{pay['id']}/cancel")
+    client.post("/demo/documents/agent_offer")
+    blocked = only(say(client, AGENT_QUESTION), "blocked")[0]
+
+    done, cancelled, refused = client.get("/actions").json()
+    by_seq = {entry["seq"]: entry for entry in all_audit_events(client)}
+    assert (done["status"], by_seq[done["audit_seq"]]["event_type"]) == ("executed", "action.executed")
+    assert done["closed_at"] == by_seq[done["audit_seq"]]["created_at"]
+    assert by_seq[done["audit_seq"]]["payload"]["posting_id"] == done["executed_posting_id"]
+    assert (cancelled["status"], by_seq[cancelled["audit_seq"]]["event_type"]) == ("cancelled", "user.cancelled")
+    assert (refused["status"], refused["audit_seq"]) == ("refused", blocked["audit_seq"])
+    assert refused["id"] == blocked["action_id"]
+    assert [reason["code"] for reason in refused["reasons"]] == ["PAYEE_NOT_OFFICIAL", "THIRD_PARTY_DISCOUNT", "SCAM_PATTERN"]
+
+
+def test_one_audit_entry_can_be_asked_for_by_number(client: TestClient) -> None:
+    client.post("/demo/documents/agent_offer")
+    blocked = only(say(client, AGENT_QUESTION), "blocked")[0]
+
+    page = client.get("/audit", params={"seq": blocked["audit_seq"]}).json()
+
+    assert page["total"] == 1
+    assert [(entry["seq"], entry["event_type"]) for entry in page["entries"]] == [(blocked["audit_seq"], "action.refused")]
+    assert client.get("/audit", params={"seq": 9_999}).json()["entries"] == []
+    assert client.get("/audit", params={"seq": 0}).status_code == 422
+
+
+def test_the_demo_settings_come_from_the_backend(client: TestClient, monkeypatch: pytest.MonkeyPatch) -> None:
+    assert client.get("/demo/settings").json() == {"otp": "246810", "cooling_off_seconds": 60}
+
+    monkeypatch.setenv("DEMO_OTP", "135790")
+    monkeypatch.setenv("COOLING_OFF_SECONDS", "5")
+    get_settings.cache_clear()
+
+    assert client.get("/demo/settings").json() == {"otp": "135790", "cooling_off_seconds": 5}
+
+
+def test_the_language_switch_applies_to_the_very_next_message(client: TestClient) -> None:
+    replies_by_language = {}
+    for language in ("ms", "en", "zh"):
+        client.patch("/me", json={"preferred_language": language})
+        replies_by_language[language] = only(say(client, "Bagaimana perbelanjaan saya?"), "message")[0]
+
+    assert [message["language"] for message in replies_by_language.values()] == ["ms", "en", "zh"]
+    assert replies_by_language["en"]["text"] == replies_by_language["en"]["text_en"]
+    assert replies_by_language["ms"]["text"] != replies_by_language["ms"]["text_en"]
+    assert "消费" in replies_by_language["zh"]["text"] or "支出" in replies_by_language["zh"]["text"]
+
+
+def test_a_turn_that_starts_with_a_document_says_how_it_arrived(client: TestClient) -> None:
+    uploaded = client.post("/demo/documents/tuition_invoice").json()
+    pasted = client.post("/documents/message", json={"text": "Please pay CNY 500.00 to Chen Li, account 6222 0000 1111 2222."}).json()
+    received = client.post("/demo/events/mule").json()["document"]
+
+    starts = [client.post(f"/chat/document/{document['id']}").json() for document in (uploaded, pasted, received)]
+    for start in starts:
+        read_events(client, start["stream_id"])
+
+    lines = ["Uploaded tuition_invoice.pdf", "Pasted a message", "Received a message: mule_message_en.txt"]
+    assert [start["text"] for start in starts] == lines
+    # The same line is what the chat history keeps as the student's side of the turn.
+    assert [item["text"] for item in client.get("/chat/history").json() if item["role"] == "user"] == lines
+    typed = client.post("/chat", json={"text": "  Bagaimana perbelanjaan saya?  "}).json()
+    read_events(client, typed["stream_id"])
+    assert typed["text"] == "Bagaimana perbelanjaan saya?"

@@ -5,7 +5,8 @@ from app.clock import demo_today, now_utc
 from app.documents.reader import read_message
 from app.routers.deps import SessionDep, UserDep
 from app.routers.documents import document_out
-from app.schemas import MuleEventOut, ResetOut
+from app.config import get_settings
+from app.schemas import DemoSettingsOut, MuleEventOut, ResetOut
 from app.seed import reset
 from app.seed.demo_docs import DEMO_DOCUMENTS, demo_docs_dir
 from app.seed.events import STRANGER_AMOUNT, STRANGER_NAME, stranger_sends_money
@@ -18,6 +19,13 @@ def reset_demo() -> ResetOut:
     """Rebuild the database: same seed data every time, FX rates fetched again and frozen."""
     source = reset()
     return ResetOut(status="reset", demo_today=demo_today(), fx_source=source)
+
+
+@router.get("/settings")
+def demo_settings() -> DemoSettingsOut:
+    """The demo's one-time code and cooling-off time, for the approval screen to show."""
+    settings = get_settings()
+    return DemoSettingsOut(otp=settings.demo_otp, cooling_off_seconds=settings.cooling_off_seconds)
 
 
 @router.post("/events/mule")

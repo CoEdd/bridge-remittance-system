@@ -1,6 +1,7 @@
 "use client";
 
 import { X } from "lucide-react";
+import clsx from "clsx";
 import { useEffect, useId, useRef, type ReactNode } from "react";
 import { Button } from "./Button";
 
@@ -13,6 +14,8 @@ interface SheetProps {
   title: string;
   children: ReactNode;
   footer?: ReactNode;
+  /** "wide" is 520px, for approvals. */
+  width?: "normal" | "wide";
 }
 
 /**
@@ -20,7 +23,7 @@ interface SheetProps {
  * Focus stays inside while it is open, Esc closes it, and focus then returns
  * to whatever opened it.
  */
-export function Sheet({ open, onClose, title, children, footer }: SheetProps) {
+export function Sheet({ open, onClose, title, children, footer, width = "normal" }: SheetProps) {
   const titleId = useId();
   const panelRef = useRef<HTMLDivElement>(null);
   const onCloseRef = useRef(onClose);
@@ -83,7 +86,10 @@ export function Sheet({ open, onClose, title, children, footer }: SheetProps) {
         aria-modal="true"
         aria-labelledby={titleId}
         tabIndex={-1}
-        className="absolute inset-y-0 right-0 flex w-[480px] max-w-full flex-col border-l border-line bg-surface shadow-overlay motion-safe:animate-sheet-in"
+        className={clsx(
+          "absolute inset-y-0 right-0 flex max-w-full flex-col border-l border-line bg-surface shadow-overlay motion-safe:animate-sheet-in",
+          width === "wide" ? "w-[520px]" : "w-[480px]",
+        )}
       >
         <div className="flex items-center justify-between gap-4 border-b border-line px-6 py-4">
           <h2 id={titleId} className="font-heading text-24 font-semibold text-ink">

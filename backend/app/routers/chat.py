@@ -7,6 +7,7 @@ from sse_starlette.sse import EventSourceResponse
 from starlette.concurrency import iterate_in_threadpool
 
 from app.agent import streams
+from app.agent.loop import shared_line
 from app.agent.types import Trigger
 from app.models import ChatMessage, Document
 from app.routers.deps import SessionDep, UserDep
@@ -18,7 +19,8 @@ router = APIRouter(prefix="/chat", tags=["chat"])
 @router.post("")
 def send_message(body: ChatIn) -> ChatStartOut:
     """Send a chat message. The agent's turn runs in the background; follow it with the stream id."""
-    return ChatStartOut(stream_id=streams.start(Trigger(kind="message", text=body.text.strip())))
+    text = body.text.strip()
+    return ChatStartOut(stream_id=streams.start(Trigger(kind="message", text=text)), text=text)
 
 
 @router.post("/document/{document_id}")
@@ -27,7 +29,9 @@ def document_uploaded(document_id: int, session: SessionDep, user: UserDep) -> C
     document = session.get(Document, document_id)
     if document is None or document.user_id != user.id:
         raise HTTPException(status_code=404, detail="There is no such document.")
-    return ChatStartOut(stream_id=streams.start(Trigger(kind="document", document_id=document_id)))
+    return ChatStartOut(
+        stream_id=streams.start(Trigger(kind="document", document_id=document_id)), text=shared_line(document)
+    )
 
 
 @router.get("/stream/{stream_id}")
@@ -53,7 +57,13 @@ def history(session: SessionDep) -> list[ChatMessageOut]:
     rows = session.scalars(select(ChatMessage).order_by(ChatMessage.id))
     return [
         ChatMessageOut(
-            id=row.id, role=row.role, text=row.text, text_en=row.text_en, language=row.language, created_at=row.created_at
+            id=row.id,
+            role=row.role,
+            text=row.text,
+            text_en=row.text_en,
+            language=row.language,
+            created_at=row.created_at,
+            events=row.events or [],
         )
         for row in rows
     ]

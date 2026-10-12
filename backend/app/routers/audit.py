@@ -36,13 +36,16 @@ def list_entries(
     page: Annotated[int, Query(ge=1)] = 1,
     page_size: Annotated[int, Query(ge=1, le=200)] = 50,
     event_type: str | None = None,
+    seq: Annotated[int | None, Query(ge=1)] = None,
 ) -> AuditPageOut:
-    """Audit entries, newest first."""
+    """Audit entries, newest first. `seq` asks for one entry by its number."""
     if event_type is not None and event_type not in EVENT_TYPES:
         raise HTTPException(status_code=422, detail="Unknown event type.")
     query = select(AuditLog)
     if event_type:
         query = query.where(AuditLog.event_type == event_type)
+    if seq is not None:
+        query = query.where(AuditLog.seq == seq)
     total = session.scalar(select(func.count()).select_from(query.subquery())) or 0
     entries = session.scalars(
         query.order_by(AuditLog.seq.desc()).offset((page - 1) * page_size).limit(page_size)

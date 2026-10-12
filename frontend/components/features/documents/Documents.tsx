@@ -5,13 +5,13 @@ import { ClipboardPaste, FileText, FolderOpen, Upload } from "lucide-react";
 import { useCallback, useEffect, useRef, useState } from "react";
 import { DocumentView } from "@/components/features/documents/DocumentView";
 import { KIND_LABELS, STATUS, languageList } from "@/components/features/documents/labels";
+import { PasteSheet } from "@/components/features/documents/PasteSheet";
 import { Loadable } from "@/components/features/home/Loadable";
 import { Badge } from "@/components/ui/Badge";
 import { Button } from "@/components/ui/Button";
 import { Card } from "@/components/ui/Card";
 import { EmptyState } from "@/components/ui/EmptyState";
 import { Menu } from "@/components/ui/Menu";
-import { Sheet } from "@/components/ui/Sheet";
 import { Skeleton } from "@/components/ui/Skeleton";
 import { ApiError, api } from "@/lib/api";
 import { formatDate } from "@/lib/format";
@@ -61,15 +61,15 @@ function DocumentList({
   );
 }
 
-export function Documents() {
+/** `initialId` opens one document straight away, for links from the Assistant. */
+export function Documents({ initialId = null }: { initialId?: number | null }) {
   const fileInput = useRef<HTMLInputElement>(null);
   const list = useApi(api.documents);
   const demos = useApi(api.demoDocuments);
-  const [selected, setSelected] = useState<number | null>(null);
+  const [selected, setSelected] = useState<number | null>(initialId);
   const [busy, setBusy] = useState<Busy>(null);
   const [error, setError] = useState<string | null>(null);
   const [pasting, setPasting] = useState(false);
-  const [message, setMessage] = useState("");
 
   const loadDetail = useCallback(
     (signal: AbortSignal): Promise<DocumentDetail | null> =>
@@ -100,11 +100,10 @@ export function Documents() {
     }
   }
 
-  async function readMessage() {
-    if (await ingest("paste", () => api.pasteMessage(message))) {
-      setPasting(false);
-      setMessage("");
-    }
+  async function readMessage(text: string): Promise<boolean> {
+    const read = await ingest("paste", () => api.pasteMessage(text));
+    if (read) setPasting(false);
+    return read;
   }
 
   const demoItems =
@@ -180,32 +179,7 @@ export function Documents() {
         }
       </Loadable>
 
-      <Sheet
-        open={pasting}
-        onClose={() => setPasting(false)}
-        title="Paste a message"
-        footer={
-          <>
-            <Button variant="secondary" onClick={() => setPasting(false)}>
-              Cancel
-            </Button>
-            <Button loading={busy === "paste"} disabled={!message.trim()} onClick={() => void readMessage()}>
-              Read message
-            </Button>
-          </>
-        }
-      >
-        <label htmlFor="pasted-message" className="mb-2 block text-13 font-medium text-muted">
-          Message
-        </label>
-        <textarea
-          id="pasted-message"
-          value={message}
-          onChange={(event) => setMessage(event.target.value)}
-          rows={12}
-          className="w-full rounded-control border border-line bg-surface p-3 text-15 text-ink"
-        />
-      </Sheet>
+      <PasteSheet open={pasting} onClose={() => setPasting(false)} busy={busy === "paste"} onRead={readMessage} />
     </>
   );
 }

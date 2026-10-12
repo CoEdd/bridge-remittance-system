@@ -112,6 +112,16 @@ def append(
     return entry
 
 
+def last_for_action(session: Session, action_id: int, event_types: tuple[str, ...]) -> AuditLog | None:
+    """The newest entry of the given types about one action."""
+    return session.scalars(
+        select(AuditLog)
+        .where(AuditLog.event_type.in_(event_types), AuditLog.payload["action_id"].as_integer() == action_id)
+        .order_by(AuditLog.seq.desc())
+        .limit(1)
+    ).first()
+
+
 def read_all(session: Session) -> list[Record]:
     return [
         Record(row.seq, row.created_at, row.event_type, row.actor, row.payload, row.prev_hash, row.hash)

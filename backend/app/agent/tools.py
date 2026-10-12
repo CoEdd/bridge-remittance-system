@@ -16,6 +16,7 @@ from sqlalchemy import select
 from sqlalchemy.orm import Session
 
 from app import documents
+from app.agent import replies
 from app.documents.extract import digits_of
 from app.fx import get_mid_rate, get_quote, get_transfer_quote
 from app.models import Account, Bill, Document, Institution, Payee, PendingAction, User
@@ -226,6 +227,7 @@ def _explain_decision(ctx: ToolContext, args: ExplainDecisionInput) -> dict[str,
         "status": action.status,
         "tier": action.tier,
         "requires": requires_for(action.tier, codes),
+        "why": replies.why(action.tier, codes)["en"],
         "reasons": [{"code": item["code"], "title": item["title"]["en"], "text": item["text"]["en"]} for item in action.reasons],
         "inputs": action.args,
         "cost_breakdown": action.cost_breakdown,
@@ -246,7 +248,7 @@ TOOLS: dict[str, Tool] = {
         Tool("analyse_spending", "Analysed your spending", "Spending by category for the last 30 days against the 30 before.", NoInput, _analyse_spending),
         Tool("read_document", "Read the document", "The verified fields, risk signals and explanation of an uploaded document.", ReadDocumentInput, _read_document),
         Tool("get_fx_rate", "Checked the exchange rate", "The frozen mid-market rate for a currency pair.", GetFxRateInput, _get_fx_rate),
-        Tool("get_transfer_quote", "Got a transfer quote", "The true cost of a conversion: fee plus exchange-rate markup.", GetTransferQuoteInput, _get_transfer_quote),
+        Tool("get_transfer_quote", "Checked the true cost of this transfer", "The true cost of a conversion: fee plus exchange-rate markup.", GetTransferQuoteInput, _get_transfer_quote),
         Tool("plan_funding", "Planned how to pay", "A funding plan for one bill: shortfall, conversion and payment steps.", PlanFundingInput, _plan_funding),
         Tool("verify_payee", "Checked the payee", "Whether a payee is verified, official and paid before.", VerifyPayeeInput, _verify_payee),
         Tool("convert_currency", "Proposed a conversion", "Propose a currency conversion. The student must approve it.", ConvertCurrencyArgs, None),

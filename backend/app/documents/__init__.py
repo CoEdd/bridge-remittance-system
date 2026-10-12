@@ -204,6 +204,7 @@ def ingest(
             user_id=user.id,
             filename=filename,
             kind=kind,
+            source=source,
             source_language=",".join(detect_languages(visible)),
             raw_text=read.text,
             chars_meta=read.runs,
