@@ -343,3 +343,52 @@ class MuleEventOut(BaseModel):
     amount_minor: int
     currency: Currency
     document: DocumentOut
+
+
+class NamedReasonOut(BaseModel):
+    code: str
+    title: str
+
+
+class ToolOut(BaseModel):
+    name: str
+    label: str
+
+
+class TierOut(BaseModel):
+    tier: Literal["T0", "T1", "T2", "T3", "REFUSED"]
+    name: str
+    rule: str
+    tools: list[ToolOut]  # the tools that start at this tier
+    raised_by: list[NamedReasonOut]  # the reasons that put an action in this tier
+
+
+class LimitOut(BaseModel):
+    key: str
+    label: str
+    amount_minor: int | None  # in the home currency; None for a limit that is a time
+    seconds: int | None
+    effect: str  # what happens above it
+
+
+class SafeguardOut(BaseModel):
+    key: str
+    title: str
+    text: str
+    reasons: list[NamedReasonOut]  # the reason codes this safeguard gives
+
+
+class SecurityPolicyOut(BaseModel):
+    """What the Security page shows, generated from the policy engine's own tables."""
+
+    tiers: list[TierOut]
+    currency: Currency  # of the limits
+    limits: list[LimitOut]
+    safeguards: list[SafeguardOut]
+
+
+class RedTeamCaseOut(BaseModel):
+    id: str
+    title: str
+    expected: str
+

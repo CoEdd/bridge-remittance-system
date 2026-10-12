@@ -42,9 +42,9 @@ class UtcDateTime(TypeDecorator[datetime]):
         return None if value is None else value.replace(tzinfo=timezone.utc)
 
 
-@lru_cache
-def get_engine() -> Engine:
-    url = make_url(get_settings().database_url)
+def make_engine(database_url: str) -> Engine:
+    """An engine set up the way every Bridge database is: the live one, and isolated copies of it."""
+    url = make_url(database_url)
     if url.database and url.database != ":memory:":
         os.makedirs(os.path.dirname(os.path.abspath(url.database)), exist_ok=True)
     engine = create_engine(url, connect_args={"check_same_thread": False})
@@ -56,6 +56,12 @@ def get_engine() -> Engine:
         cursor.close()
 
     return engine
+
+
+@lru_cache
+def get_engine() -> Engine:
+    """The live demo database."""
+    return make_engine(get_settings().database_url)
 
 
 def get_session() -> Iterator[Session]:

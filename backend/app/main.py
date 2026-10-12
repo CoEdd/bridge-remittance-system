@@ -19,6 +19,7 @@ from app.routers import actions as actions_router
 from app.routers import audit as audit_router
 from app.routers import chat as chat_router
 from app.routers import documents as documents_router
+from app.routers import security as security_router
 from app.schemas import HealthResponse
 from app.seed import ensure_seeded
 
@@ -83,6 +84,7 @@ for router in (
     audit_router.router,
     documents_router.router,
     chat_router.router,
+    security_router.router,
     demo.router,
 ):
     app.include_router(router)

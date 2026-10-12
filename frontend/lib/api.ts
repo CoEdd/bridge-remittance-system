@@ -16,6 +16,9 @@ import type {
   MuleEvent,
   OtpResult,
   Payee,
+  RedTeamCase,
+  RedTeamEvent,
+  SecurityPolicy,
   SpendingInsights,
   TamperResult,
   Transaction,
@@ -73,6 +76,45 @@ function postJson<T>(path: string, body?: unknown): Promise<T> {
   });
 }
 
+/**
+ * POSTs and reads the answer as Server-Sent Events, calling `onEvent` for each one.
+ * (The browser's EventSource can only GET.) Resolves when the stream ends.
+ */
+async function postForEvents(
+  path: string,
+  onEvent: (name: string, data: unknown) => void,
+  signal?: AbortSignal,
+): Promise<void> {
+  let response: Response;
+  try {
+    response = await fetch(`${BASE_URL}${path}`, { method: "POST", headers: { Accept: "text/event-stream" }, signal });
+  } catch (cause) {
+    if (cause instanceof DOMException && cause.name === "AbortError") throw cause;
+    throw new ApiError("The backend could not be reached.", null);
+  }
+  if (!response.ok || !response.body) throw new ApiError(await errorMessage(response), response.status);
+
+  const reader = response.body.pipeThrough(new TextDecoderStream()).getReader();
+  let buffer = "";
+  for (;;) {
+    const { value, done } = await reader.read();
+    if (done) return;
+    buffer += value;
+    // Events are separated by a blank line.
+    const blocks = buffer.split(/\r?\n\r?\n/);
+    buffer = blocks.pop() ?? "";
+    for (const block of blocks) {
+      const lines = block.split(/\r?\n/);
+      const name = lines.find((line) => line.startsWith("event:"))?.slice(6).trim();
+      const data = lines
+        .filter((line) => line.startsWith("data:"))
+        .map((line) => line.slice(5).trimStart())
+        .join("\n");
+      if (name && data) onEvent(name, JSON.parse(data));
+    }
+  }
+}
+
 function withQuery(path: string, params: object): string {
   const query = new URLSearchParams();
   for (const [key, value] of Object.entries(params)) {
@@ -127,4 +169,9 @@ export const api = {
   demoSettings: (signal?: AbortSignal) => request<DemoSettings>("/demo/settings", { signal }),
   /** Demo event: a stranger sends money, then their "please forward it" message arrives. */
   strangerTransfer: () => postJson<MuleEvent>("/demo/events/mule"),
+  securityPolicy: (signal?: AbortSignal) => request<SecurityPolicy>("/security/policy", { signal }),
+  redTeamCases: (signal?: AbortSignal) => request<RedTeamCase[]>("/security/redteam", { signal }),
+  /** Runs the red-team suite on isolated copies of the database, reporting each case as it starts and ends. */
+  runRedTeam: (onEvent: (event: RedTeamEvent) => void, signal?: AbortSignal) =>
+    postForEvents("/security/redteam/run", (name, data) => onEvent({ event: name, data } as RedTeamEvent), signal),
 };

@@ -2,7 +2,7 @@ from fastapi import APIRouter
 from sqlalchemy import select
 from sqlalchemy.orm import selectinload
 
-from app.models import Bill, Payee
+from app.models import Bill, Payee, PendingAction
 from app.routers.deps import SessionDep, UserDep
 from app.routers.documents import bill_out
 from app.schemas import BillOut, PayeeOut
@@ -24,6 +24,14 @@ def list_bills(session: SessionDep, user: UserDep) -> list[BillOut]:
 
 @router.get("/payees")
 def list_payees(session: SessionDep, user: UserDep) -> list[PayeeOut]:
+    """Every payee the student has paid, or that a document asked them to pay."""
+    # A first payment that is waiting out its cooling-off time, by payee.
+    waiting = session.scalars(
+        select(PendingAction).where(
+            PendingAction.user_id == user.id, PendingAction.status == "cooling_off", PendingAction.tool == "pay_bill"
+        )
+    )
+    cooling_off = {(action.cost_breakdown or {}).get("payee_id"): action.expires_at for action in waiting}
     payees = session.scalars(
         select(Payee)
         .where(Payee.user_id == user.id)
@@ -41,7 +49,7 @@ def list_payees(session: SessionDep, user: UserDep) -> list[PayeeOut]:
             verified_source=payee.verified_source,
             created_at=payee.created_at,
             first_paid_at=payee.first_paid_at,
-            cooling_off_until=payee.cooling_off_until,
+            cooling_off_until=cooling_off.get(payee.id),
         )
         for payee in payees
     ]

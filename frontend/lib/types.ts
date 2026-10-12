@@ -449,3 +449,70 @@ export interface MuleEvent {
   currency: Currency;
   document: DocumentDetail;
 }
+
+/** A policy reason by name, e.g. { code: "DAILY_LIMIT", title: "Daily limit reached" }. */
+export interface NamedReason {
+  code: string;
+  title: string;
+}
+
+export interface TierRow {
+  tier: PolicyTier;
+  name: string;
+  rule: string;
+  /** The tools that start at this tier. */
+  tools: { name: string; label: string }[];
+  /** The reasons that put an action in this tier. */
+  raised_by: NamedReason[];
+}
+
+export interface Limit {
+  key: string;
+  label: string;
+  /** In the home currency; null for a limit that is a time. */
+  amount_minor: number | null;
+  seconds: number | null;
+  /** What happens above it. */
+  effect: string;
+}
+
+export interface Safeguard {
+  key: string;
+  title: string;
+  text: string;
+  reasons: NamedReason[];
+}
+
+/** Response of GET /security/policy: generated from the policy engine's own tables. */
+export interface SecurityPolicy {
+  tiers: TierRow[];
+  currency: Currency;
+  limits: Limit[];
+  safeguards: Safeguard[];
+}
+
+/** One red-team case, before it is run. */
+export interface RedTeamCase {
+  id: string;
+  title: string;
+  expected: string;
+}
+
+/** A red-team case while it runs and once it has a result. */
+export interface RedTeamResult extends RedTeamCase {
+  status: "running" | "passed" | "failed";
+  observed: string | null;
+  /** The key audit entries of the isolated copy the case ran on. */
+  evidence: { seq: number; event_type: string; label: string; summary: string }[];
+  checks: { label: string; passed: boolean }[];
+}
+
+export interface RedTeamSummary {
+  passed: number;
+  total: number;
+  duration_ms: number;
+}
+
+/** The events of POST /security/redteam/run. */
+export type RedTeamEvent = { event: "case"; data: RedTeamResult } | { event: "done"; data: RedTeamSummary };
+

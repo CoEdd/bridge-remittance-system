@@ -89,26 +89,46 @@ def document_passages(document_id: int, filename: str, text: str) -> list[Passag
     ]
 
 
+class _Embedder:
+    """The embedding model and every vector computed so far. One for the whole process."""
+
+    def __init__(self) -> None:
+        self._lock = threading.Lock()
+        self._model: Any = None
+        self._vectors: dict[str, Any] = {}  # text -> vector
+
+    def embed(self, texts: list[str]) -> Any:
+        import numpy
+
+        with self._lock:
+            missing = [text for text in dict.fromkeys(texts) if text not in self._vectors]
+            if missing:
+                if self._model is None:
+                    from sentence_transformers import SentenceTransformer
+
+                    self._model = SentenceTransformer(MODEL_NAME)
+                vectors = self._model.encode(missing, normalize_embeddings=True, show_progress_bar=False)
+                self._vectors.update(zip(missing, vectors))
+            return numpy.stack([self._vectors[text] for text in texts])
+
+
+_embedder = _Embedder()
+
+
 class PassageIndex:
+    """
+    The knowledge files plus the documents of one database. The live database has the
+    module-level `index`; an isolated copy of the database gets an index of its own, so
+    its documents never show up in the live one.
+    """
+
     def __init__(self) -> None:
         self._lock = threading.RLock()
-        self._model: Any = None
-        self._vector_cache: dict[str, Any] = {}  # text -> vector, kept across resets
         self._knowledge: list[Passage] | None = None
         self._documents: list[Passage] = []
 
     def _embed(self, texts: list[str]) -> Any:
-        import numpy
-
-        missing = [text for text in dict.fromkeys(texts) if text not in self._vector_cache]
-        if missing:
-            if self._model is None:
-                from sentence_transformers import SentenceTransformer
-
-                self._model = SentenceTransformer(MODEL_NAME)
-            vectors = self._model.encode(missing, normalize_embeddings=True, show_progress_bar=False)
-            self._vector_cache.update(zip(missing, vectors))
-        return numpy.stack([self._vector_cache[text] for text in texts])
+        return _embedder.embed(texts)
 
     def reset(self) -> None:
         """Forget every document passage. Called by the demo reset."""

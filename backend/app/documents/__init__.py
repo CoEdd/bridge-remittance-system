@@ -22,7 +22,7 @@ from app.config import effective_agent_mode
 from app.db import write_lock
 from app.documents import explain, injection, risk
 from app.documents.extract import Field, digits_of, extract_scripted
-from app.documents.index import index
+from app.documents.index import PassageIndex, index
 from app.documents.languages import detect_languages
 from app.documents.reader import ReadResult
 from app.documents.verify import verify_fields
@@ -60,9 +60,11 @@ def bill_is_flagged(bill: Bill) -> bool:
     return document is not None and (document.trust_flag == "untrusted" or bool(policy_signals(document)))
 
 
-def _extract(visible: str, raw: str, kind: str, institutions: list[Institution], llm_client: Any) -> tuple[dict[str, Field], str]:
+def _extract(
+    visible: str, raw: str, kind: str, institutions: list[Institution], llm_client: Any, live: bool
+) -> tuple[dict[str, Field], str]:
     names = [(item.name, item.name_local) for item in institutions]
-    if effective_agent_mode() == "live":
+    if live:
         from app.documents.live import extract_live
         from app.llm import LlmUnavailable
 
@@ -134,6 +136,7 @@ def _explain(
     payable: bool,
     institutions: list[Institution],
     llm_client: Any,
+    live: bool,
 ) -> dict[str, str]:
     untrusted = document.trust_flag == "untrusted"
     named = next((item for item in institutions if item.name in visible or item.name_local in visible), None)
@@ -147,7 +150,7 @@ def _explain(
         payable=payable,
         institution_names=(named.name, named.name_local) if named else None,
     )
-    if effective_agent_mode() != "live":
+    if not live:
         return templates
 
     from app.documents.live import explain_live
@@ -186,9 +189,17 @@ def ingest(
     source: str,
     now: datetime | None = None,
     llm_client: Any = None,
+    passages: PassageIndex = index,
+    scripted: bool = False,
 ) -> Document:
-    """Run the whole pipeline on one document and store the result. `source` says how it arrived."""
+    """
+    Run the whole pipeline on one document and store the result. `source` says how it arrived.
+
+    `passages` is the index the document joins: the live one unless the session belongs to
+    an isolated copy of the database. `scripted` keeps Claude out of it whatever the agent mode.
+    """
     now = now or now_utc()
+    live = not scripted and effective_agent_mode() == "live"
     with write_lock:
         findings = injection.detect(read.text, read.runs)
         hidden = injection.hidden_ranges(findings)
@@ -197,7 +208,7 @@ def ingest(
         institutions = list(session.scalars(select(Institution).order_by(Institution.id)))
         payees = list(session.scalars(select(Payee).where(Payee.user_id == user.id).order_by(Payee.id)))
 
-        fields, extractor = _extract(visible, read.text, kind, institutions, llm_client)
+        fields, extractor = _extract(visible, read.text, kind, institutions, llm_client, live)
         verify_fields(fields, read.text, hidden)
 
         document = Document(
@@ -216,11 +227,11 @@ def ingest(
         )
         session.add(document)
         session.flush()
-        index.add_document(document.id, filename, visible)
+        passages.add_document(document.id, filename, visible)
 
         # Risk rules read verified fields only: an unverified value proves nothing either way.
         verified = {name: field for name, field in fields.items() if field.verified}
-        signals = risk.assess(visible, verified, institutions, payees, index.search)
+        signals = risk.assess(visible, verified, institutions, payees, passages.search)
         account_status = _account_status(fields, institutions, payees)
         bill = _create_bill(session, user, document, fields, payees, now)
         document.risk_signals = [
@@ -228,7 +239,7 @@ def ingest(
             *signals,
         ]
         document.explanation = _explain(
-            document, visible, fields, signals, account_status, bill is not None, institutions, llm_client
+            document, visible, fields, signals, account_status, bill is not None, institutions, llm_client, live
         )
 
         audit.append(

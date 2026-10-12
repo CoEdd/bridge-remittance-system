@@ -234,14 +234,12 @@ def _start_audit_log(session: Session, today: date, fx_source: str) -> None:
     audit.append(session, "system.reset", "system", {"demo_today": today, "fx_source": fx_source})
 
 
-def reset() -> str:
+def build(engine: Engine, *, offline: bool) -> str:
     """
-    Drop and recreate every table, seed the demo data, freeze the FX rates and start
-    a new audit chain. Returns the FX source ("frankfurter" or "offline_snapshot").
+    Drop and recreate every table in `engine`, seed the demo data, freeze the FX rates and
+    start a new audit chain. Returns the FX source ("frankfurter" or "offline_snapshot").
     """
-    engine = get_engine()
     with write_lock:
-        index.reset()
         Base.metadata.drop_all(engine)
         Base.metadata.create_all(engine)
         with engine.begin() as connection:
@@ -251,10 +249,17 @@ def reset() -> str:
             _add_reference_data(session, today)
             _add_history(session, today)
             _add_bills(session)
-            source = freeze_rates(session, offline=get_settings().fx_offline, now=now_utc())
+            source = freeze_rates(session, offline=offline, now=now_utc())
             _start_audit_log(session, today, source)
             session.commit()
     return source
+
+
+def reset() -> str:
+    """Rebuild the live demo database from scratch. Returns the FX source."""
+    with write_lock:
+        index.reset()
+        return build(get_engine(), offline=get_settings().fx_offline)
 
 
 def _is_current(engine: Engine) -> bool:
