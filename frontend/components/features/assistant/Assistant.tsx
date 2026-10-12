@@ -88,7 +88,6 @@ export function Assistant() {
           working={working}
           problem={assistant.problem}
           retryLast={assistant.retryLast}
-          onOpenPlan={assistant.setOpenPlan}
           emptyAction={<Button onClick={() => useDemo("tuition_invoice")}>Use demo: tuition invoice</Button>}
         />
         <Composer
@@ -103,7 +102,7 @@ export function Assistant() {
       </div>
 
       <div className="flex min-h-0 flex-col [grid-area:context]">
-        <ContextPanel live={live} language={language} onOpenPlan={assistant.setOpenPlan} />
+        <ContextPanel live={live} />
       </div>
 
       <PasteSheet open={pasting} onClose={() => setPasting(false)} busy={readingPaste} onRead={readPaste} />

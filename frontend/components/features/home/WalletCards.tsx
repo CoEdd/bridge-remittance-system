@@ -16,12 +16,11 @@ const CURRENCY_NAMES: Record<Currency, string> = {
   USD: "US dollar",
 };
 
-function rateLine(rate: Rate): string {
-  const source =
-    rate.source === "frankfurter"
-      ? `ECB via Frankfurter, ${formatTimestampUtc(rate.fetched_at)}`
-      : "offline snapshot";
-  return `Rate: 1 ${rate.base} = ${rate.mid_rate} ${rate.quote} · ${source}`;
+/** Where the rate comes from and when it was fetched: shown on hover, not on the card. */
+function rateSource(rate: Rate): string {
+  return rate.source === "frankfurter"
+    ? `ECB via Frankfurter, ${formatTimestampUtc(rate.fetched_at)}`
+    : "Offline snapshot";
 }
 
 function WalletCard({ account, home }: { account: Account; home: Currency }) {
@@ -41,7 +40,10 @@ function WalletCard({ account, home }: { account: Account; home: Currency }) {
           <p className="mt-1 text-15 text-body">
             About <Amount minor={account.home_equivalent_minor} currency={home} />
           </p>
-          <p className="mt-auto pt-4 text-13 text-muted">{rateLine(account.rate)}</p>
+          <p className="mt-auto pt-4 text-13 text-muted" title={rateSource(account.rate)}>
+            1 {account.rate.base} = {account.rate.mid_rate} {account.rate.quote} ·{" "}
+            {account.rate.source === "frankfurter" ? "ECB" : "offline"}
+          </p>
         </>
       ) : (
         <p className="mt-1">

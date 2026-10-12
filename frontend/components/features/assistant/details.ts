@@ -1,6 +1,6 @@
 import { FIELD_LABELS } from "@/components/features/documents/labels";
 import { formatAmount, formatDate, formatTimestampUtc } from "@/lib/format";
-import type { ConversionCost, CostBreakdown, Currency, PaymentCost, StepEvent } from "@/lib/types";
+import type { CostBreakdown, Currency, StepEvent } from "@/lib/types";
 
 /** One line of a details table. */
 export type Row = [label: string, value: string];
@@ -42,35 +42,45 @@ export function asCost(value: unknown): CostBreakdown | null {
   return kind === "conversion" || kind === "payment" ? (value as CostBreakdown) : null;
 }
 
-/** Every number behind a conversion: the fee, and what the exchange rate costs on top. */
-export function conversionRows(cost: ConversionCost): Row[] {
+/** What a decision needs: the amounts, and for a conversion the fee plus what the rate costs on top. */
+export function keyRows(cost: CostBreakdown): Row[] {
+  if (cost.kind === "payment") {
+    return [
+      ["Amount", formatAmount(cost.amount_minor, cost.currency)],
+      ["Account", cost.payee_account_ref],
+    ];
+  }
+  const from = cost.from_currency;
+  return [
+    ["You receive", formatAmount(cost.amount_received_minor, cost.to_currency)],
+    ["Fee", formatAmount(cost.fee_minor, from)],
+    ["Cost hidden in the rate", formatAmount(cost.markup_cost_minor, from)],
+    ["True cost", formatAmount(cost.total_cost_minor, from)],
+  ];
+}
+
+/** The rest of the breakdown, shown on request. */
+export function moreRows(cost: CostBreakdown): Row[] {
+  if (cost.kind === "payment") {
+    return [
+      ["Payee", cost.payee_name],
+      ["Fee", formatAmount(cost.fee_minor, cost.currency)],
+      ["Total", formatAmount(cost.total_minor, cost.currency)],
+    ];
+  }
   const from = cost.from_currency;
   return [
     ["Amount", formatAmount(cost.amount_minor, from)],
     ["Transfer service", cost.provider_name],
     ["Mid-market rate", `1 ${from} = ${cost.mid_rate} ${cost.to_currency}`],
     ["Offered rate", `1 ${from} = ${cost.offered_rate} ${cost.to_currency}`],
-    ["Fee", formatAmount(cost.fee_minor, from)],
-    ["Cost hidden in the rate", formatAmount(cost.markup_cost_minor, from)],
-    ["True cost", formatAmount(cost.total_cost_minor, from)],
-    ["You receive", formatAmount(cost.amount_received_minor, cost.to_currency)],
     ["Arrives", formatTimestampUtc(cost.arrives_at)],
     ["Quote expires", formatTimestampUtc(cost.expires_at)],
   ];
 }
 
-export function paymentRows(cost: PaymentCost): Row[] {
-  return [
-    ["Amount", formatAmount(cost.amount_minor, cost.currency)],
-    ["Payee", cost.payee_name],
-    ["Account", cost.payee_account_ref],
-    ["Fee", formatAmount(cost.fee_minor, cost.currency)],
-    ["Total", formatAmount(cost.total_minor, cost.currency)],
-  ];
-}
-
 export function costRows(cost: CostBreakdown): Row[] {
-  return cost.kind === "conversion" ? conversionRows(cost) : paymentRows(cost);
+  return [...keyRows(cost), ...moreRows(cost)];
 }
 
 const NEEDS: Record<string, string> = {

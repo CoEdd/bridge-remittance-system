@@ -389,6 +389,7 @@ class SecurityPolicyOut(BaseModel):
 
 class RedTeamCaseOut(BaseModel):
     id: str
-    title: str
+    title: str  # a name of two or three words
+    attack: str  # what is tried, in one line
     expected: str
 

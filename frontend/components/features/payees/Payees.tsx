@@ -42,8 +42,8 @@ function PayeeRow({ payee, bills }: { payee: Payee; bills: Bill[] }) {
     <tr className="border-b border-line align-top last:border-b-0">
       <th scope="row" className="py-3 pr-4 text-15 font-medium text-ink">
         {payee.name}
+        <span className="block text-13 font-normal text-muted">{payee.bank_name}</span>
       </th>
-      <td className="py-3 pr-4 text-15 text-body">{payee.bank_name}</td>
       <td className="py-3 pr-4">
         <span className="block font-heading text-15 whitespace-nowrap text-ink tabular-nums">
           {shown ? payee.account_ref : masked(payee.account_ref)}
@@ -61,28 +61,25 @@ function PayeeRow({ payee, bills }: { payee: Payee; bills: Bill[] }) {
         </Button>
       </td>
       <td className="py-3 pr-4">
-        {payee.verified_source ? (
-          <Badge tone="success" icon={BadgeCheck}>
-            {SOURCES[payee.verified_source]}
-          </Badge>
-        ) : (
-          <Badge tone="warning" icon={TriangleAlert}>
-            Not verified
-          </Badge>
-        )}
+        <span className="flex flex-wrap gap-1">
+          {payee.verified_source ? (
+            <Badge tone="success" icon={BadgeCheck}>
+              {SOURCES[payee.verified_source]}
+            </Badge>
+          ) : (
+            <Badge tone="warning" icon={TriangleAlert}>
+              Not verified
+            </Badge>
+          )}
+          {payee.cooling_off_until && (
+            <span title={`Until ${formatTimestampUtc(payee.cooling_off_until)}`}>
+              <Badge tone="warning">Cooling off</Badge>
+            </span>
+          )}
+        </span>
       </td>
       <td className="py-3 pr-4 text-15 whitespace-nowrap text-body">
         {payee.first_paid_at ? formatDate(payee.first_paid_at) : "Never"}
-      </td>
-      <td className="py-3 pr-4 text-15 text-body">
-        {payee.cooling_off_until ? (
-          <>
-            <Badge tone="warning">Cooling off</Badge>
-            <span className="mt-1 block text-13 text-muted">Until {formatTimestampUtc(payee.cooling_off_until)}</span>
-          </>
-        ) : (
-          "None"
-        )}
       </td>
       <td className="py-3">
         {bills.length === 0 ? (
@@ -137,7 +134,7 @@ export function Payees() {
               <caption className="sr-only">Payees and how each one is verified</caption>
               <thead>
                 <tr className="border-b border-line text-13 text-muted">
-                  {["Payee", "Bank", "Account", "Verification", "First paid", "Cooling-off", "Bills"].map((heading) => (
+                  {["Payee", "Account", "Verification", "First paid", "Bills"].map((heading) => (
                     <th key={heading} scope="col" className="pr-4 pb-2 font-medium last:pr-0">
                       {heading}
                     </th>

@@ -60,7 +60,8 @@ def leftover_copies() -> list[Path]:
 
 def test_there_are_eleven_cases_with_the_ids_rt_01_to_rt_11() -> None:
     assert [case.id for case in CASES] == [f"RT-{number:02d}" for number in range(1, 12)]
-    assert all(case.title and case.expected for case in CASES)
+    assert all(case.attack and case.expected for case in CASES)
+    assert all(1 <= len(case.title.split()) <= 4 for case in CASES)  # a name, not a sentence
     assert set(EXPECTED_EVIDENCE) == {case.id for case in CASES}
 
 
@@ -139,7 +140,7 @@ def test_a_case_fails_when_money_moves() -> None:
         box.no_money_moved()
         return box.money_line()
 
-    result = run_case(Case("RT-XX", "A payment that goes through", "Nothing moves", pays_quietly))
+    result = run_case(Case("RT-XX", "Quiet payment", "A payment that goes through", "Nothing moves", pays_quietly))
 
     assert result["status"] == "failed"
     assert result["checks"] == [{"label": "No money moved", "passed": False}]
@@ -150,8 +151,8 @@ def test_a_case_that_crashes_or_checks_nothing_is_failed_not_passed() -> None:
     def crashes(box: Sandbox) -> str:
         raise RuntimeError("boom")
 
-    crashed = run_case(Case("RT-XX", "A case that crashes", "It fails", crashes))
-    empty = run_case(Case("RT-YY", "A case with no checks", "It fails", lambda box: "Nothing was checked."))
+    crashed = run_case(Case("RT-XX", "Crash", "A case that crashes", "It fails", crashes))
+    empty = run_case(Case("RT-YY", "No checks", "A case with no checks", "It fails", lambda box: "Nothing was checked."))
 
     assert (crashed["status"], crashed["observed"]) == ("failed", "The case could not run (RuntimeError).")
     assert (empty["status"], empty["checks"]) == ("failed", [])
@@ -229,7 +230,9 @@ def test_running_the_suite_after_acts_1_and_2_changes_nothing_in_the_live_demo_d
 def test_the_api_lists_the_cases_before_they_run(client: TestClient) -> None:
     cases = client.get("/security/redteam").json()
 
-    assert [(case["id"], case["title"], case["expected"]) for case in cases] == [(case.id, case.title, case.expected) for case in CASES]
+    assert [(case["id"], case["title"], case["attack"], case["expected"]) for case in cases] == [
+        (case.id, case.title, case.attack, case.expected) for case in CASES
+    ]
 
 
 def test_the_api_streams_running_then_a_result_for_every_case(client: TestClient) -> None:
@@ -241,7 +244,7 @@ def test_the_api_streams_running_then_a_result_for_every_case(client: TestClient
     assert [(data["id"], data["status"]) for data in cases[1::2]] == [(case.id, "passed") for case in CASES]
     for running, result in zip(cases[0::2], cases[1::2]):
         assert (running["observed"], running["evidence"], running["checks"]) == (None, [], [])
-        assert set(result) == {"id", "title", "status", "expected", "observed", "evidence", "checks", "duration_ms"}
+        assert set(result) == {"id", "title", "attack", "status", "expected", "observed", "evidence", "checks", "duration_ms"}
         assert result["observed"] and result["evidence"] and result["title"] == running["title"]
         assert set(result["evidence"][0]) == {"seq", "event_type", "label", "summary", "payload"}
     done = events[-1][1]

@@ -1,16 +1,16 @@
 "use client";
 
-import { Languages, LoaderCircle, MessageSquare, RefreshCw } from "lucide-react";
+import { LoaderCircle, MessageSquare, RefreshCw } from "lucide-react";
 import { useEffect, useRef, useState, type ReactNode } from "react";
 import { BlockedPanel } from "@/components/features/assistant/BlockedPanel";
 import { DocumentCard } from "@/components/features/assistant/DocumentCard";
-import { shortened, type Turn } from "@/components/features/assistant/model";
+import { lead, type Turn } from "@/components/features/assistant/model";
 import { PlanBlock } from "@/components/features/assistant/PlanBlock";
-import { StepCard } from "@/components/features/assistant/StepCard";
+import { Steps } from "@/components/features/assistant/Steps";
 import type { Problem } from "@/components/features/assistant/useAssistant";
 import { Button } from "@/components/ui/Button";
 import { EmptyState } from "@/components/ui/EmptyState";
-import type { Action, AgentReply, Language } from "@/lib/types";
+import type { Action, AgentReply, Language, StepEvent } from "@/lib/types";
 
 function UserMessage({ text }: { text: string }) {
   return (
@@ -21,41 +21,35 @@ function UserMessage({ text }: { text: string }) {
   );
 }
 
-/** A reply from Bridge. Long replies are cut at 40 words; Malay and Chinese replies can show their English. */
+/** A reply from Bridge: its opening sentences, the rest behind "More", and the English behind a toggle. */
 function AgentMessage({ reply }: { reply: AgentReply }) {
   const [english, setEnglish] = useState(false);
   const [expanded, setExpanded] = useState(false);
   const hasEnglish = reply.language !== "en" && reply.text_en !== reply.text;
-  const short = shortened(reply.text);
-  const shortEnglish = shortened(reply.text_en);
-  const clipped = !expanded && (short !== null || (english && shortEnglish !== null));
+  const opening = lead(reply.text);
+  const openingEnglish = lead(reply.text_en);
+  const long = opening !== null || (english && openingEnglish !== null);
 
   return (
-    <div className="mr-auto max-w-[92%] rounded-card border border-line bg-teal-tint px-4 py-3 motion-safe:animate-step-in">
-      <p className="mb-1 text-13 font-semibold text-ink">Bridge</p>
+    <div className="mr-auto max-w-[92%] rounded-card border border-line bg-teal-tint px-4 py-2 motion-safe:animate-step-in">
+      <p className="text-13 font-semibold text-ink">Bridge</p>
       <p lang={reply.language} className="text-15 break-words whitespace-pre-wrap text-ink">
-        {expanded ? reply.text : (short ?? reply.text)}
+        {expanded ? reply.text : (opening ?? reply.text)}
       </p>
       {english && (
-        <p lang="en" className="mt-2 border-t border-line pt-2 text-15 break-words whitespace-pre-wrap text-body">
-          {expanded ? reply.text_en : (shortEnglish ?? reply.text_en)}
+        <p lang="en" className="mt-1 border-t border-line pt-1 text-15 break-words whitespace-pre-wrap text-body">
+          {expanded ? reply.text_en : (openingEnglish ?? reply.text_en)}
         </p>
       )}
-      {(hasEnglish || clipped || expanded) && (
-        <div className="mt-2 flex flex-wrap items-center gap-1">
-          {(clipped || expanded) && (
+      {(hasEnglish || long) && (
+        <div className="-mb-1 -ml-3 flex flex-wrap items-center">
+          {long && (
             <Button variant="ghost" size="sm" aria-expanded={expanded} onClick={() => setExpanded(!expanded)}>
-              {expanded ? "Show less" : "Show more"}
+              {expanded ? "Less" : "More"}
             </Button>
           )}
           {hasEnglish && (
-            <Button
-              variant="ghost"
-              size="sm"
-              icon={Languages}
-              aria-pressed={english}
-              onClick={() => setEnglish(!english)}
-            >
+            <Button variant="ghost" size="sm" aria-pressed={english} onClick={() => setEnglish(!english)}>
               {english ? "Hide English" : "Show English"}
             </Button>
           )}
@@ -69,7 +63,7 @@ function InlineProblem({ message, onRetry }: { message: string; onRetry?: () => 
   return (
     <div
       role="alert"
-      className="flex items-center justify-between gap-3 rounded-card border border-line bg-surface px-4 py-3"
+      className="flex items-center justify-between gap-3 rounded-card border border-line bg-surface px-4 py-2"
     >
       <p className="text-15 text-body">{message}</p>
       {onRetry && (
@@ -85,25 +79,19 @@ interface TurnViewProps {
   turn: Turn;
   actions: Action[];
   language: Language;
-  onOpenPlan: (planId: string) => void;
   /** Set on the newest turn of this visit: runs it again if the agent could not finish it. */
   onRetry?: () => void;
 }
 
-/** One turn, in the order it happened: the question, each step, the reply, then what it led to. */
-function TurnView({ turn, actions, language, onOpenPlan, onRetry }: TurnViewProps) {
+/** One turn: what was asked, what the agent did, what it said, and what came of it. Each shown once. */
+function TurnView({ turn, actions, language, onRetry }: TurnViewProps) {
+  const steps = turn.events.flatMap((item): StepEvent[] => (item.event === "step" ? [item.data] : []));
   const failed = turn.events.find((item) => item.event === "error");
   return (
     <li className="flex flex-col gap-2">
       <UserMessage text={turn.userText} />
-      {turn.events.map((item, index) =>
-        item.event === "step" ? (
-          <div key={index} className="flex flex-col gap-2">
-            <StepCard step={item.data} action={actions.find((action) => action.id === item.data.details.action_id)} />
-            {item.data.tool === "read_document" && <DocumentCard step={item.data} />}
-          </div>
-        ) : null,
-      )}
+      <Steps steps={steps} actions={actions} />
+      {steps.map((step) => step.tool === "read_document" && <DocumentCard key={step.id} step={step} />)}
       {failed?.event === "error" ? (
         <InlineProblem
           message={language === "en" ? failed.data.message_en : failed.data.message}
@@ -114,9 +102,7 @@ function TurnView({ turn, actions, language, onOpenPlan, onRetry }: TurnViewProp
       )}
       {turn.events.map((item, index): ReactNode => {
         if (item.event === "blocked") return <BlockedPanel key={index} blocked={item.data} language={language} />;
-        if (item.event === "approval_required") {
-          return <PlanBlock key={index} approval={item.data} actions={actions} onOpen={onOpenPlan} />;
-        }
+        if (item.event === "approval_required") return <PlanBlock key={index} approval={item.data} actions={actions} />;
         return null;
       })}
     </li>
@@ -131,21 +117,11 @@ interface ConversationProps {
   working: string | null;
   problem: Problem | null;
   retryLast: (() => void) | null;
-  onOpenPlan: (planId: string) => void;
   /** Shown while there is nothing to read yet. */
   emptyAction: ReactNode;
 }
 
-export function Conversation({
-  turns,
-  actions,
-  language,
-  working,
-  problem,
-  retryLast,
-  onOpenPlan,
-  emptyAction,
-}: ConversationProps) {
+export function Conversation({ turns, actions, language, working, problem, retryLast, emptyAction }: ConversationProps) {
   const end = useRef<HTMLDivElement>(null);
   const eventCount = turns.reduce((count, turn) => count + turn.events.length + (turn.reply ? 1 : 0), 0);
   const closedCount = actions.filter((action) => action.closed_at !== null).length;
@@ -168,7 +144,6 @@ export function Conversation({
               turn={turn}
               actions={actions}
               language={language}
-              onOpenPlan={onOpenPlan}
               // Only a turn started in this visit, and only the newest one, can be run again.
               onRetry={index === turns.length - 1 && turn.key.startsWith("live-") ? (retryLast ?? undefined) : undefined}
             />

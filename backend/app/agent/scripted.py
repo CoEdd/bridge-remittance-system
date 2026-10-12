@@ -100,7 +100,6 @@ class ScriptedDriver:
         steps = {step["tool"]: step for step in plan["steps"]}
         wallets = {item["currency"]: item["account_id"] for item in balances.data["accounts"]}
         pay_args = {"bill_id": bill_id, "from_account_id": wallets[plan["currency"]]}
-        needs_code = False
         quote = None
 
         # If the policy would refuse the payment anyway, do not set up a conversion for it.
@@ -120,15 +119,13 @@ class ScriptedDriver:
             if conversion.verdict == "refused":
                 yield self._respond(replies.blocked(conversion.data["reasons"]))
                 return
-            needs_code = "otp" in conversion.data["requires"]
 
         payment = yield ToolCall("pay_bill", pay_args)
         if payment.verdict == "refused":
             yield self._respond(replies.blocked(payment.data["reasons"]))
             return
-        needs_code = needs_code or "otp" in payment.data["requires"]
         if quote:
-            yield self._respond(replies.plan_with_conversion(plan, quote, needs_code))
+            yield self._respond(replies.plan_with_conversion(plan, quote))
         else:
             yield self._respond(replies.plan_ready(plan, payment.data["cost_breakdown"]["payee_name"]))
 
@@ -147,7 +144,7 @@ class ScriptedDriver:
         if payment.verdict == "refused":
             yield self._respond(replies.blocked(payment.data["reasons"]))
         else:
-            yield self._respond(replies.payment_prepared(payment.data["cost_breakdown"], "otp" in payment.data["requires"]))
+            yield self._respond(replies.payment_prepared(payment.data["cost_breakdown"]))
 
     def _spending(self) -> Script:
         insights = yield ToolCall("analyse_spending", {})

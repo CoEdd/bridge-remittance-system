@@ -494,7 +494,10 @@ export interface SecurityPolicy {
 /** One red-team case, before it is run. */
 export interface RedTeamCase {
   id: string;
+  /** A name of two or three words. */
   title: string;
+  /** What is tried, in one line. */
+  attack: string;
   expected: string;
 }
 

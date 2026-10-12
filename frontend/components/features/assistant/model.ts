@@ -130,12 +130,25 @@ export function suggestNext({ documents, bills, actions, demos, language }: Sugg
   return [{ kind: "ask", label: QUESTIONS[question][language], language }];
 }
 
-const WORD_LIMIT = 40;
-const CJK_LIMIT = 80;
+const LEAD_WORDS = 20;
 
-/** The first 40 words of a reply (80 characters for Chinese), or null when it is short enough. */
-export function shortened(text: string): string | null {
-  if (!text.includes(" ")) return text.length > CJK_LIMIT ? `${text.slice(0, CJK_LIMIT)}…` : null;
-  const words = text.split(/\s+/);
-  return words.length > WORD_LIMIT ? `${words.slice(0, WORD_LIMIT).join(" ")}…` : null;
+/** Rough length of a text in words. Chinese has no spaces, so two characters count as a word. */
+function size(text: string): number {
+  return /\s/.test(text.trim()) ? text.trim().split(/\s+/).length : Math.ceil(text.length / 2);
+}
+
+/**
+ * The opening of a reply: whole sentences, about 20 words at most, always at least one.
+ * null when the reply is already that short. The rest waits behind "More".
+ */
+export function lead(text: string): string | null {
+  if (size(text) <= LEAD_WORDS) return null;
+  // A sentence ends at . ! ? followed by a space ("12,000.00" and "0.05%" do not end one), or at 。！？
+  const ends = [...text.matchAll(/[.!?](?=\s)|[。！？]/g)].map((match) => match.index + 1);
+  let cut = 0;
+  for (const end of ends) {
+    if (cut > 0 && size(text.slice(0, end)) > LEAD_WORDS) break;
+    cut = end;
+  }
+  return cut > 0 && cut < text.trimEnd().length ? text.slice(0, cut) : null;
 }

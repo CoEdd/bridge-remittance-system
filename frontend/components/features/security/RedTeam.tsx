@@ -29,13 +29,22 @@ function StatusBadge({ result }: { result: RedTeamResult | undefined }) {
   );
 }
 
-/** One attack: what it is, what should happen, and after a run what really happened. */
+function Line({ label, text }: { label: string; text: string }) {
+  return (
+    <p className="text-13 text-body">
+      <span className="font-medium text-ink">{label}: </span>
+      {text}
+    </p>
+  );
+}
+
+/** One attack: its name and its result. What was tried, expected and observed opens on "Details". */
 function CaseCard({ item, result }: { item: RedTeamCase; result: RedTeamResult | undefined }) {
   const finished = result && result.status !== "running" ? result : null;
   return (
     <li
       className={clsx(
-        "flex flex-col rounded-card border bg-surface p-4 transition-colors duration-200",
+        "rounded-card border bg-surface px-4 py-3 transition-colors duration-200",
         finished?.status === "passed" ? "border-teal" : finished?.status === "failed" ? "border-danger" : "border-line",
       )}
     >
@@ -43,44 +52,39 @@ function CaseCard({ item, result }: { item: RedTeamCase; result: RedTeamResult |
         <span className="font-heading text-13 font-semibold text-muted tabular-nums">{item.id}</span>
         <StatusBadge result={result} />
       </div>
-      <p className="mt-2 text-15 font-medium text-ink">{item.title}</p>
-      <p className="mt-1 text-13 text-muted">Expected: {item.expected}</p>
-      {finished && (
-        <>
-          <p className="mt-2 text-13 text-ink">Observed: {finished.observed}</p>
-          <details className="mt-2">
-            <summary className="cursor-pointer rounded-sm text-13 font-medium text-teal">Details</summary>
-            <ul className="mt-2 flex flex-col gap-1">
-              {finished.checks.map((check) => (
-                <li key={check.label} className="flex items-start gap-2 text-13 text-body">
-                  {check.passed ? (
-                    <Check aria-hidden className="mt-0.5 size-4 shrink-0 text-teal" />
-                  ) : (
-                    <X aria-hidden className="mt-0.5 size-4 shrink-0 text-danger" />
-                  )}
-                  <span>
-                    <span className="sr-only">{check.passed ? "Held: " : "Did not hold: "}</span>
-                    {check.label}
-                  </span>
-                </li>
-              ))}
-            </ul>
-            {finished.evidence.length > 0 && (
-              <>
-                <p className="mt-2 text-13 font-medium text-muted">Audit entries on the copy</p>
-                <ul className="mt-1 flex flex-col gap-1">
-                  {finished.evidence.map((entry) => (
-                    <li key={entry.seq} className="text-13 text-body">
-                      <span className="font-heading text-ink tabular-nums">#{entry.seq}</span> {entry.label}
-                      {entry.summary && ` · ${entry.summary}`}
-                    </li>
-                  ))}
-                </ul>
-              </>
-            )}
-          </details>
-        </>
-      )}
+      <p className="mt-1 text-15 font-medium text-ink">{item.title}</p>
+      {finished?.status === "failed" && <p className="mt-1 text-13 text-danger">{finished.observed}</p>}
+      <details className="mt-1">
+        <summary className="cursor-pointer rounded-sm text-13 font-medium text-teal">Details</summary>
+        <div className="mt-2 flex flex-col gap-1">
+          <Line label="Attack" text={item.attack} />
+          <Line label="Expected" text={item.expected} />
+          {finished && <Line label="Observed" text={finished.observed ?? ""} />}
+        </div>
+        {finished && (
+          <ul className="mt-2 flex flex-col gap-1 border-t border-line pt-2">
+            {finished.checks.map((check) => (
+              <li key={check.label} className="flex items-start gap-2 text-13 text-body">
+                {check.passed ? (
+                  <Check aria-hidden className="mt-0.5 size-4 shrink-0 text-teal" />
+                ) : (
+                  <X aria-hidden className="mt-0.5 size-4 shrink-0 text-danger" />
+                )}
+                <span>
+                  <span className="sr-only">{check.passed ? "Held: " : "Did not hold: "}</span>
+                  {check.label}
+                </span>
+              </li>
+            ))}
+            {finished.evidence.map((entry) => (
+              <li key={entry.seq} className="text-13 text-muted">
+                Audit #{entry.seq}: {entry.label}
+                {entry.summary && ` · ${entry.summary}`}
+              </li>
+            ))}
+          </ul>
+        )}
+      </details>
     </li>
   );
 }
@@ -116,37 +120,35 @@ export function RedTeam({ cases }: { cases: RedTeamCase[] }) {
   }
 
   return (
-    <section id="red-team" aria-labelledby="red-team-title" className="scroll-mt-28">
-      <div className="mb-4 flex flex-wrap items-center justify-between gap-4">
-        <div>
-          <h2 id="red-team-title" className="font-heading text-18 font-semibold text-ink">
+    <section id="red-team" aria-labelledby="red-team-title">
+      <div className="mb-4 flex flex-wrap items-center gap-4">
+        <Button size="lg" icon={Play} loading={running} onClick={() => void run()}>
+          Run red-team suite
+        </Button>
+        <p role="status" className="text-24 font-semibold text-ink">
+          {summary && (
+            <>
+              <span className="font-heading tabular-nums">
+                {summary.passed} / {summary.total}
+              </span>{" "}
+              passed{" "}
+              <span className="ml-1 text-13 font-normal text-muted">
+                in {(summary.duration_ms / 1000).toFixed(1)} seconds
+              </span>
+            </>
+          )}
+          {problem && <span className="text-15 font-medium text-danger">{problem}</span>}
+        </p>
+        <div className="ml-auto text-right">
+          <h2 id="red-team-title" className="sr-only">
             Red-team suite
           </h2>
-          <p className="mt-1 text-13 text-body">
+          <p className="text-13 text-muted">
             Runs on an isolated copy of the database; your demo data is not affected.
           </p>
         </div>
-        <div className="flex items-center gap-4">
-          <p role="status" className="text-18 font-semibold text-ink">
-            {summary && (
-              <>
-                <span className="font-heading tabular-nums">
-                  {summary.passed} / {summary.total}
-                </span>{" "}
-                passed{" "}
-                <span className="ml-1 text-13 font-normal text-muted">
-                  in {(summary.duration_ms / 1000).toFixed(1)} seconds
-                </span>
-              </>
-            )}
-            {problem && <span className="text-15 font-medium text-danger">{problem}</span>}
-          </p>
-          <Button size="lg" icon={Play} loading={running} onClick={() => void run()}>
-            Run red-team suite
-          </Button>
-        </div>
       </div>
-      <ul className="grid grid-cols-3 gap-4">
+      <ul className="grid grid-cols-4 items-start gap-3">
         {cases.map((item) => (
           <CaseCard key={item.id} item={item} result={results[item.id]} />
         ))}

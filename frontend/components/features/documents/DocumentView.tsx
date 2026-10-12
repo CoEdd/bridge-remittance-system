@@ -46,16 +46,18 @@ function RiskPanel({ signals, shown, onToggle }: { signals: RiskSignal[]; shown:
         </h3>
         <EnglishToggle shown={shown} onToggle={onToggle} />
       </div>
-      <ul className="mt-3 flex flex-col gap-4">
+      <ul className="mt-3 flex flex-col gap-2">
         {signals.map((signal) => (
           <li key={signal.code} lang={shown}>
-            <p className="text-15 font-semibold text-ink">{signal.title[shown]}</p>
-            <p className="text-15 text-body">{signal.text[shown]}</p>
-            <details className="mt-1">
-              <summary className="inline-flex cursor-pointer items-center gap-1 rounded-sm text-13 font-medium text-amber-ink">
-                <CircleHelp aria-hidden className="size-4" />
-                Why?
+            <details>
+              <summary className="flex cursor-pointer items-center justify-between gap-3 rounded-sm">
+                <span className="text-15 font-semibold text-ink">{signal.title[shown]}</span>
+                <span className="inline-flex items-center gap-1 text-13 font-medium text-amber-ink">
+                  <CircleHelp aria-hidden className="size-4" />
+                  Why?
+                </span>
               </summary>
+              <p className="mt-1 text-15 text-body">{signal.text[shown]}</p>
               <ul className="mt-1 flex flex-col gap-1 border-l-2 border-amber-line pl-3">
                 {signal.evidence.map((quote) => (
                   <li key={quote} className="text-13 text-body">
@@ -63,8 +65,8 @@ function RiskPanel({ signals, shown, onToggle }: { signals: RiskSignal[]; shown:
                   </li>
                 ))}
               </ul>
+              {signal.policy_clause && <PolicyQuote clause={signal.policy_clause} shown={shown} />}
             </details>
-            {signal.policy_clause && <PolicyQuote clause={signal.policy_clause} shown={shown} />}
           </li>
         ))}
       </ul>

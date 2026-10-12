@@ -135,15 +135,9 @@ def investment_declined() -> Texts:
 
 def fallback() -> Texts:
     return {
-        "ms": (
-            "Dalam mod skrip, saya boleh menjawab soalan demo: membayar bil sebelum tarikh akhir, membayar permintaan "
-            "yang anda terima, memindahkan wang, dan perbelanjaan anda. Mod langsung menjawab soalan terbuka."
-        ),
-        "en": (
-            "In scripted mode I can answer the demo questions: paying a bill before its deadline, paying a request "
-            "you received, forwarding money, and your spending. Live mode handles open questions."
-        ),
-        "zh": "在脚本模式下，我可以回答演示问题：在截止日期前支付账单、支付您收到的付款请求、转出资金以及您的消费情况。开放式问题由实时模式处理。",
+        "ms": "Dalam mod skrip, saya hanya boleh menjawab soalan demo.",
+        "en": "In scripted mode I can only answer the demo questions.",
+        "zh": "在脚本模式下，我只能回答演示问题。",
     }
 
 
@@ -171,37 +165,24 @@ def too_many_steps() -> Texts:
     }
 
 
-def plan_with_conversion(plan: dict[str, Any], quote: dict[str, Any], needs_code: bool) -> Texts:
-    """The Act 1 reply: not enough CNY, convert once, then pay."""
+def plan_with_conversion(plan: dict[str, Any], quote: dict[str, Any]) -> Texts:
+    """The Act 1 reply: not enough CNY, convert once, then pay. The costs are on the approval sheet."""
     send = format_amount(quote["amount_minor"], quote["from_currency"])
-    receive = format_amount(quote["amount_received_minor"], quote["to_currency"])
-    cost = format_amount(quote["total_cost_minor"], quote["from_currency"])
     bill = format_amount(plan["bill_amount_minor"], plan["currency"])
     currency = plan["currency"]
-    approve = {
-        "ms": "Kedua-dua langkah memerlukan pengesahan dan kod sekali guna anda." if needs_code else "Sila sahkan setiap langkah.",
-        "en": "Both steps need your confirmation and a one-time code." if needs_code else "Please confirm each step.",
-        "zh": "两步都需要您确认并输入一次性验证码。" if needs_code else "请逐步确认。",
-    }
     return {
-        "ms": (
-            f"Baki {currency} anda tidak cukup. Saya cadangkan tukar {send} kepada {receive} (kos sebenar {cost}), "
-            f"kemudian bayar yuran {bill}. {approve['ms']}"
-        ),
-        "en": (
-            f"Your {currency} balance is not enough. I suggest converting {send} to {receive} (true cost {cost}), "
-            f"then paying the {bill} bill. {approve['en']}"
-        ),
-        "zh": f"您的 {currency} 余额不足。建议先将 {send} 兑换为 {receive}（实际成本 {cost}），再支付 {bill} 的账单。{approve['zh']}",
+        "ms": f"Baki {currency} tidak cukup. Tukar {send} dahulu, kemudian bayar {bill}.",
+        "en": f"Not enough {currency}. Convert {send} first, then pay {bill}.",
+        "zh": f"{currency} 余额不足。先兑换 {send}，再支付 {bill}。",
     }
 
 
 def plan_ready(plan: dict[str, Any], payee: str) -> Texts:
     bill = format_amount(plan["bill_amount_minor"], plan["currency"])
     return {
-        "ms": f"Baki {plan['currency']} anda mencukupi. Saya telah menyediakan bayaran {bill} kepada {payee} untuk pengesahan anda.",
-        "en": f"Your {plan['currency']} balance is enough. I have prepared a payment of {bill} to {payee} for you to confirm.",
-        "zh": f"您的 {plan['currency']} 余额充足。我已准备好向{payee}支付 {bill}，请您确认。",
+        "ms": f"Baki {plan['currency']} mencukupi. Bayaran {bill} kepada {payee} sedia untuk kelulusan anda.",
+        "en": f"You have enough {plan['currency']}. A payment of {bill} to {payee} is ready for your approval.",
+        "zh": f"{plan['currency']} 余额充足。向{payee}支付 {bill} 已准备好，等待您批准。",
     }
 
 
@@ -224,23 +205,18 @@ def plan_insufficient(plan: dict[str, Any]) -> Texts:
     }
 
 
-def payment_prepared(summary: dict[str, Any], needs_code: bool) -> Texts:
+def payment_prepared(summary: dict[str, Any]) -> Texts:
     amount = format_amount(summary["amount_minor"], summary["currency"])
     payee = summary["payee_name"]
-    extra = {
-        "ms": " Kod sekali guna diperlukan." if needs_code else "",
-        "en": " A one-time code is needed." if needs_code else "",
-        "zh": "需要输入一次性验证码。" if needs_code else "",
-    }
     return {
-        "ms": f"Saya telah menyediakan bayaran {amount} kepada {payee}. Sila sahkan untuk meneruskan.{extra['ms']}",
-        "en": f"I have prepared a payment of {amount} to {payee}. Please confirm to continue.{extra['en']}",
-        "zh": f"我已准备好向{payee}支付 {amount}，请确认后继续。{extra['zh']}",
+        "ms": f"Bayaran {amount} kepada {payee} sedia untuk kelulusan anda.",
+        "en": f"A payment of {amount} to {payee} is ready for your approval.",
+        "zh": f"向{payee}支付 {amount} 已准备好，等待您批准。",
     }
 
 
 def blocked(codes: list[str]) -> Texts:
-    """Why a payment was refused: the policy engine's reasons, then what to do instead."""
+    """What Bridge says when a payment is refused. Short: the reasons are shown beside it."""
     if "MONEY_MULE_PATTERN" in codes:
         return {
             "ms": (
@@ -255,12 +231,11 @@ def blocked(codes: list[str]) -> Texts:
             ),
             "zh": "我不能替您转出这笔钱。替陌生人转移资金正是学生被利用成为“钱骡”的方式，可能导致银行账户被关闭、留下犯罪记录并失去签证。误汇的款项应通过您的银行退回，而不是转到对方指定的账户。",
         }
-    advice = advice_for(codes)
-    titles = {language: [reason(code).title[language] for code in codes] for language in ("ms", "en", "zh")}
+    # The reasons and the advice travel in the "blocked" event; the reply does not repeat them.
     return {
-        "ms": f"Saya tidak boleh meneruskan bayaran ini: {'; '.join(titles['ms'])}. {advice['ms']}",
-        "en": f"I cannot go ahead with this payment: {'; '.join(titles['en'])}. {advice['en']}",
-        "zh": f"我无法继续这笔付款：{'；'.join(titles['zh'])}。{advice['zh']}",
+        "ms": "Saya tidak boleh meneruskan bayaran ini. Tiada wang dipindahkan.",
+        "en": "I cannot go ahead with this payment. No money was moved.",
+        "zh": "我无法继续这笔付款。资金没有任何变动。",
     }
 
 

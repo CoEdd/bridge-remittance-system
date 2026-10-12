@@ -1,59 +1,75 @@
 "use client";
 
-import { ArrowRight, Ban, Languages, TriangleAlert } from "lucide-react";
+import { ArrowRight, Ban, TriangleAlert } from "lucide-react";
 import Link from "next/link";
 import { useState } from "react";
+import { lead } from "@/components/features/assistant/model";
 import { PolicyQuote } from "@/components/features/documents/PolicyQuote";
 import { Button } from "@/components/ui/Button";
 import { LANGUAGE_NAMES } from "@/lib/language";
 import type { BlockedEvent, Language } from "@/lib/types";
 
-/** Why a payment was refused: one row per reason, the policy clause that proves it, and what to do instead. */
+/**
+ * Why a payment was refused. At a glance: the reasons by name and one line of advice.
+ * "Why?" opens the explanation of each reason and the policy clause behind it.
+ */
 export function BlockedPanel({ blocked, language }: { blocked: BlockedEvent; language: Language }) {
   const [english, setEnglish] = useState(false);
+  const [why, setWhy] = useState(false);
   const shown: Language = english ? "en" : language;
   // The reasons were written in the student's language when the payment was blocked.
   const translated = blocked.reasons.some((reason) => reason.text !== reason.text_en);
+  const advice = english ? blocked.advice_en : blocked.advice;
 
   return (
     <section
       aria-label="Payment blocked"
       className="overflow-hidden rounded-card border border-danger bg-surface motion-safe:animate-step-in"
     >
-      <h3 className="flex items-center gap-2 bg-danger-tint px-4 py-3 font-heading text-18 font-semibold text-danger">
+      <h3 className="flex items-center gap-2 bg-danger-tint px-4 py-2 font-heading text-18 font-semibold text-danger">
         <Ban aria-hidden className="size-5 shrink-0" />
         Payment blocked: no money was moved
       </h3>
-      <ul className="flex flex-col gap-4 px-4 py-4">
+      <ul className="flex flex-col gap-2 px-4 py-3">
         {blocked.reasons.map((reason) => (
-          <li key={reason.code} className="grid grid-cols-[auto_1fr] gap-3">
+          <li key={reason.code} className="grid grid-cols-[auto_1fr] gap-x-2">
             <TriangleAlert aria-hidden className="mt-0.5 size-5 text-danger" strokeWidth={1.75} />
-            <div lang={shown}>
-              <p className="text-15 font-semibold text-ink">{english ? reason.title_en : reason.title}</p>
-              <p className="text-15 text-body">{english ? reason.text_en : reason.text}</p>
-              {reason.policy_clause && <PolicyQuote clause={reason.policy_clause} shown={shown} />}
+            <div lang={shown} className="min-w-0">
+              <p className="text-15 font-medium text-ink">{english ? reason.title_en : reason.title}</p>
+              {why && <p className="text-13 text-body">{english ? reason.text_en : reason.text}</p>}
+              {reason.policy_clause &&
+                (why ? (
+                  <PolicyQuote clause={reason.policy_clause} shown={shown} />
+                ) : (
+                  <p className="truncate text-13 text-muted">
+                    University policy: “{(reason.policy_clause.versions.en ?? reason.policy_clause).text}”
+                  </p>
+                ))}
             </div>
           </li>
         ))}
       </ul>
-      <div className="flex flex-col gap-2 border-t border-line px-4 py-3">
-        <p lang={shown} className="text-15 font-medium text-ink">
-          {english ? blocked.advice_en : blocked.advice}
+      <div className="border-t border-line px-4 py-2">
+        <p lang={shown} className="text-13 font-medium text-ink">
+          {why ? advice : (lead(advice) ?? advice)}
         </p>
-        <div className="flex flex-wrap items-center justify-between gap-2">
+        <div className="mt-1 flex flex-wrap items-center gap-1">
+          <Button variant="ghost" size="sm" aria-expanded={why} className="-ml-3" onClick={() => setWhy(!why)}>
+            {why ? "Less" : "Why?"}
+          </Button>
+          {translated && (
+            <Button variant="ghost" size="sm" onClick={() => setEnglish(!english)}>
+              {english ? `Show ${LANGUAGE_NAMES[language]}` : "Show English"}
+            </Button>
+          )}
           {blocked.audit_seq !== null && (
             <Link
               href={`/audit?entry=${blocked.audit_seq}`}
-              className="inline-flex items-center gap-1 rounded-sm text-13 font-medium text-teal hover:underline"
+              className="ml-auto inline-flex items-center gap-1 rounded-sm text-13 font-medium text-teal hover:underline"
             >
-              View in audit log
+              Audit log
               <ArrowRight aria-hidden className="size-4" />
             </Link>
-          )}
-          {translated && (
-            <Button variant="ghost" size="sm" icon={Languages} onClick={() => setEnglish(!english)}>
-              {english ? `Show ${LANGUAGE_NAMES[language]}` : "Show English"}
-            </Button>
           )}
         </div>
       </div>

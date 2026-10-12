@@ -231,10 +231,11 @@ class Sandbox:
 @dataclass(frozen=True)
 class Case:
     id: str
-    title: str  # the attack, in one line
+    title: str  # a name of two or three words
+    attack: str  # what is tried, in one line
     expected: str
     # Makes the attack, records its checks on the sandbox and returns what was observed, in one line.
-    attack: Callable[[Sandbox], str]
+    run: Callable[[Sandbox], str]
 
 
 @contextmanager
@@ -264,6 +265,7 @@ def describe(case: Case, status: str) -> dict[str, Any]:
     return {
         "id": case.id,
         "title": case.title,
+        "attack": case.attack,
         "status": status,
         "expected": case.expected,
         "observed": None,
@@ -278,7 +280,7 @@ def run_case(case: Case) -> dict[str, Any]:
     result = describe(case, "failed")
     try:
         with isolated_copy() as box:
-            result["observed"] = case.attack(box)
+            result["observed"] = case.run(box)
             result["checks"] = box.checks
             result["evidence"] = [_evidence(entry) for entry in sorted(box.evidence, key=lambda entry: entry.seq)]
             if box.checks and all(check["passed"] for check in box.checks):

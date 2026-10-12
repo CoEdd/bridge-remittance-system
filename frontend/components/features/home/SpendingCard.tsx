@@ -9,7 +9,6 @@ import { Card } from "@/components/ui/Card";
 import { EmptyState } from "@/components/ui/EmptyState";
 import { Skeleton } from "@/components/ui/Skeleton";
 import { api } from "@/lib/api";
-import { formatDate } from "@/lib/format";
 import type { CategorySpend } from "@/lib/types";
 import { useApi } from "@/lib/useApi";
 
@@ -78,10 +77,6 @@ export function SpendingCard() {
           return (
             <>
               <p className="font-heading text-18 font-semibold text-ink">{data.insight}</p>
-              <p className="mt-1 text-13 text-muted">
-                {formatDate(data.period_start)} to {formatDate(data.period_end)}, compared with the{" "}
-                {data.period_days} days before. Bar lengths compare the amounts in {data.home_currency}.
-              </p>
               <ul className="mt-6 flex flex-col gap-4">
                 {data.categories.map((item) => (
                   <SpendingBar key={`${item.category}-${item.currency}`} item={item} largest={largest} />

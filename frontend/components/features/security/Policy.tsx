@@ -1,5 +1,4 @@
 import {
-  ArrowRight,
   Ban,
   CircleDollarSign,
   Link2,
@@ -10,8 +9,7 @@ import {
   UserCheck,
   type LucideIcon,
 } from "lucide-react";
-import Link from "next/link";
-import { tierOf } from "@/components/features/assistant/StepCard";
+import { tierOf } from "@/components/features/assistant/Steps";
 import { Amount } from "@/components/ui/Amount";
 import { Badge, TierBadge } from "@/components/ui/Badge";
 import { Card } from "@/components/ui/Card";
@@ -31,7 +29,7 @@ export function TierTable({ tiers }: { tiers: TierRow[] }) {
             <th scope="col" className="w-24 pb-2 font-medium">
               Name
             </th>
-            <th scope="col" className="w-80 pb-2 font-medium">
+            <th scope="col" className="w-96 pb-2 font-medium">
               Rule
             </th>
             <th scope="col" className="pb-2 font-medium">
@@ -42,14 +40,14 @@ export function TierTable({ tiers }: { tiers: TierRow[] }) {
         <tbody>
           {tiers.map((row) => (
             <tr key={row.tier} className="border-b border-line align-top last:border-b-0">
-              <td className="py-3">
+              <td className="py-2">
                 <TierBadge tier={tierOf(row.tier)} />
               </td>
-              <th scope="row" className="py-3 text-15 font-medium text-ink">
+              <th scope="row" className="py-2 text-15 font-medium text-ink">
                 {row.name}
               </th>
-              <td className="py-3 pr-4 text-15 text-body">{row.rule}</td>
-              <td className="py-3">
+              <td className="py-2 pr-4 text-15 text-body">{row.rule}</td>
+              <td className="py-2">
                 {row.tools.length > 0 && (
                   <ul className="flex flex-wrap gap-1">
                     {row.tools.map((tool) => (
@@ -59,14 +57,9 @@ export function TierTable({ tiers }: { tiers: TierRow[] }) {
                     ))}
                   </ul>
                 )}
-                {row.tier === "T3" && (
-                  <p className="mt-2 text-13 text-body">
-                    Also: {row.raised_by.map((reason) => reason.title.toLowerCase()).join(" · ")}
-                  </p>
-                )}
-                {row.tier === "REFUSED" && (
-                  <details>
-                    <summary className="cursor-pointer rounded-sm text-13 font-medium text-ink">
+                {row.raised_by.length > 0 && (
+                  <details className={row.tools.length > 0 ? "mt-1" : undefined}>
+                    <summary className="cursor-pointer rounded-sm text-13 font-medium text-teal">
                       {row.raised_by.length} reasons
                     </summary>
                     <ul className="mt-2 flex flex-wrap gap-1">
@@ -94,20 +87,17 @@ function limitValue(limit: Limit, currency: Currency) {
 
 export function Limits({ limits, currency }: { limits: Limit[]; currency: Currency }) {
   return (
-    <section aria-labelledby="your-limits">
-      <h2 id="your-limits" className="mb-3 font-heading text-18 font-semibold text-ink">
-        Your limits
-      </h2>
+    <Card title="Your limits">
       <ul className="grid grid-cols-4 gap-4">
         {limits.map((limit) => (
-          <li key={limit.key} className="rounded-card border border-line bg-surface p-4">
+          <li key={limit.key}>
             <p className="text-13 font-medium text-muted">{limit.label}</p>
-            <p className="mt-1 text-24 font-semibold text-ink">{limitValue(limit, currency)}</p>
-            <p className="mt-1 text-13 text-body">{limit.effect}</p>
+            <p className="text-18 font-semibold text-ink">{limitValue(limit, currency)}</p>
+            <p className="text-13 text-body">{limit.effect}</p>
           </li>
         ))}
       </ul>
-    </section>
+    </Card>
   );
 }
 
@@ -121,35 +111,35 @@ const SAFEGUARD_ICONS: Record<string, LucideIcon> = {
   audit_log: Link2,
 };
 
+/** The safeguards by name. What each one does opens on request. */
 export function Safeguards({ safeguards }: { safeguards: Safeguard[] }) {
   return (
-    <section aria-labelledby="safeguards">
-      <h2 id="safeguards" className="mb-3 font-heading text-18 font-semibold text-ink">
-        Safeguards
-      </h2>
-      <ul className="grid grid-cols-4 gap-4">
+    <Card title="Safeguards">
+      <ul className="flex flex-wrap gap-2">
         {safeguards.map((item) => {
           const Icon = SAFEGUARD_ICONS[item.key] ?? CircleDollarSign;
           return (
-            <li key={item.key} className="flex flex-col rounded-card border border-line bg-surface p-4">
-              <p className="flex items-center gap-2 text-15 font-semibold text-ink">
-                <Icon aria-hidden className="size-5 shrink-0 text-teal" strokeWidth={1.75} />
-                {item.title}
-              </p>
-              <p className="mt-1 text-13 text-body">{item.text}</p>
-              {item.key === "audit_log" && (
-                <Link
-                  href="/audit"
-                  className="mt-auto inline-flex items-center gap-1 self-start rounded-sm pt-2 text-13 font-medium text-teal hover:underline"
-                >
-                  Open audit log
-                  <ArrowRight aria-hidden className="size-4" />
-                </Link>
-              )}
+            <li
+              key={item.key}
+              className="inline-flex h-8 items-center gap-2 rounded-full border border-line bg-paper px-3 text-13 font-medium text-ink"
+            >
+              <Icon aria-hidden className="size-4 text-teal" strokeWidth={1.75} />
+              {item.title}
             </li>
           );
         })}
       </ul>
-    </section>
+      <details className="mt-3">
+        <summary className="cursor-pointer rounded-sm text-13 font-medium text-teal">What each one does</summary>
+        <dl className="mt-2 grid grid-cols-[auto_1fr] gap-x-4 gap-y-1 text-13">
+          {safeguards.map((item) => (
+            <div key={item.key} className="contents">
+              <dt className="font-medium text-ink">{item.title}</dt>
+              <dd className="text-body">{item.text}</dd>
+            </div>
+          ))}
+        </dl>
+      </details>
+    </Card>
   );
 }

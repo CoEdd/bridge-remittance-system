@@ -29,7 +29,7 @@ def security_policy(user: UserDep) -> SecurityPolicyOut:
 @router.get("/redteam")
 def list_red_team_cases() -> list[RedTeamCaseOut]:
     """The red-team cases, before they are run."""
-    return [RedTeamCaseOut(id=case.id, title=case.title, expected=case.expected) for case in CASES]
+    return [RedTeamCaseOut(id=case.id, title=case.title, attack=case.attack, expected=case.expected) for case in CASES]
 
 
 @router.post("/redteam/run")

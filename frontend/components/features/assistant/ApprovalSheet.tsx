@@ -1,11 +1,11 @@
 "use client";
 
-import { BadgeCheck, Languages, TriangleAlert } from "lucide-react";
+import { BadgeCheck, TriangleAlert } from "lucide-react";
 import { useEffect, useState } from "react";
 import { CountdownRing } from "@/components/features/assistant/CountdownRing";
-import { costRows } from "@/components/features/assistant/details";
+import { keyRows, moreRows } from "@/components/features/assistant/details";
 import { describeAction, isWaiting } from "@/components/features/assistant/model";
-import { Rows, tierOf } from "@/components/features/assistant/StepCard";
+import { Rows, tierOf } from "@/components/features/assistant/Steps";
 import type { ApproveResult } from "@/components/features/assistant/useAssistant";
 import { Badge, TierBadge } from "@/components/ui/Badge";
 import { Button } from "@/components/ui/Button";
@@ -31,11 +31,11 @@ const OUTCOMES: Record<Action["status"], string> = {
   expired: "Expired",
 };
 
-/** One sentence of what approving will do. */
+/** One line of what approving will do. */
 function sentence(action: Action): string {
   const cost = action.cost_breakdown;
   if (cost?.kind === "conversion") {
-    return `Convert ${formatAmount(cost.amount_minor, cost.from_currency)} to ${cost.to_currency} via ${cost.provider_name}`;
+    return `Convert ${formatAmount(cost.amount_minor, cost.from_currency)} to ${cost.to_currency}`;
   }
   return describeAction(action);
 }
@@ -59,29 +59,16 @@ function PayeeCheck({ payee }: { payee: Payee | undefined }) {
   );
 }
 
-function TierReason({ action, language, limit }: { action: Action; language: Language; limit: string }) {
-  const [english, setEnglish] = useState(false);
+/** The tier and, in a few words, what put the action there. */
+function TierLine({ action, language, limit }: { action: Action; language: Language; limit: string }) {
+  const why = action.reasons.map((reason) => reason.title[language]).join(" · ");
   const overLimit = action.reasons.some((reason) => reason.code === "OVER_TXN_LIMIT");
   return (
-    <div className="rounded-control border border-amber-line bg-amber-tint p-3">
-      <div className="flex items-center justify-between gap-2">
-        <TierBadge tier={tierOf(action.tier)} />
-        {language !== "en" && (
-          <Button variant="ghost" size="sm" icon={Languages} aria-pressed={english} onClick={() => setEnglish(!english)}>
-            {english ? "Hide English" : "Show English"}
-          </Button>
-        )}
-      </div>
-      <p lang={language} className="mt-2 text-15 text-ink">
-        {action.why[language]}
-      </p>
-      {english && (
-        <p lang="en" className="mt-1 text-15 text-body">
-          {action.why.en}
-        </p>
-      )}
-      {overLimit && <p className="mt-1 text-13 text-amber-ink">Per-payment limit: {limit}</p>}
-    </div>
+    <p className="flex flex-wrap items-center gap-2 text-15 text-ink">
+      <TierBadge tier={tierOf(action.tier)} />
+      <span lang={language}>{why}</span>
+      {overLimit && <span className="text-muted">({limit})</span>}
+    </p>
   );
 }
 
@@ -205,18 +192,28 @@ export function ApprovalSheet({
           {coolingOff && current.cooling_off_until ? (
             <div className="flex flex-col items-center gap-3 py-4 text-center">
               <CountdownRing until={current.cooling_off_until} totalSeconds={settings.cooling_off_seconds} />
-              <p className="max-w-xs text-15 text-body">A first payment to a new payee waits before it runs.</p>
+              <p className="text-15 text-body">A first payment waits before it runs.</p>
             </div>
           ) : (
             <>
-              {cost && <Rows rows={costRows(cost)} strong={["True cost", "Total"]} size="15" />}
+              {cost && (
+                <div>
+                  <Rows rows={keyRows(cost)} strong={["True cost"]} size="15" />
+                  <details className="mt-2">
+                    <summary className="cursor-pointer rounded-sm text-13 font-medium text-teal">More details</summary>
+                    <div className="mt-2">
+                      <Rows rows={moreRows(cost)} />
+                    </div>
+                  </details>
+                </div>
+              )}
               {cost?.kind === "conversion" && cost.warning && (
                 <p className="flex items-start gap-2 text-13 font-medium text-amber-ink">
                   <TriangleAlert aria-hidden className="mt-0.5 size-4 shrink-0" />
                   {cost.warning}
                 </p>
               )}
-              <TierReason
+              <TierLine
                 action={current}
                 language={language}
                 limit={formatAmount(me.per_txn_limit_minor, me.home_currency)}
@@ -259,7 +256,7 @@ export function ApprovalSheet({
               {note}
             </p>
           )}
-          <p className="text-15 text-body">Nothing is waiting for you in this plan.</p>
+          <p className="text-15 text-body">Nothing is waiting for you.</p>
           <ol className="flex flex-col gap-2">
             {plan.map((action) => (
               <li key={action.id} className="flex items-center justify-between gap-3">
