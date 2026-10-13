@@ -7,7 +7,7 @@ def test_first_start_seeds_the_database(client: TestClient) -> None:
     assert me == {
         "id": 1,
         "name": "Ahmad Faris",
-        "preferred_language": "ms",
+        "preferred_language": "en",
         "home_currency": "MYR",
         "per_txn_limit_minor": 500_000,
         "daily_limit_minor": 1_000_000,
@@ -27,7 +27,7 @@ def test_patch_me_refuses_an_unknown_language(client: TestClient) -> None:
     response = client.patch("/me", json={"preferred_language": "fr"})
 
     assert response.status_code == 422
-    assert client.get("/me").json()["preferred_language"] == "ms"
+    assert client.get("/me").json()["preferred_language"] == "en"
 
 
 def test_accounts_show_balances_equivalents_and_fx_source(client: TestClient) -> None:
@@ -133,12 +133,12 @@ def test_payees(client: TestClient) -> None:
 
 
 def test_demo_reset_restores_everything(client: TestClient) -> None:
-    client.patch("/me", json={"preferred_language": "en"})
+    client.patch("/me", json={"preferred_language": "ms"})
     before = client.get("/transactions").json()
 
     response = client.post("/demo/reset")
 
     assert response.status_code == 200
     assert response.json() == {"status": "reset", "demo_today": "2026-10-15", "fx_source": "offline_snapshot"}
-    assert client.get("/me").json()["preferred_language"] == "ms"
+    assert client.get("/me").json()["preferred_language"] == "en"
     assert client.get("/transactions").json() == before

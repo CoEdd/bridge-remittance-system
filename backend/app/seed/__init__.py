@@ -73,7 +73,7 @@ def _add_reference_data(session: Session, today: date) -> None:
         User(
             id=DEMO_USER_ID,
             name="Ahmad Faris",
-            preferred_language="ms",
+            preferred_language="en",
             home_currency="MYR",
             per_txn_limit_minor=to_minor("5000.00", "MYR"),
             daily_limit_minor=to_minor("10000.00", "MYR"),

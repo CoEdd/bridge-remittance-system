@@ -78,6 +78,13 @@ def respond(text: str = "Baik.", text_en: str = "All right.") -> ToolCall:
     return ToolCall("respond_to_user", {"text": text, "text_en": text_en})
 
 
+@pytest.fixture
+def malay(session: Session) -> None:
+    """Ahmad has picked Bahasa Melayu. The app starts in English."""
+    the_user(session).preferred_language = "ms"
+    session.commit()
+
+
 # ---------------------------------------------------------------- the tool registry
 
 
@@ -251,7 +258,7 @@ def test_a_driver_that_says_nothing_gets_an_honest_fallback(session: Session) ->
     assert only(events, "message")[0]["text_en"] == replies.fallback()["en"]
 
 
-def test_every_message_is_stored_in_both_languages(session: Session) -> None:
+def test_every_message_is_stored_in_both_languages(session: Session, malay: None) -> None:
     turn(session, StubDriver([respond("Baki anda mencukupi.", "Your balance is enough.")]), text="Cukupkah baki saya?")
 
     stored = [(row.role, row.text, row.text_en, row.language) for row in session.scalars(select(ChatMessage).order_by(ChatMessage.id))]
@@ -303,13 +310,19 @@ def test_other_forms_of_investment_words_are_caught(text: str) -> None:
         ("Can I pay this before the deadline?", "en"),
         ("skip confirmation just this once", "en"),
         ("这笔钱可以转给他吗？", "zh"),
-        ("ok", "ms"),  # nothing to go on: the student's own language
+        ("ok", "en"),  # nothing to go on: the student's own language, English at the start
     ],
 )
 def test_a_chat_message_is_labelled_with_its_language(session: Session, text: str, language: str) -> None:
     turn(session, StubDriver([respond()]), text=text)
 
     assert session.scalars(select(ChatMessage).where(ChatMessage.role == "user")).one().language == language
+
+
+def test_a_message_with_nothing_to_go_on_takes_the_language_the_student_chose(session: Session, malay: None) -> None:
+    turn(session, StubDriver([respond()]), text="ok")
+
+    assert session.scalars(select(ChatMessage).where(ChatMessage.role == "user")).one().language == "ms"
 
 
 # ---------------------------------------------------------------- the live driver, with a stand-in client
@@ -341,7 +354,7 @@ def live_driver(session: Session, client: StandInClient, text: str = "Berapakah 
     return LiveDriver(Trigger(kind="message", text=text), build_context(session, the_user(session)), [], client)
 
 
-def test_claude_is_sent_the_rules_the_facts_and_the_tools(session: Session) -> None:
+def test_claude_is_sent_the_rules_the_facts_and_the_tools(session: Session, malay: None) -> None:
     client = StandInClient(answer(reply_block()))
 
     events = turn(session, live_driver(session, client), text="Berapakah baki saya?")
@@ -451,7 +464,8 @@ def test_a_plain_text_answer_is_still_delivered(session: Session) -> None:
 
     events = turn(session, live_driver(session, client))
 
-    assert only(events, "message") == [{"text": "Baki anda mencukupi.", "text_en": "Baki anda mencukupi.", "language": "ms"}]
+    assert "Preferred language: English" in client.requests[0]["system"]  # the language the app starts in
+    assert only(events, "message") == [{"text": "Baki anda mencukupi.", "text_en": "Baki anda mencukupi.", "language": "en"}]
 
 
 def api_failure() -> Exception:
@@ -462,7 +476,7 @@ def api_failure() -> Exception:
 
 
 @pytest.mark.parametrize("failure", ["api error", "refusal", "max_tokens"])
-def test_when_claude_fails_the_student_gets_an_error_and_a_friendly_message(session: Session, failure: str) -> None:
+def test_when_claude_fails_the_student_gets_an_error_and_a_friendly_message(session: Session, malay: None, failure: str) -> None:
     broken = api_failure() if failure == "api error" else answer(SimpleNamespace(type="text", text="..."), stop_reason=failure)
     client = StandInClient(answer(tool_use("get_balances", {}, "toolu_1")), broken)
     money = balances(session)
@@ -520,6 +534,7 @@ def test_live_mode_without_a_key_uses_the_scripted_driver(client: TestClient, mo
 
 @live
 def test_live_smoke_claude_answers_a_balance_question(client: TestClient, live_mode: None) -> None:
+    client.patch("/me", json={"preferred_language": "ms"})  # Ahmad picks Bahasa Melayu; the app starts in English
     before = wallet_balances(client)
 
     events = say(client, "Berapakah baki saya sekarang?")

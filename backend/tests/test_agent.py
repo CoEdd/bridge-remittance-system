@@ -33,6 +33,11 @@ DEADLINE_QUESTION = "Boleh saya bayar yuran ini sebelum tarikh akhir?"
 AGENT_QUESTION = "Boleh saya bayar melalui ejen ini?"
 FORWARD_QUESTION = "Boleh saya pindahkan wang ini seperti yang diminta?"
 
+# The same three questions as the English chips on the Assistant screen.
+DEADLINE_QUESTION_EN = "Can I pay this fee before the deadline?"
+AGENT_QUESTION_EN = "Can I pay through this agent?"
+FORWARD_QUESTION_EN = "Can I forward this money as asked?"
+
 START = {"MYR": 985_000, "CNY": 342_000, "USD": 18_000}
 TUITION, RENT, PHONE, BUFFER = 1_200_000, 280_000, 9_800, 50_000
 FEE = 800  # MYR 8.00 per transfer
@@ -73,10 +78,16 @@ def tools_of(events: list[tuple[str, dict[str, Any]]]) -> list[tuple[str, str, s
     return [(step["tool"], step["tier"], step["verdict"]) for step in only(events, "step")]
 
 
+@pytest.fixture
+def malay(client: TestClient) -> None:
+    """Ahmad picks Bahasa Melayu, as with the header buttons. The app starts in English."""
+    assert client.patch("/me", json={"preferred_language": "ms"}).status_code == 200
+
+
 # ---------------------------------------------------------------- Act 1: the real bill
 
 
-def test_act_1_plan_convert_and_pay_the_tuition(client: TestClient) -> None:
+def test_act_1_plan_convert_and_pay_the_tuition(client: TestClient, malay: None) -> None:
     amount, received = expected_conversion("1.62")
     invoice = client.post("/demo/documents/tuition_invoice").json()
     bill_id = invoice["bill"]["id"]
@@ -155,7 +166,7 @@ def test_act_1_plan_convert_and_pay_the_tuition(client: TestClient) -> None:
     assert client.get("/audit/verify").json()["ok"] is True
 
 
-def test_explaining_an_uploaded_document(client: TestClient) -> None:
+def test_explaining_an_uploaded_document(client: TestClient, malay: None) -> None:
     invoice = client.post("/demo/documents/tuition_invoice").json()
 
     events = read_events(client, client.post(f"/chat/document/{invoice['id']}").json()["stream_id"])
@@ -204,7 +215,7 @@ def test_act_1_holds_for_any_frozen_rate_from_1_40_to_1_90(client: TestClient, r
 # ---------------------------------------------------------------- Act 2: the scam
 
 
-def test_act_2_the_agent_offer_is_refused_and_no_money_moves(client: TestClient) -> None:
+def test_act_2_the_agent_offer_is_refused_and_no_money_moves(client: TestClient, malay: None) -> None:
     client.post("/demo/documents/agent_offer")
     audit_before = len(all_audit_events(client))
 
@@ -251,7 +262,7 @@ def test_act_2_the_agent_offer_is_refused_and_no_money_moves(client: TestClient)
 # ---------------------------------------------------------------- Act 3: the money mule
 
 
-def test_act_3_forwarding_the_strangers_money_is_refused(client: TestClient) -> None:
+def test_act_3_forwarding_the_strangers_money_is_refused(client: TestClient, malay: None) -> None:
     event = client.post("/demo/events/mule").json()
     after_transfer = {**START, "CNY": START["CNY"] + 300_000}
 
@@ -277,7 +288,7 @@ def test_act_3_forwarding_the_strangers_money_is_refused(client: TestClient) -> 
     assert client.get("/actions/pending").json() == []
 
 
-def test_the_same_request_without_the_strangers_money_only_needs_approval(client: TestClient) -> None:
+def test_the_same_request_without_the_strangers_money_only_needs_approval(client: TestClient, malay: None) -> None:
     client.post("/demo/documents/mule_message")
 
     events = say(client, FORWARD_QUESTION)
@@ -286,6 +297,50 @@ def test_the_same_request_without_the_strangers_money_only_needs_approval(client
     card = only(events, "approval_required")[0]["actions"][0]
     assert (card["payee"], card["amount"], card["requires"]) == ("Zhou Min", 290_000, ["confirm", "otp", "cooling_off"])
     assert only(events, "message")[0]["text"] == "Bayaran CNY 2,900.00 kepada Zhou Min sedia untuk kelulusan anda."
+
+
+# ---------------------------------------------------------------- the demo starts in English
+
+
+def test_the_three_acts_start_in_english(client: TestClient) -> None:
+    """Nothing chosen in the header: the English chips get English answers and the same verdicts."""
+    assert client.get("/me").json()["preferred_language"] == "en"
+    amount, _ = expected_conversion("1.62")
+
+    invoice = client.post("/demo/documents/tuition_invoice").json()
+    explained = only(read_events(client, client.post(f"/chat/document/{invoice['id']}").json()["stream_id"]), "message")
+    act_1 = say(client, DEADLINE_QUESTION_EN)
+    convert, pay = only(act_1, "approval_required")[0]["actions"]
+    assert approve(client, convert["id"])["status"] == approve(client, pay["id"])["status"] == "executed"
+    client.post("/demo/documents/agent_offer")
+    act_2 = say(client, AGENT_QUESTION_EN)
+    client.post("/demo/events/mule")
+    before_act_3 = wallet_balances(client)
+    act_3 = say(client, FORWARD_QUESTION_EN)
+
+    def english(text: str) -> dict[str, str]:
+        return {"text": text, "text_en": text, "language": "en"}
+
+    assert explained == [english(invoice["explanation"]["en"])]
+    assert (convert["tier"], pay["tier"], convert["amount"], pay["amount"]) == ("T3", "T3", amount, TUITION)
+    assert convert["reasons"][0]["title"] == convert["reasons"][0]["title_en"] == "Above your per-payment limit"
+    assert only(act_1, "message") == [english("Not enough CNY. Convert MYR 7,483.64 first, then pay CNY 12,000.00.")]
+
+    assert tools_of(act_2) == [("pay_bill", "REFUSED", "refused")]
+    scam = only(act_2, "blocked")[0]
+    assert [reason["code"] for reason in scam["reasons"]] == ["PAYEE_NOT_OFFICIAL", "THIRD_PARTY_DISCOUNT", "SCAM_PATTERN"]
+    assert scam["summary"] == "Payment blocked" and scam["advice"] == scam["advice_en"]
+    assert [reason["title"] for reason in scam["reasons"]] == [reason["title_en"] for reason in scam["reasons"]]
+    assert only(act_2, "message") == [english("I cannot go ahead with this payment. No money was moved.")]
+
+    assert tools_of(act_3) == [("pay_bill", "REFUSED", "refused")]
+    mule = only(act_3, "blocked")[0]
+    assert [reason["code"] for reason in mule["reasons"]] == ["MONEY_MULE_PATTERN"]
+    assert mule["advice"] == "Do not forward money from strangers. Ask your bank to return it to the sender."
+    reply = only(act_3, "message")[0]
+    assert reply["language"] == "en" and reply["text"] == reply["text_en"] and "money mules" in reply["text"]
+    assert wallet_balances(client) == before_act_3
+    assert client.get("/actions/pending").json() == []
 
 
 # ---------------------------------------------------------------- what the agent will not do
@@ -316,7 +371,7 @@ def test_asking_to_skip_confirmation_changes_nothing(client: TestClient) -> None
         "我应该把生活费拿去投资股票吗？",
     ],
 )
-def test_investment_questions_are_declined_and_logged(client: TestClient, question: str) -> None:
+def test_investment_questions_are_declined_and_logged(client: TestClient, malay: None, question: str) -> None:
     audit_before = len(all_audit_events(client))
 
     events = say(client, question)
@@ -332,7 +387,7 @@ def test_investment_questions_are_declined_and_logged(client: TestClient, questi
     assert (logged[0]["label"], logged[0]["summary"]) == ("Agent declined", "INVESTMENT_ADVICE")
 
 
-def test_an_ordinary_question_about_spending_is_answered_from_the_data(client: TestClient) -> None:
+def test_an_ordinary_question_about_spending_is_answered_from_the_data(client: TestClient, malay: None) -> None:
     insights = client.get("/insights/spending").json()
     eating_out = next(item for item in insights["categories"] if item["category"] == "eating_out")
 
@@ -355,7 +410,7 @@ def test_asking_to_pay_with_no_document_gets_an_honest_answer(client: TestClient
 # ---------------------------------------------------------------- chat plumbing
 
 
-def test_chat_history_keeps_both_languages(client: TestClient) -> None:
+def test_chat_history_keeps_both_languages(client: TestClient, malay: None) -> None:
     invoice = client.post("/demo/documents/tuition_invoice").json()
     read_events(client, client.post(f"/chat/document/{invoice['id']}").json()["stream_id"])
     say(client, DEADLINE_QUESTION)
@@ -396,7 +451,7 @@ def test_the_reply_follows_the_students_language(client: TestClient) -> None:
 # ---------------------------------------------------------------- what the chat screen reads
 
 
-def test_each_step_says_why_it_got_its_tier(client: TestClient) -> None:
+def test_each_step_says_why_it_got_its_tier(client: TestClient, malay: None) -> None:
     client.post("/demo/documents/tuition_invoice")
 
     steps = {step["tool"]: step for step in only(say(client, DEADLINE_QUESTION), "step")}
@@ -412,7 +467,7 @@ def test_each_step_says_why_it_got_its_tier(client: TestClient) -> None:
     assert steps["pay_bill"]["why"].startswith("Kod sekali guna diperlukan kerana jumlah ini melebihi had setiap bayaran anda")
 
 
-def test_a_refused_step_says_why(client: TestClient) -> None:
+def test_a_refused_step_says_why(client: TestClient, malay: None) -> None:
     client.post("/demo/documents/agent_offer")
 
     step = only(say(client, AGENT_QUESTION), "step")[0]

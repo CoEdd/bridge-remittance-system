@@ -65,7 +65,7 @@ def test_reset_is_repeatable() -> None:
 
 
 def test_reset_restores_changed_data(session: Session) -> None:
-    session.get_one(User, DEMO_USER_ID).preferred_language = "en"
+    session.get_one(User, DEMO_USER_ID).preferred_language = "ms"
     session.get_one(Bill, 1).status = "paid"
     session.commit()
     session.close()
@@ -73,14 +73,14 @@ def test_reset_restores_changed_data(session: Session) -> None:
     reset()
 
     with Session(get_engine()) as fresh:
-        assert fresh.get_one(User, DEMO_USER_ID).preferred_language == "ms"
+        assert fresh.get_one(User, DEMO_USER_ID).preferred_language == "en"
         assert fresh.get_one(Bill, 1).status == "open"
 
 
 def test_user_and_limits(session: Session) -> None:
     user = session.get_one(User, DEMO_USER_ID)
 
-    assert (user.name, user.preferred_language, user.home_currency) == ("Ahmad Faris", "ms", "MYR")
+    assert (user.name, user.preferred_language, user.home_currency) == ("Ahmad Faris", "en", "MYR")
     assert user.per_txn_limit_minor == 500_000
     assert user.daily_limit_minor == 1_000_000
     assert user.new_payee_limit_minor == 300_000
@@ -200,7 +200,7 @@ def test_start_up_rebuilds_a_database_from_before_the_audit_log(session: Session
     ensure_seeded()
 
     with Session(get_engine()) as fresh:
-        assert fresh.get_one(User, DEMO_USER_ID).preferred_language == "ms"
+        assert fresh.get_one(User, DEMO_USER_ID).preferred_language == "en"
         assert [row.event_type for row in fresh.query(AuditLog).order_by(AuditLog.seq)] == ["system.genesis", "system.reset"]
         # The rebuilt table has its append-only protection again.
         triggers = fresh.execute(text("SELECT name FROM sqlite_master WHERE type = 'trigger' ORDER BY name")).scalars().all()

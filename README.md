@@ -28,6 +28,11 @@ make reset                    # restore the demo data while the app runs
 In both modes every call goes through the same policy engine, ledger and audit log. The
 header of the app says which mode is on.
 
+## Language
+
+The app starts in English. Bahasa Melayu and Chinese are in the header; a switch applies
+from Bridge's next answer on, and `make reset` goes back to English.
+
 ## Neuro-symbolic claim check
 
 What it does: an LLM turns a message, in any wording and language, into a fixed set of

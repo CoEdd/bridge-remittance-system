@@ -18,9 +18,10 @@ import type { BlockedEvent, Language } from "@/lib/types";
 export function BlockedPanel({ blocked, language }: { blocked: BlockedEvent; language: Language }) {
   const [english, setEnglish] = useState(false);
   const [why, setWhy] = useState(false);
-  const shown: Language = english ? "en" : language;
   // The reasons were written in the student's language when the payment was blocked.
   const translated = blocked.reasons.some((reason) => reason.text !== reason.text_en);
+  // A panel written in English stays in English, whatever language is chosen afterwards.
+  const shown: Language = english || !translated ? "en" : language;
   const advice = english ? blocked.advice_en : blocked.advice;
   const check = blocked.claim_check;
 
