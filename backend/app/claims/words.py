@@ -3,8 +3,11 @@ The claim check in plain words: what a claim means, what a trusted fact says, an
 status names, in English, Malay and Chinese. Fixed text written by people.
 """
 
+from typing import Any
+
 from app.claims.schema import Claim
 from app.rules.engine import Fact
+from app.sources.vocabulary import Citation
 
 Texts = dict[str, str]
 LANGUAGES = ("en", "ms", "zh")
@@ -55,6 +58,21 @@ _PATTERNS: dict[str, Texts] = {
     "deadline_pressure": {"en": "Pressure to pay fast is a known scam pattern", "ms": "Desakan bayar segera ialah corak penipuan yang diketahui", "zh": "催促尽快付款是已知的诈骗手法"},
     "visa_threat": {"en": "A visa threat is a known scam pattern", "ms": "Ugutan visa ialah corak penipuan yang diketahui", "zh": "以签证相威胁是已知的诈骗手法"},
     "secrecy_request": {"en": "A request for secrecy is a known scam pattern", "ms": "Permintaan kerahsiaan ialah corak penipuan yang diketahui", "zh": "要求保密是已知的诈骗手法"},
+    "personal_account_request": {
+        "en": "Paying fees into a personal account is a known scam pattern",
+        "ms": "Membayar yuran ke akaun peribadi ialah corak penipuan yang diketahui",
+        "zh": "把学费付入个人账户是已知的诈骗手法",
+    },
+    "changed_account_details": {
+        "en": "A notice that the account has changed is a known scam pattern",
+        "ms": "Notis bahawa akaun telah bertukar ialah corak penipuan yang diketahui",
+        "zh": "通知账户已变更是已知的诈骗手法",
+    },
+    "money_mule_forwarding": {
+        "en": "Forwarding money for a stranger is a known scam pattern",
+        "ms": "Memindahkan wang bagi pihak orang asing ialah corak penipuan yang diketahui",
+        "zh": "替陌生人转账是已知的诈骗手法",
+    },
 }
 _FACTS: dict[str, Texts] = {
     "registered_institution": {"en": "{0} is a registered institution", "ms": "{0} ialah institusi berdaftar", "zh": "{0}是已登记的机构"},
@@ -63,7 +81,14 @@ _FACTS: dict[str, Texts] = {
     "paid_before": {"en": "You paid {0} before, into the account ending in {tail}", "ms": "Anda pernah membayar {0}, ke akaun berakhir {tail}", "zh": "您以前向{0}付过款，账户尾号为 {tail}"},
 }
 _SAYS = {"en": "The message says: {meaning} (“{source}”).", "ms": "Mesej itu menyatakan: {meaning} (“{source}”).", "zh": "消息声称：{meaning}（“{source}”）。"}
-_FROM = {"en": "{fact} (source: {source}).", "ms": "{fact} (sumber: {source}).", "zh": "{fact}（来源：{source}）。"}
+_FROM = {"en": "{fact}.", "ms": "{fact}.", "zh": "{fact}。"}
+_SOURCE = {"en": "Source: {title}", "ms": "Sumber: {title}", "zh": "来源：{title}"}
+_APPROVED = {
+    "en": "{line}, approved by {reviewer} on {date}",
+    "ms": "{line}, diluluskan oleh {reviewer} pada {date}",
+    "zh": "{line}，由 {reviewer} 于 {date} 批准",
+}
+_ITEM_ACCOUNT = {"en": "{0}'s official account ends in {tail}", "ms": "Akaun rasmi {0} berakhir dengan {tail}", "zh": "{0}的官方账户尾号为 {tail}"}
 _RULE = {"en": "Rule {id}: {text}", "ms": "Peraturan {id}: {text}", "zh": "规则 {id}：{text}"}
 _POLICY_SAYS = {"en": "{0}'s policy says it {1}", "ms": "Dasar {0} menyatakan ia {1}", "zh": "{0}的政策规定其{1}"}
 
@@ -102,7 +127,45 @@ def says(claim: Claim, short_name: str | None = None) -> Texts:
 
 def from_source(fact: Fact) -> Texts:
     words = fact_words(fact)
-    return {language: _FROM[language].format(fact=words[language], source=fact.source) for language in LANGUAGES}
+    return {language: _FROM[language].format(fact=words[language]) for language in LANGUAGES}
+
+
+def item_words(predicate: str, institution: str, value: str) -> Texts:
+    """A rule-source item in plain words: what it will mean once approved."""
+    from app.sources.vocabulary import atom_of
+
+    atom = atom_of(predicate, institution, value)
+    if predicate == "official_account":
+        return {language: text.format(_short(institution), tail=atom[-1][-4:]) for language, text in _ITEM_ACCOUNT.items()}
+    return fact_words(Fact(atom, "trusted"))
+
+
+def _date(cite: Citation) -> str:
+    when = cite.approved_at
+    return f"{when.day} {when:%b} {when.year}" if when else ""
+
+
+def cite_line(cite: Citation) -> Texts:
+    """ "Source: SPIU payment policy (spiu.example), approved by seed on 15 Sep 2026"."""
+    title = f"{cite.title} ({cite.domain})" if cite.domain else cite.title
+    lines = {language: _SOURCE[language].format(title=title) for language in LANGUAGES}
+    if cite.reviewer and cite.approved_at:
+        lines = {
+            language: _APPROVED[language].format(line=line, reviewer=cite.reviewer, date=_date(cite))
+            for language, line in lines.items()
+        }
+    return lines
+
+
+def cite_json(cite: Citation) -> dict[str, Any]:
+    return {
+        "title": cite.title,
+        "domain": cite.domain,
+        "url": cite.url,
+        "reviewer": cite.reviewer,
+        "approved_on": cite.approved_at.date().isoformat() if cite.approved_at else None,
+        "text": cite_line(cite),
+    }
 
 
 def rule_line(rule_id: str, text: Texts) -> Texts:

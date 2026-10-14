@@ -2,8 +2,9 @@
 Trusted facts for the claim check (symbolic side).
 
 Every fact comes from data we hold ourselves: the institution registry, the student's
-own payment history, the institution's approved policy and the scam advisory. Nothing
-here is ever read from the document being checked.
+own payment history, and the rule-source items a person has approved (institution policies
+and scam patterns, each with its source sentence). Nothing here is ever read from the
+document being checked, and an item that is not approved is never a fact.
 """
 
 import re
@@ -13,23 +14,12 @@ from sqlalchemy import select
 from sqlalchemy.orm import Session
 
 from app.claims.schema import Claim
-from app.documents.index import knowledge_passages
 from app.models import Institution, Payee, User
 from app.rules.engine import Fact
+from app.sources.vocabulary import Citation, item_atom
 
-# A clause of an institution's policy -> the policy facts it states.
-POLICY_CLAUSES = {
-    "no-agents-no-discounts": ("no_payment_agents", "no_third_party_discounts"),
-    "no-visa-threats": ("never_threatens_visa",),
-}
-# A clause of the scam advisory -> the scam pattern it describes.
-ADVISORY_CLAUSES = {
-    "fake-agents": "third_party_fee_discount",
-    "urgency": "deadline_pressure",
-    "threats": "visa_threat",
-    "secrecy": "secrecy_request",
-}
-OFFICIAL_CHANNEL_CLAUSE = "official-channel"
+REGISTRY = Citation("Institution registry")
+HISTORY = Citation("Your payment history")
 
 # Claim types whose first argument names an institution or a payee, to be matched to the registry.
 _NAMED = {"represents_institution": "institution_name", "agent_of_institution": "institution_name", "payee_name": "name"}
@@ -61,42 +51,28 @@ def aliases(institutions: list[Institution]) -> dict[str, str]:
 
 
 def collect(session: Session, user: User) -> list[Fact]:
-    """Every trusted fact the rules may use, each with where it comes from."""
-    institutions = list(session.scalars(select(Institution).order_by(Institution.id)))
-    by_acronym = {acronym(item.name).casefold(): item.name for item in institutions}
-    facts: list[Fact] = []
+    """
+    Every trusted fact the rules may use. Each carries its citations in `ref`: one per
+    source that backs it, so a fact approved from two sources cites both.
+    """
+    from app.sources import approved_items, citation  # rule sources read this module's name matching
 
-    def add(source: str, *atom: str) -> None:
-        facts.append(Fact(tuple(atom), "trusted", source))
+    cited: dict[tuple[str, ...], list[Citation]] = {}
 
-    for institution in institutions:
-        add("Institution registry", "registered_institution", institution.name)
-        add("Institution registry", "official_account", institution.name, digits(institution.official_account_ref))
+    def add(cite: Citation, *atom: str) -> None:
+        cited.setdefault(tuple(atom), []).append(cite)
+
+    for institution in session.scalars(select(Institution).order_by(Institution.id)):
+        add(REGISTRY, "registered_institution", institution.name)
+        add(REGISTRY, "official_account", institution.name, digits(institution.official_account_ref))
 
     paid = select(Payee).where(Payee.user_id == user.id, Payee.first_paid_at.is_not(None)).order_by(Payee.id)
     for payee in session.scalars(paid):
-        add("Your payment history", "paid_before", payee.name, digits(payee.account_ref))
+        add(HISTORY, "paid_before", payee.name, digits(payee.account_ref))
 
-    seen: set[tuple[str, ...]] = set()
-    for passage in knowledge_passages():
-        if passage.source == "policy":
-            # "spiu_payment_policy_en.md" is the policy of the institution whose acronym is SPIU.
-            institution = by_acronym.get(passage.file.split("_")[0].casefold())
-            if institution is None:
-                continue
-            source = f"{acronym(institution)} payment policy"
-            found = [("policy", institution, name) for name in POLICY_CLAUSES.get(passage.clause or "", ())]
-            if passage.clause == OFFICIAL_CHANNEL_CLAUSE:
-                found.append(("official_channel", institution, "official account or student portal"))
-        elif passage.source == "advisory" and passage.clause in ADVISORY_CLAUSES:
-            source, found = "Scam advisory", [("known_scam_pattern", ADVISORY_CLAUSES[passage.clause])]
-        else:
-            continue
-        for atom in found:  # the same clause exists once per language
-            if atom not in seen:
-                seen.add(atom)
-                add(source, *atom)
-    return facts
+    for item in approved_items(session):
+        add(citation(item), *item_atom(item))
+    return [Fact(atom, "trusted", cites[0].title, ref=tuple(cites)) for atom, cites in cited.items()]
 
 
 def ground(claims: list[Claim], session: Session) -> list[Fact]:
@@ -122,5 +98,11 @@ def ground(claims: list[Claim], session: Session) -> list[Fact]:
     return grounded
 
 
+def cites(fact: Fact) -> tuple[Citation, ...]:
+    return fact.ref if fact.kind == "trusted" and isinstance(fact.ref, tuple) else ()
+
+
 def as_json(fact: Fact) -> dict[str, Any]:
-    return {"atom": list(fact.atom), "source": fact.source}
+    from app.claims.words import cite_json
+
+    return {"atom": list(fact.atom), "source": fact.source, "cites": [cite_json(cite) for cite in cites(fact)]}

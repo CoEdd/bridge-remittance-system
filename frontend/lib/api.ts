@@ -19,7 +19,12 @@ import type {
   Payee,
   RedTeamCase,
   RedTeamEvent,
+  RuleSourceDetail,
+  RuleSources,
   SecurityPolicy,
+  SourceItem,
+  SourceItemEdit,
+  SourceVocabulary,
   SpendingInsights,
   TamperResult,
   Transaction,
@@ -173,6 +178,25 @@ export const api = {
   securityPolicy: (signal?: AbortSignal) => request<SecurityPolicy>("/security/policy", { signal }),
   redTeamCases: (signal?: AbortSignal) => request<RedTeamCase[]>("/security/redteam", { signal }),
   claimCheckOverview: (signal?: AbortSignal) => request<ClaimCheckOverview>("/security/claim-check", { signal }),
+  ruleSources: (signal?: AbortSignal) => request<RuleSources>("/sources", { signal }),
+  ruleSource: (id: number, signal?: AbortSignal) => request<RuleSourceDetail>(`/sources/${id}`, { signal }),
+  sourceVocabulary: (signal?: AbortSignal) => request<SourceVocabulary>("/sources/vocabulary", { signal }),
+  /** Fetch a page and let Claude propose items (live mode only). Slow: it reads the whole page. */
+  addSource: (url: string) => postJson<RuleSourceDetail>("/sources", { url }),
+  uploadSource: (file: File) => {
+    const form = new FormData();
+    form.append("file", file);
+    return request<RuleSourceDetail>("/sources/upload", { method: "POST", body: form });
+  },
+  refetchSource: (id: number) => postJson<RuleSourceDetail>(`/sources/${id}/refetch`),
+  approveItem: (id: number) => postJson<SourceItem>(`/source-items/${id}/approve`),
+  rejectItem: (id: number) => postJson<SourceItem>(`/source-items/${id}/reject`),
+  editItem: (id: number, changes: SourceItemEdit) =>
+    request<SourceItem>(`/source-items/${id}`, {
+      method: "PATCH",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(changes),
+    }),
   /** Runs the red-team suite on isolated copies of the database, reporting each case as it starts and ends. */
   runRedTeam: (onEvent: (event: RedTeamEvent) => void, signal?: AbortSignal) =>
     postForEvents("/security/redteam/run", (name, data) => onEvent({ event: name, data } as RedTeamEvent), signal),

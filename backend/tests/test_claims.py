@@ -156,8 +156,14 @@ def test_the_agent_message_scripted_and_offline(session: Session) -> None:
     assert by_type["agent_of_institution"]["meaning"] == {"en": "Says it acts for SPIU", "ms": "Mengaku bertindak bagi pihak SPIU", "zh": "自称代表SPIU办理"}
     assert by_type["secrecy_request"]["source"] == "Jangan beritahu pejabat kewangan, nanti diskaun dibatalkan."
     r2 = next(item for item in check["conclusions"] if item["rule"] == "R2")
-    assert r2["reasoning"]["en"][-1] == "Rule R2: An agent claim contradicted by the institution's own policy blocks the payment."
-    assert "(source: SPIU payment policy)" in r2["reasoning"]["en"][1]
+    assert r2["reasoning"][-1]["text"]["en"] == "Rule R2: An agent claim contradicted by the institution's own policy blocks the payment."
+    policy_line = r2["reasoning"][1]
+    assert policy_line["text"]["en"] == "SPIU's policy says it does not use payment agents."
+    # Every fact used says where it comes from and who approved it.
+    assert [cite["text"]["en"] for cite in policy_line["cites"]] == [
+        "Source: SPIU payment policy (spiu.example), approved by seed on 15 Sep 2026"
+    ]
+    assert policy_line["cites"][0]["text"]["ms"] == "Sumber: SPIU payment policy (spiu.example), diluluskan oleh seed pada 15 Sep 2026"
 
 
 @pytest.mark.parametrize(
@@ -209,7 +215,7 @@ def test_facts_never_come_from_the_document_being_checked(session: Session) -> N
     assert after == before
     assert not any("6217998820415530" in atom or "Lim Wei Jie" in atom for atom in after)
     assert {fact.source for fact in facts.collect(session, the_user(session))} == {
-        "Institution registry", "Your payment history", "SPIU payment policy", "Scam advisory",
+        "Institution registry", "Your payment history", "SPIU payment policy", "Scam advisory (sample)",
     }  # fmt: skip
 
 
@@ -333,7 +339,8 @@ def test_a_blocked_payment_carries_the_claims_that_count_and_the_reasoning(clien
         ("secrecy_request", "flagged"),
     ]
     assert [item["rule"] for item in check["reasoning"]] == ["R1", "R2", "R3", "R4", "R7"]
-    assert check["reasoning"][1]["lines"]["ms"][-1].startswith("Peraturan R2: ")
+    assert check["reasoning"][1]["lines"][-1]["text"]["ms"].startswith("Peraturan R2: ")
+    assert any(cite["title"] == "SPIU payment policy" for line in check["reasoning"][1]["lines"] for cite in line["cites"])
 
 
 def test_a_payment_with_nothing_wrong_carries_no_claim_check(client: TestClient) -> None:

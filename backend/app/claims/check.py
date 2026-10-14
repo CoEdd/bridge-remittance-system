@@ -3,15 +3,18 @@ The claim check, end to end: extract the claims (neural side), then judge them w
 rules against trusted facts (symbolic side), and keep the chain behind every conclusion.
 """
 
+from datetime import datetime
 from typing import Any
 
+from sqlalchemy import select
 from sqlalchemy.orm import Session
 
+from app import audit
 from app.claims import facts, words
 from app.claims.extract import Extraction, extract
 from app.claims.schema import Claim
 from app.documents.extract import Field
-from app.models import User
+from app.models import Document, User
 from app.rules import engine
 from app.rules.core_rules import CORE_RULES, SUPPORT_RULES, CoreRule
 from app.rules.engine import Derivation, Fact
@@ -30,20 +33,24 @@ def _short_names(trusted: list[Fact], grounded: list[Fact]) -> dict[int, str]:
     }
 
 
-def _reasoning(derivation: Derivation, claims: list[Claim], short: dict[int, str]) -> dict[str, list[str]]:
-    """The chain behind one conclusion, in plain words: what was said, what we know, which rule."""
-    lines: dict[str, list[str]] = {language: [] for language in words.LANGUAGES}
+def _reasoning(derivation: Derivation, claims: list[Claim], short: dict[int, str]) -> list[dict[str, Any]]:
+    """
+    The chain behind one conclusion, in plain words: what was said, what we know, which rule.
+    Every line that states a trusted fact carries the sources behind it.
+    """
+    lines: list[dict[str, Any]] = []
     for step in engine.chain(derivation):
-        sentences = [
-            words.says(claims[fact.ref], short.get(fact.ref)) if fact.kind == "claim" else words.from_source(fact)
+        entries = [
+            {"text": words.says(claims[fact.ref], short.get(fact.ref)), "cites": []}
+            if fact.kind == "claim"
+            else {"text": words.from_source(fact), "cites": [words.cite_json(cite) for cite in facts.cites(fact)]}
             for fact in step.used
             if fact.kind != "derived"
         ]
-        sentences.append(words.rule_line(step.rule.id, step.rule.text))
-        for sentence in sentences:
-            for language in words.LANGUAGES:
-                if sentence[language] not in lines[language]:
-                    lines[language].append(sentence[language])
+        entries.append({"text": words.rule_line(step.rule.id, step.rule.text), "cites": []})
+        for entry in entries:
+            if all(entry["text"]["en"] != line["text"]["en"] for line in lines):
+                lines.append(entry)
     return lines
 
 
@@ -112,10 +119,17 @@ def judge(claims: list[Claim], trusted: list[Fact], grounded: list[Fact]) -> dic
 
 
 def run_check(
-    session: Session, user: User, visible_text: str, fields: dict[str, Field], *, live: bool, client: Any = None
+    session: Session,
+    user: User,
+    visible_text: str,
+    fields: dict[str, Field],
+    *,
+    live: bool,
+    client: Any = None,
+    hints: str = "",
 ) -> dict[str, Any]:
     """Everything the claim check found in one document, ready to store with it."""
-    extraction: Extraction = extract(visible_text, fields, live=live, client=client)
+    extraction: Extraction = extract(visible_text, fields, live=live, client=client, hints=hints)
     result = judge(extraction.claims, facts.collect(session, user), facts.ground(extraction.claims, session))
     return {
         "origin": extraction.origin,
@@ -124,3 +138,41 @@ def run_check(
         "dropped": extraction.dropped,
         **result,
     }
+
+
+def rejudge(session: Session, now: datetime) -> None:
+    """
+    Judge every stored document again with today's trusted facts, after a rule-source item
+    was approved, rejected or edited. Symbolic side only: the claims stay as extracted. A
+    document whose conclusions change gets a new claims.checked audit entry.
+    """
+    documents = session.scalars(select(Document).order_by(Document.id))
+    for document in documents:
+        check = document.claim_check or {}
+        if "claims" not in check:
+            continue
+        user = session.get_one(User, document.user_id)
+        claims = [Claim(row["type"], dict(row["args"]), row["source"], row["start"], row["end"]) for row in check["claims"]]
+        result = judge(claims, facts.collect(session, user), facts.ground(claims, session))
+        before = [(item["rule"], item["raises"]) for item in check.get("conclusions") or []]
+        document.claim_check = {**check, **result}
+        after = [(item["rule"], item["raises"]) for item in result["conclusions"]]
+        if after != before:
+            audit.append(
+                session,
+                "claims.checked",
+                "system",
+                {
+                    "document_id": document.id,
+                    "origin": check.get("origin"),
+                    "model": check.get("model"),
+                    "claims": len(claims),
+                    "dropped": check.get("dropped", 0),
+                    "conclusions": [
+                        {"rule": item["rule"], "severity": item["severity"], "raises": item["raises"]}
+                        for item in result["conclusions"]
+                    ],
+                    "rechecked": True,
+                },
+                now=now,
+            )

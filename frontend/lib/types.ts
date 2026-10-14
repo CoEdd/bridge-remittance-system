@@ -272,10 +272,27 @@ export interface ClaimRow {
 }
 
 /** The chain behind one conclusion of the claim check, in plain words. */
+/** Where a trusted fact comes from, and who approved it. */
+export interface Cite {
+  title: string;
+  domain: string | null;
+  url: string | null;
+  reviewer: string | null;
+  approved_on: string | null;
+  /** "Source: SPIU payment policy (spiu.example), approved by seed on 15 Sep 2026", by language. */
+  text: Translations;
+}
+
+/** One line of a reasoning chain. A line that states a trusted fact cites its sources. */
+export interface ReasoningLine {
+  text: Translations;
+  cites: Cite[];
+}
+
 export interface ClaimReasoning {
   rule: string;
   title: Translations;
-  lines: Record<Language, string[]>;
+  lines: ReasoningLine[];
 }
 
 /** The neuro-symbolic claim check of one document. Empty when the document was never checked. */
@@ -289,7 +306,7 @@ export interface ClaimCheck {
     rule: string;
     severity: "block" | "warn";
     title: Translations;
-    reasoning: Record<Language, string[]>;
+    reasoning: ReasoningLine[];
   }[];
 }
 
@@ -581,3 +598,73 @@ export interface ClaimCheckOverview {
   } | null;
 }
 
+// ---------------------------------------------------------------- rule sources
+
+export type SourceItemStatus = "proposed" | "approved" | "rejected" | "needs_review";
+export type SourceItemPredicate = "official_account" | "official_channel" | "policy" | "known_scam_pattern";
+
+export interface RuleSource {
+  id: number;
+  /** url: fetched from the web; upload: a PDF someone added; bundled: shipped with Bridge. */
+  kind: "url" | "upload" | "bundled";
+  title: string;
+  url: string | null;
+  domain: string | null;
+  fetched_at: string;
+  /** Proposals the checks threw away. */
+  dropped: number;
+  counts: Record<SourceItemStatus, number>;
+}
+
+export interface SourceItem {
+  id: number;
+  source_id: number;
+  predicate: SourceItemPredicate;
+  label: string;
+  institution: string;
+  value: string;
+  /** The item in plain words. */
+  words: Translations;
+  description: string;
+  examples: string[];
+  /** The exact source sentence. */
+  sentence: string;
+  /** The page, scrolled to the sentence. */
+  link: string | null;
+  confidence: number | null;
+  model: string | null;
+  status: SourceItemStatus;
+  edited: boolean;
+  reviewer: string | null;
+  reviewed_at: string | null;
+}
+
+export interface RuleSourceDetail extends RuleSource {
+  items: SourceItem[];
+}
+
+export interface RuleSources {
+  /** Adding a source needs live mode. */
+  can_add: boolean;
+  note: string | null;
+  sources: RuleSource[];
+}
+
+export interface Choice {
+  name: string;
+  label: string;
+}
+
+export interface SourceVocabulary {
+  predicates: Choice[];
+  policies: Choice[];
+  patterns: Choice[];
+  institutions: string[];
+}
+
+export interface SourceItemEdit {
+  institution?: string;
+  value?: string;
+  description?: string;
+  examples?: string[];
+}

@@ -20,6 +20,12 @@ EVENT_LABELS = {
     "action.executed": "Executed",
     "action.refused": "Refused",
     "action.expired": "Expired",
+    "source.added": "Source added",
+    "source.fetched": "Source fetched",
+    "fact.proposed": "Item proposed",
+    "fact.approved": "Item approved",
+    "fact.rejected": "Item rejected",
+    "fact.edited": "Item edited",
 }
 
 TOOL_LABELS = {
@@ -92,6 +98,18 @@ def summarise(event_type: str, payload: Any) -> str:
         rules = [item["rule"] for item in payload.get("conclusions") or []]
         parts.append(f"{payload.get('claims')} claims")
         parts.append(", ".join(rules) if rules else "no rule fired")
+    if event_type == "source.added":
+        parts.append(str(payload.get("domain") or payload.get("title")))
+    if event_type == "source.fetched":
+        parts.append(f"Source #{payload.get('source_id')}")
+        parts.append("changed" if payload.get("changed") else "unchanged")
+    if event_type.startswith("fact.") and event_type != "fact.edited":
+        parts.append(f"Item #{payload.get('item_id')}")
+        parts.append(" ".join(str(part) for part in (payload.get("predicate"), payload.get("value")) if part))
+        if payload.get("reviewer"):
+            parts.append(f"by {payload['reviewer']}")
+    if event_type == "fact.edited":
+        parts.append(f"Item #{payload.get('item_id')}")
     if event_type == "agent.declined" and payload.get("reason"):
         parts.append(str(payload["reason"]))
     if "attempt" in payload:

@@ -367,6 +367,7 @@ def test_claude_is_sent_the_rules_the_facts_and_the_tools(session: Session, mala
         "under 80 words",
         "Never say that money moved",
         "only PROPOSE money actions",
+        "Do not decide on your own to skip the proposal",
         "untrusted data",
         "Never give investment advice",
         "channel the student already knows",

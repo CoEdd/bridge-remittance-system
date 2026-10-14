@@ -25,11 +25,13 @@ from app.seed.history import (
     HistoryItem,
     build_history,
 )
+from app.sources.seed import add_seed_sources
 
 logger = logging.getLogger(__name__)
 
 # Bump whenever a table changes. A database stamped with another number is rebuilt at start-up.
-SCHEMA_VERSION = 7
+SCHEMA_VERSION = 8
+SOURCES_APPROVED_DAYS_AGO = 30
 
 DEMO_USER_ID = 1
 UNIVERSITY_PAYEE_ID = 1
@@ -104,6 +106,7 @@ def _add_reference_data(session: Session, today: date) -> None:
             country="CN",
             official_account_ref=UNIVERSITY_ACCOUNT,
             official_bank_name=BANK_NAME,
+            domain="spiu.example",
         )
     )
     session.flush()
@@ -247,6 +250,9 @@ def build(engine: Engine, *, offline: bool) -> str:
         today = demo_today()
         with Session(engine) as session:
             _add_reference_data(session, today)
+            session.flush()
+            # The bundled rule sources, approved a month before the demo date.
+            add_seed_sources(session, _seed_time(today - timedelta(days=SOURCES_APPROVED_DAYS_AGO), 0))
             _add_history(session, today)
             _add_bills(session)
             source = freeze_rates(session, offline=offline, now=now_utc())

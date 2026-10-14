@@ -84,10 +84,10 @@ def _quoted(candidates: list[Claim], visible_text: str) -> tuple[list[Claim], in
     return kept, len(candidates) - len(kept)
 
 
-def ask_claude(visible_text: str, client: Any = None) -> list[Claim]:
-    """One request to Claude. Raises LlmUnavailable when it cannot be used."""
+def ask_claude(visible_text: str, client: Any = None, hints: str = "") -> list[Claim]:
+    """One request to Claude. `hints` adds approved scam patterns. Raises LlmUnavailable."""
     answer = complete_json(
-        system=SYSTEM,
+        system=f"{SYSTEM}\n\n{hints}" if hints else SYSTEM,
         user=f"<document>\n{visible_text}\n</document>",
         schema=EXTRACTION_SCHEMA,
         client=client,
@@ -166,11 +166,13 @@ def fallback_claims(visible_text: str, fields: dict[str, Field]) -> list[Claim]:
     return claims
 
 
-def extract(visible_text: str, fields: dict[str, Field], *, live: bool, client: Any = None) -> Extraction:
+def extract(
+    visible_text: str, fields: dict[str, Field], *, live: bool, client: Any = None, hints: str = ""
+) -> Extraction:
     """The claims of one document, from Claude (live), the demo cache or the regex extractor."""
     if live:
         try:
-            claims, dropped = _quoted(ask_claude(visible_text, client), visible_text)
+            claims, dropped = _quoted(ask_claude(visible_text, client, hints), visible_text)
             return Extraction(claims, "live", model=model_name(), dropped=dropped)
         except LlmUnavailable as error:
             logger.warning("Live claim extraction failed (%s); using the offline extractors.", error)

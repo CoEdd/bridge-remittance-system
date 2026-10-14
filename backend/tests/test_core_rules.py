@@ -1,5 +1,6 @@
 """The eight rules of the claim check, each with fixture claims and facts. No LLM anywhere."""
 
+from datetime import datetime, timezone
 from typing import Any
 
 import pytest
@@ -9,17 +10,19 @@ from app.claims.check import judge
 from app.claims.schema import CLAIM_TYPES, Claim
 from app.rules.core_rules import CORE_RULES, RULES_BY_ID
 from app.rules.engine import Fact, check_rules
+from app.sources.vocabulary import Citation
 
 SPIU = "Shenzhen Polytechnic International University"
 OFFICIAL, OTHER = "4100202600008815", "6217998820415530"
 LANDLORD, RENT_ACCOUNT = "Lingnan Student Housing", "3300118820260042"
 
+POLICY = Citation("SPIU payment policy", "spiu.example", None, "seed", datetime(2026, 9, 15, 4, tzinfo=timezone.utc))
 FACTS = [
     Fact(("registered_institution", SPIU), "trusted", "Institution registry"),
     Fact(("official_account", SPIU, OFFICIAL), "trusted", "Institution registry"),
     Fact(("paid_before", SPIU, OFFICIAL), "trusted", "Your payment history"),
     Fact(("paid_before", LANDLORD, RENT_ACCOUNT), "trusted", "Your payment history"),
-    Fact(("policy", SPIU, "no_payment_agents"), "trusted", "SPIU payment policy"),
+    Fact(("policy", SPIU, "no_payment_agents"), "trusted", "SPIU payment policy", ref=(POLICY,)),
     Fact(("policy", SPIU, "no_third_party_discounts"), "trusted", "SPIU payment policy"),
     Fact(("policy", SPIU, "never_threatens_visa"), "trusted", "SPIU payment policy"),
     Fact(("known_scam_pattern", "third_party_fee_discount"), "trusted", "Scam advisory"),
@@ -177,20 +180,28 @@ def test_a_claim_that_matches_a_trusted_fact_is_supported() -> None:
 def test_the_reasoning_chain_reads_in_plain_words() -> None:
     result = check(("agent_of_institution", SPIU))
 
-    assert result["conclusions"][0]["reasoning"]["en"] == [
+    lines = result["conclusions"][0]["reasoning"]
+    assert [line["text"]["en"] for line in lines] == [
         f"The message says: Says it acts for SPIU (“{SPIU}”).",
-        "SPIU's policy says it does not use payment agents (source: SPIU payment policy).",
+        "SPIU's policy says it does not use payment agents.",
         "Rule R2: An agent claim contradicted by the institution's own policy blocks the payment.",
     ]
-    assert result["conclusions"][0]["reasoning"]["ms"][2].startswith("Peraturan R2: ")
-    assert result["conclusions"][0]["reasoning"]["zh"][2].startswith("规则 R2：")
+    # Only the fact line has a source; the claim quotes the message, the rule is ours.
+    assert [[cite["text"]["en"] for cite in line["cites"]] for line in lines] == [
+        [],
+        ["Source: SPIU payment policy (spiu.example), approved by seed on 15 Sep 2026"],
+        [],
+    ]
+    assert lines[1]["cites"][0]["text"]["zh"] == "来源：SPIU payment policy (spiu.example)，由 seed 于 15 Sep 2026 批准"
+    assert lines[2]["text"]["ms"].startswith("Peraturan R2: ")
+    assert lines[2]["text"]["zh"].startswith("规则 R2：")
 
 
 def test_a_chained_conclusion_shows_the_step_it_rests_on() -> None:
     result = check(("deadline_pressure", "today only"), ("represents_institution", SPIU), ("payee_account", OTHER))
 
     r7 = next(item for item in result["conclusions"] if item["rule"] == "R7")
-    lines = r7["reasoning"]["en"]
+    lines = [line["text"]["en"] for line in r7["reasoning"]]
     assert [line.split(":")[0] for line in lines if line.startswith("Rule")] == ["Rule R1", "Rule R7"]
     assert lines[-1] == f"Rule R7: {RULES_BY_ID['R7'].text['en']}"
     assert any("Pressure to pay fast" in line for line in lines)

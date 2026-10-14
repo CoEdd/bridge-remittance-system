@@ -411,3 +411,77 @@ class ClaimCheckOverviewOut(BaseModel):
     # The latest results of `make eval-claims`, or None when it has not been run.
     evaluation: dict[str, Any] | None
 
+
+# ---------------------------------------------------------------- rule sources
+
+
+class SourceCounts(BaseModel):
+    proposed: int = 0
+    approved: int = 0
+    rejected: int = 0
+    needs_review: int = 0
+
+
+class SourceOut(BaseModel):
+    id: int
+    kind: Literal["url", "upload", "bundled"]
+    title: str
+    url: str | None
+    domain: str | None
+    fetched_at: datetime
+    dropped: int  # proposals the checks threw away
+    counts: SourceCounts
+
+
+class SourceItemOut(BaseModel):
+    id: int
+    source_id: int
+    predicate: Literal["official_account", "official_channel", "policy", "known_scam_pattern"]
+    label: str  # "Scam pattern", "Institution policy", ...
+    institution: str
+    value: str
+    words: dict[str, str]  # the item in plain words, by language
+    description: str
+    examples: list[str]
+    sentence: str
+    link: str | None  # the page, scrolled to the sentence where the browser supports it
+    confidence: float | None
+    model: str | None
+    status: Literal["proposed", "approved", "rejected", "needs_review"]
+    edited: bool
+    reviewer: str | None
+    reviewed_at: datetime | None
+
+
+class SourceDetailOut(SourceOut):
+    items: list[SourceItemOut]
+
+
+class SourcesOut(BaseModel):
+    can_add: bool  # adding needs live mode
+    note: str | None
+    sources: list[SourceOut]
+
+
+class SourceIn(BaseModel):
+    url: str = Field(min_length=8, max_length=2000)
+
+
+class SourceItemEdit(BaseModel):
+    institution: str | None = None
+    value: str | None = None
+    description: str | None = None
+    examples: list[str] | None = None
+
+
+class Choice(BaseModel):
+    name: str
+    label: str
+
+
+class VocabularyOut(BaseModel):
+    predicates: list[Choice]
+    policies: list[Choice]
+    patterns: list[Choice]
+    institutions: list[str]
+

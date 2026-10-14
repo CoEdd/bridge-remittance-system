@@ -7,13 +7,14 @@ clause of the institution's own policy, found by cross-language retrieval.
 """
 
 import re
-from collections.abc import Callable
+from collections.abc import Callable, Sequence
 from typing import Any
 
 from app.documents.concepts import CONCEPTS, NEGATION
 from app.documents.extract import Field, digits_of
 from app.documents.index import Hit, knowledge_passages
 from app.models import Institution, Payee
+from app.sources import ApprovedPattern
 
 Search = Callable[[str, int, str | None], list[Hit]]
 
@@ -39,8 +40,12 @@ def assess(
     institutions: list[Institution],
     payees: list[Payee],
     search: Search,
+    patterns: Sequence[ApprovedPattern] = (),
 ) -> list[dict[str, Any]]:
-    """Every risk signal the document carries, each with its evidence."""
+    """
+    Every risk signal the document carries, each with its evidence. `patterns` are the
+    approved scam patterns from rule sources; their example phrases count like the fixed words.
+    """
     signals: list[dict[str, Any]] = []
     payee_name = fields.get("payee_name")
     account = fields.get("payee_account")
@@ -124,6 +129,20 @@ def assess(
             if found and not (category in _NEGATABLE and NEGATION.search(sentence.replace(found.group(0), ""))):
                 matches.append({"category": category, "text": found.group(0), "sentence": sentence})
                 break
+    for pattern in patterns:
+        hit = next(
+            (
+                (example, sentence)
+                for example in pattern.examples
+                for sentence in sentences
+                if example.casefold() in sentence.casefold()
+                and not NEGATION.search(sentence.casefold().replace(example.casefold(), ""))
+                and all(match["sentence"] != sentence for match in matches)
+            ),
+            None,
+        )
+        if hit:
+            matches.append({"category": pattern.name, "text": hit[0], "sentence": hit[1], "source": pattern.title})
     if matches:
         signals.append(
             {

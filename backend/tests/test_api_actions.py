@@ -125,7 +125,7 @@ def test_a_fresh_audit_log_shows_genesis_and_reset_newest_first(client: TestClie
     page = client.get("/audit").json()
 
     assert (page["total"], page["page"], page["page_size"]) == (2, 1, 50)
-    assert len(page["event_types"]) == 15
+    assert len(page["event_types"]) == 21
     assert page["event_types"][0] == {"code": "system.genesis", "label": "Log started"}
     newest, oldest = page["entries"]
     assert (newest["seq"], newest["event_type"], newest["label"], newest["actor"]) == (2, "system.reset", "Demo reset", "system")

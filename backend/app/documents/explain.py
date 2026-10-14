@@ -48,6 +48,16 @@ _SCAM_WORDS = {
     "threat": {"ms": "ugutan", "en": "threats", "zh": "威胁恐吓"},
     "secrecy": {"ms": "permintaan supaya dirahsiakan", "en": "a request for secrecy", "zh": "要求保密"},
 }
+# Approved scam patterns from rule sources, when their example phrases match.
+_SCAM_WORDS |= {
+    "deadline_pressure": _SCAM_WORDS["urgency"],
+    "secrecy_request": _SCAM_WORDS["secrecy"],
+    "third_party_fee_discount": {"ms": "diskaun untuk membayar pihak ketiga", "en": "a discount for paying a third party", "zh": "向第三方付款可享折扣"},
+    "visa_threat": {"ms": "ugutan visa", "en": "a visa threat", "zh": "签证威胁"},
+    "personal_account_request": {"ms": "bayaran ke akaun peribadi", "en": "payment into a personal account", "zh": "付款到个人账户"},
+    "changed_account_details": {"ms": "akaun yang bertukar", "en": "a changed account", "zh": "账户变更"},
+    "money_mule_forwarding": {"ms": "memindahkan wang bagi orang asing", "en": "forwarding money for a stranger", "zh": "替陌生人转账"},
+}
 
 
 def format_date(value: date, language: str) -> str:
@@ -221,7 +231,7 @@ def _sentences(
 
     scam = signals.get("SCAM_PATTERN")
     if scam:
-        signs = _join([_SCAM_WORDS[category][language] for category in scam["categories"]], language)
+        signs = _join(list(dict.fromkeys(_SCAM_WORDS[category][language] for category in scam["categories"])), language)
         say(f"Tanda amaran: {signs}.", f"Warning signs: {signs}.", f"危险信号：{signs}。")
 
     if signals or untrusted:

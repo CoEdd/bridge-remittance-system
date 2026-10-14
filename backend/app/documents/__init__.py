@@ -16,7 +16,7 @@ from typing import Any
 from sqlalchemy import select
 from sqlalchemy.orm import Session
 
-from app import audit
+from app import audit, sources
 from app.clock import now_utc
 from app.config import effective_agent_mode
 from app.db import write_lock
@@ -260,7 +260,8 @@ def ingest(
 
         # Risk rules read verified fields only: an unverified value proves nothing either way.
         verified = {name: field for name, field in fields.items() if field.verified}
-        signals = risk.assess(visible, verified, institutions, payees, passages.search)
+        patterns = sources.approved_patterns(session)  # approved in Rule sources; none in the seed
+        signals = risk.assess(visible, verified, institutions, payees, passages.search, patterns)
         account_status = _account_status(fields, institutions, payees)
         bill = _create_bill(session, user, document, fields, payees, now)
         document.risk_signals = [
@@ -270,7 +271,13 @@ def ingest(
         # The neuro-symbolic claim check: an extra layer beside the risk signals above. Its
         # facts are read before this document's own payee is counted (it was never paid).
         check = run_check(
-            session, user, visible, verified, live=live if claims_live is None else claims_live, client=llm_client
+            session,
+            user,
+            visible,
+            verified,
+            live=live if claims_live is None else claims_live,
+            client=llm_client,
+            hints=sources.pattern_hints(patterns),
         )
         document.claim_check = check
         explanation = _explain(

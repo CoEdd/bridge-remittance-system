@@ -27,6 +27,9 @@ ACTION_STATUSES = (
     "expired",
 )
 AUDIT_ACTORS = ("agent", "policy", "user", "system")
+SOURCE_KINDS = ("url", "upload", "bundled")
+ITEM_PREDICATES = ("official_account", "official_channel", "policy", "known_scam_pattern")
+ITEM_STATUSES = ("proposed", "approved", "rejected", "needs_review")
 CHAT_ROLES = ("user", "assistant")
 
 
@@ -104,6 +107,7 @@ class Institution(Base):
     country: Mapped[str]
     official_account_ref: Mapped[str]
     official_bank_name: Mapped[str]
+    domain: Mapped[str] = mapped_column(default="")  # its web domain: only pages there may state facts about it
 
 
 class Payee(Base):
@@ -254,3 +258,47 @@ class ChatMessage(Base):
     # so the conversation can be shown again exactly as it happened.
     events: Mapped[Any] = mapped_column(JSON, default=list)
     created_at: Mapped[datetime] = mapped_column(UtcDateTime)
+
+
+class Source(Base):
+    """A published page or file that rule items come from. Only the supporting sentences are kept."""
+
+    __tablename__ = "sources"
+    __table_args__ = (one_of("kind", SOURCE_KINDS),)
+
+    id: Mapped[int] = mapped_column(primary_key=True)
+    kind: Mapped[str]  # url (fetched), upload (a PDF someone added) or bundled (a file shipped with Bridge)
+    title: Mapped[str]
+    url: Mapped[str | None]
+    domain: Mapped[str | None]
+    fetched_at: Mapped[datetime] = mapped_column(UtcDateTime)
+    content_hash: Mapped[str]  # of the readable text, so a re-fetch can tell when the page changed
+    dropped: Mapped[int] = mapped_column(default=0)  # proposals thrown away by the checks
+    created_at: Mapped[datetime] = mapped_column(UtcDateTime)
+
+    items: Mapped[list["SourceItem"]] = relationship(back_populates="source", order_by="SourceItem.id")
+
+
+class SourceItem(Base):
+    """One fact or scam pattern from a source, in the fixed vocabulary. Active only when approved."""
+
+    __tablename__ = "source_items"
+    __table_args__ = (one_of("predicate", ITEM_PREDICATES), one_of("status", ITEM_STATUSES))
+
+    id: Mapped[int] = mapped_column(primary_key=True)
+    source_id: Mapped[int] = mapped_column(ForeignKey("sources.id"))
+    predicate: Mapped[str]
+    institution: Mapped[str]  # registered institution name; empty for a scam pattern
+    value: Mapped[str]  # the account, the channel, the policy name or the pattern name
+    description: Mapped[str] = mapped_column(default="")
+    examples: Mapped[Any] = mapped_column(JSON, default=list)
+    sentence: Mapped[str] = mapped_column(Text)  # the exact source sentence
+    confidence: Mapped[float | None]  # Claude's own estimate; not money
+    model: Mapped[str | None]  # who proposed it: a model name, or None for the seed
+    status: Mapped[str]
+    edited: Mapped[bool] = mapped_column(default=False)
+    reviewer: Mapped[str | None]
+    reviewed_at: Mapped[datetime | None] = mapped_column(UtcDateTime)
+    created_at: Mapped[datetime] = mapped_column(UtcDateTime)
+
+    source: Mapped[Source] = relationship(back_populates="items")

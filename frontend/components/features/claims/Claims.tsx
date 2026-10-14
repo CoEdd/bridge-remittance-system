@@ -1,6 +1,6 @@
 import { BadgeCheck, CircleHelp, CircleX, TriangleAlert, type LucideIcon } from "lucide-react";
 import { Badge, type BadgeTone } from "@/components/ui/Badge";
-import type { ClaimCheck, ClaimReasoning, ClaimRow, ClaimStatus, Language } from "@/lib/types";
+import type { Cite, ClaimCheck, ClaimReasoning, ClaimRow, ClaimStatus, Language } from "@/lib/types";
 
 const STATUS: Record<ClaimStatus, { label: string; tone: BadgeTone; icon: LucideIcon }> = {
   supported: { label: "Supported", tone: "success", icon: BadgeCheck },
@@ -82,6 +82,27 @@ export function ClaimTable({ claims, shown }: { claims: ClaimRow[]; shown: Langu
   );
 }
 
+/** Under a fact: where it comes from and who approved it, linked to the page when there is one. */
+function Source({ cite, shown }: { cite: Cite; shown: Language }) {
+  return (
+    <span className="mt-0.5 mb-1 block border-l-2 border-line pl-2 text-muted">
+      {cite.url ? (
+        <a
+          href={cite.url}
+          target="_blank"
+          rel="noreferrer"
+          className="rounded-sm underline decoration-line underline-offset-2 hover:text-teal"
+        >
+          {cite.text[shown]}
+          <span className="sr-only"> (opens in a new tab)</span>
+        </a>
+      ) : (
+        cite.text[shown]
+      )}
+    </span>
+  );
+}
+
 /** "Show reasoning": the chain behind each conclusion, in plain words. */
 export function Reasoning({ items, shown }: { items: ClaimReasoning[]; shown: Language }) {
   if (items.length === 0) return null;
@@ -94,9 +115,12 @@ export function Reasoning({ items, shown }: { items: ClaimReasoning[]; shown: La
             <span className="font-medium text-ink">
               {item.rule} · {item.title[shown]}
             </span>
-            {item.lines[shown].map((line) => (
-              <span key={line} className="block">
-                {line}
+            {item.lines.map((line) => (
+              <span key={line.text.en} className="block">
+                {line.text[shown]}
+                {line.cites.map((cite) => (
+                  <Source key={cite.text.en} cite={cite} shown={shown} />
+                ))}
               </span>
             ))}
           </li>

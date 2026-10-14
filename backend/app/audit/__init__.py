@@ -40,6 +40,12 @@ EVENT_TYPES = (
     "action.executed",
     "action.refused",
     "action.expired",
+    "source.added",
+    "source.fetched",
+    "fact.proposed",
+    "fact.approved",
+    "fact.rejected",
+    "fact.edited",
 )
 
 

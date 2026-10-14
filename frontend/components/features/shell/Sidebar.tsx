@@ -2,6 +2,7 @@
 
 import clsx from "clsx";
 import {
+  BookCheck,
   FileText,
   House,
   MessageSquare,
@@ -18,6 +19,7 @@ const NAV_ITEMS: { href: string; label: string; icon: LucideIcon }[] = [
   { href: "/assistant", label: "Assistant", icon: MessageSquare },
   { href: "/documents", label: "Documents", icon: FileText },
   { href: "/payees", label: "Payees", icon: Users },
+  { href: "/sources", label: "Rule sources", icon: BookCheck },
   { href: "/audit", label: "Audit log", icon: ScrollText },
   { href: "/security", label: "Security", icon: ShieldCheck },
 ];

@@ -92,13 +92,13 @@ def test_append_refuses_unknown_event_types_and_actors(session: Session) -> None
         audit.append(session, "system.genesis", "system", {})  # only the first entry may be the genesis
 
 
-def test_all_fifteen_event_types_are_accepted(session: Session) -> None:
-    assert len(audit.EVENT_TYPES) == 15
+def test_all_twenty_one_event_types_are_accepted(session: Session) -> None:
+    assert len(audit.EVENT_TYPES) == 21
     for event_type in audit.EVENT_TYPES[1:]:
         audit.append(session, event_type, "system", {"event": event_type}, now=NOW)
     session.commit()
 
-    assert audit.verify(session) == {"ok": True, "entries": 16}
+    assert audit.verify(session) == {"ok": True, "entries": 22}
 
 
 def test_verify_reports_an_intact_chain(session: Session) -> None:

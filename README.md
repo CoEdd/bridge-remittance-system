@@ -33,6 +33,28 @@ header of the app says which mode is on.
 The app starts in English. Bahasa Melayu and Chinese are in the header; a switch applies
 from Bridge's next answer on, and `make reset` goes back to English.
 
+## Who sets the rules
+
+- **The eight rules** are written by people and tested (`backend/app/rules/core_rules.py`).
+- **The facts they use** come from published sources (page **Rule sources**,
+  `backend/app/sources/`). In live mode a person adds a page or a PDF; Bridge fetches only
+  that page (robots.txt obeyed, at most 3 redirects, 2 MB, HTML or PDF). Claude proposes
+  items from a fixed vocabulary (`official_account`, `official_channel`, `policy`,
+  `known_scam_pattern`), each with the exact sentence it rests on. Plain code drops any item
+  whose sentence is not in the page word for word, any item outside the vocabulary, and any
+  fact about an institution from a site that is not its own.
+- **Nothing is active until a person approves it.** Approve, Reject and Edit (within the
+  vocabulary) are logged in the audit chain. If a page changes when it is checked again, its
+  items wait for review again.
+- **Every fact in a verdict says where it comes from**, for example "Source: SPIU payment
+  policy (spiu.example), approved by seed on 15 Sep 2026", with a link to the page.
+
+The two bundled sources (SPIU's policy and a sample scam advisory, both fictional) were
+written by us, pass the same checks and are stored as approved by "seed". Public warnings
+from real universities, such as UTS and the University of Sussex, count only as evidence of
+scam patterns, never as facts about SPIU. There is no login, so approvals are recorded as
+"Demo reviewer".
+
 ## Neuro-symbolic claim check
 
 What it does: an LLM turns a message, in any wording and language, into a fixed set of
@@ -44,7 +66,7 @@ and rules behind it. It can only add caution: it never approves a payment.
   Every claim must quote the exact text it came from; a claim whose quote is not in the
   document is dropped.
 - **Symbolic side** (`backend/app/claims/facts.py`, `backend/app/rules/`): trusted facts
-  (institution registry, the student's payment history, the institution's policy) and a
+  (institution registry, the student's payment history, approved rule-source items) and a
   small rule engine running eight rules written as data.
 
 **Measured result** (`docs/claim-check-eval.md`, test set of 25 messages in English, Malay
