@@ -3,6 +3,7 @@
 import os
 import threading
 from collections.abc import Iterator
+from contextlib import contextmanager
 from datetime import datetime, timezone
 from functools import lru_cache
 from typing import Any
@@ -23,6 +24,53 @@ class Base(DeclarativeBase):
 # under this lock, so the hash chain and the balances can never be updated by two
 # threads at once (request handlers and the background sweep share one process).
 write_lock = threading.RLock()
+
+
+class ResetGate:
+    """
+    A demo reset drops and rebuilds every table. Requests read inside `reading()`; a reset
+    waits for the requests already running and holds new ones back until it is done, so no
+    request ever sees the tables half built. The requests held back go first after a reset,
+    so a second reset cannot keep them waiting.
+    """
+
+    def __init__(self) -> None:
+        self._changed = threading.Condition()
+        self._readers = 0
+        self._held = 0  # requests waiting for a reset to finish
+        self._resetting = False
+
+    @contextmanager
+    def reading(self) -> Iterator[None]:
+        with self._changed:
+            if self._resetting:
+                self._held += 1
+                self._changed.wait_for(lambda: not self._resetting)
+                self._held -= 1
+                self._changed.notify_all()
+            self._readers += 1
+        try:
+            yield
+        finally:
+            with self._changed:
+                self._readers -= 1
+                self._changed.notify_all()
+
+    @contextmanager
+    def resetting(self) -> Iterator[None]:
+        with self._changed:
+            self._changed.wait_for(lambda: not self._resetting and self._held == 0)
+            self._resetting = True
+            self._changed.wait_for(lambda: self._readers == 0)
+        try:
+            yield
+        finally:
+            with self._changed:
+                self._resetting = False
+                self._changed.notify_all()
+
+
+reset_gate = ResetGate()
 
 
 class UtcDateTime(TypeDecorator[datetime]):
@@ -65,6 +113,6 @@ def get_engine() -> Engine:
 
 
 def get_session() -> Iterator[Session]:
-    """FastAPI dependency: one database session per request."""
-    with Session(get_engine()) as session:
+    """FastAPI dependency: one database session per request, never during a demo reset."""
+    with reset_gate.reading(), Session(get_engine()) as session:
         yield session

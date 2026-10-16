@@ -11,6 +11,7 @@ import {
   ShieldCheck,
 } from "lucide-react";
 import { useCallback, useEffect, useId, useState } from "react";
+import { useDemoCommands } from "@/lib/demo";
 import { AuditTable } from "@/components/features/audit/AuditTable";
 import { EntrySheet } from "@/components/features/audit/EntrySheet";
 import { Loadable } from "@/components/features/home/Loadable";
@@ -122,6 +123,15 @@ export function AuditLog({ initialEntry = null }: { initialEntry?: number | null
     }
   }
 
+  // The demo bar's "Audit proof" step: the chain is intact, then a changed copy shows where it breaks.
+  useDemoCommands({
+    "audit:proof": async () => {
+      await verify();
+      await new Promise((resolve) => setTimeout(resolve, 1200)); // time to read "intact"
+      await simulate();
+    },
+  });
+
   async function simulate() {
     setSimulating(true);
     try {
@@ -165,7 +175,9 @@ export function AuditLog({ initialEntry = null }: { initialEntry?: number | null
       </Card>
 
       {simulation ? (
-        <Simulation result={simulation} onBack={() => setSimulation(null)} onOpen={setOpened} />
+        <div data-demo="tamper">
+          <Simulation result={simulation} onBack={() => setSimulation(null)} onOpen={setOpened} />
+        </div>
       ) : (
         <Card>
           <Loadable

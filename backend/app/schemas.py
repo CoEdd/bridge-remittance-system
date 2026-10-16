@@ -148,6 +148,22 @@ class ResetOut(BaseModel):
     fx_source: FxSource
 
 
+DemoStepKey = Literal["upload", "verify", "plan", "pay", "agent", "mule", "audit", "redteam", "sources"]
+
+
+class DemoStepOut(BaseModel):
+    key: DemoStepKey
+    done: bool
+
+
+class DemoStateOut(BaseModel):
+    """How far the demo has come, for the presenter's demo bar. Read from the app's own state."""
+
+    steps: list[DemoStepOut]
+    invoice_document_id: int | None  # the tuition invoice, once it has been taken in
+    pending_plan_id: str | None  # a plan waiting for approval
+
+
 class ReasonOut(BaseModel):
     code: str
     severity: Literal["info", "warn", "block"]

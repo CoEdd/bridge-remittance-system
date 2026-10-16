@@ -5,7 +5,7 @@ from urllib.parse import quote
 from fastapi import APIRouter, HTTPException, UploadFile
 from sqlalchemy import select
 
-from app import sources
+from app import demo_progress, sources
 from app.claims.words import item_words
 from app.config import effective_agent_mode
 from app.models import Institution, Source, SourceItem
@@ -93,6 +93,7 @@ def _fail(error: SourceError) -> HTTPException:
 
 @router.get("/sources")
 def list_sources(session: SessionDep) -> SourcesOut:
+    demo_progress.mark("sources_viewed")
     live = effective_agent_mode() == "live"
     return SourcesOut(
         can_add=live,

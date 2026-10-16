@@ -1,7 +1,7 @@
 "use client";
 
 import { BadgeCheck, CircleHelp, Languages, ShieldAlert, TriangleAlert } from "lucide-react";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { FIELD_LABELS, KIND_LABELS, STATUS, languageList } from "@/components/features/documents/labels";
 import { ClaimTable, ORIGINS, Reasoning } from "@/components/features/claims/Claims";
 import { PolicyQuote } from "@/components/features/documents/PolicyQuote";
@@ -9,6 +9,7 @@ import { SourceText } from "@/components/features/documents/SourceText";
 import { Badge } from "@/components/ui/Badge";
 import { Button } from "@/components/ui/Button";
 import { Card } from "@/components/ui/Card";
+import { useGlosses } from "@/lib/demo";
 import { formatAmount, formatDate } from "@/lib/format";
 import { LANGUAGE_NAMES, useLanguage } from "@/lib/language";
 import type { Currency, DocumentDetail, DocumentField, Language, RiskSignal } from "@/lib/types";
@@ -117,7 +118,9 @@ function FieldList({
 /** Everything Bridge read from one document: the text, the fields, the risks and the explanation. */
 export function DocumentView({ document }: { document: DocumentDetail }) {
   const { language } = useLanguage();
-  const [showEnglish, setShowEnglish] = useState(false);
+  const glosses = useGlosses();
+  const [showEnglish, setShowEnglish] = useState(glosses);
+  useEffect(() => setShowEnglish(glosses), [glosses]); // the presenter's G key
   const [active, setActive] = useState<DocumentField | null>(null);
 
   const shown: Language = showEnglish ? "en" : (language ?? "en");
@@ -198,13 +201,15 @@ export function DocumentView({ document }: { document: DocumentDetail }) {
           />
         </Card>
         <div className="flex flex-col gap-6">
-          <Card title="Extracted fields">
-            {document.fields.length === 0 ? (
-              <p className="text-15 text-body">No payment details were found.</p>
-            ) : (
-              <FieldList fields={document.fields} onActive={setActive} />
-            )}
-          </Card>
+          <div data-demo="fields" className="rounded-card">
+            <Card title="Extracted fields">
+              {document.fields.length === 0 ? (
+                <p className="text-15 text-body">No payment details were found.</p>
+              ) : (
+                <FieldList fields={document.fields} onActive={setActive} />
+              )}
+            </Card>
+          </div>
           <Card>
             <div className="mb-2 flex items-center justify-between gap-4">
               <h2 className="font-heading text-18 font-semibold text-ink">Explanation</h2>

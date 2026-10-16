@@ -6,7 +6,7 @@ from fastapi import APIRouter, HTTPException, UploadFile
 from sqlalchemy import select
 from sqlalchemy.orm import Session
 
-from app import documents
+from app import demo_progress, documents
 from app.clock import demo_today
 from app.documents.extract import FIELD_NAMES
 from app.documents.reader import ReadResult, UnreadableDocument, read_image, read_message, read_pdf
@@ -140,12 +140,19 @@ def list_demo_documents() -> list[DemoDocumentOut]:
 
 
 @router.post("/demo/documents/{key}")
-def ingest_demo_document(key: str, session: SessionDep, user: UserDep) -> DocumentOut:
-    """Ingest a bundled demo document exactly as if it had been uploaded or pasted."""
+def ingest_demo_document(key: str, session: SessionDep, user: UserDep, pasted: bool = False) -> DocumentOut:
+    """
+    Ingest a bundled demo document exactly as if it had been uploaded. With `pasted=true` a
+    message is taken in exactly as if its text had been pasted (the presenter's demo bar).
+    """
     demo = DEMO_DOCUMENTS.get(key)
     if demo is None:
         raise HTTPException(status_code=404, detail="There is no such demo document.")
     data = (demo_docs_dir() / demo.filename).read_bytes()
+    if pasted:
+        if demo.kind != "message":
+            raise HTTPException(status_code=422, detail="Only a message can be pasted.")
+        return _ingest(session, user, "Pasted message", "message", read_message(data.decode("utf-8")), "paste")
     read = read_pdf(data) if demo.filename.endswith(".pdf") else read_message(data.decode("utf-8"))
     return _ingest(session, user, demo.filename, demo.kind, read, "demo bundle")
 
@@ -163,6 +170,8 @@ def get_document(document_id: int, session: SessionDep, user: UserDep) -> Docume
     document = session.get(Document, document_id)
     if document is None or document.user_id != user.id:
         raise HTTPException(status_code=404, detail="There is no such document.")
+    if document.kind == "invoice":
+        demo_progress.mark("invoice_viewed")  # the demo's "read and verify" step
     return document_out(session, document)
 
 

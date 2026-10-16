@@ -14,7 +14,10 @@ export function DocumentCard({ step }: { step: StepEvent }) {
   const total = verified + (Array.isArray(details.unverified_fields) ? details.unverified_fields.length : 0);
 
   return (
-    <div className="flex items-center gap-3 rounded-card border border-line bg-surface px-4 py-2 motion-safe:animate-step-in">
+    <div
+      data-demo="document"
+      className="flex items-center gap-3 rounded-card border border-line bg-surface px-4 py-2 motion-safe:animate-step-in"
+    >
       <FileText aria-hidden className="size-5 shrink-0 text-muted" strokeWidth={1.75} />
       <span className="min-w-0 flex-1 truncate text-15 font-medium text-ink">{String(details.filename)}</span>
       <span className="text-13 whitespace-nowrap text-muted">

@@ -1,11 +1,11 @@
 "use client";
 
-import { useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { ApprovalSheet } from "@/components/features/assistant/ApprovalSheet";
 import { Composer } from "@/components/features/assistant/Composer";
 import { ContextPanel } from "@/components/features/assistant/ContextPanel";
 import { Conversation } from "@/components/features/assistant/Conversation";
-import { suggestNext, type Suggestion } from "@/components/features/assistant/model";
+import { QUESTIONS, suggestNext, type Suggestion } from "@/components/features/assistant/model";
 import { SuggestedNext } from "@/components/features/assistant/SuggestedNext";
 import { useAssistant } from "@/components/features/assistant/useAssistant";
 import { PasteSheet } from "@/components/features/documents/PasteSheet";
@@ -14,12 +14,29 @@ import { Card } from "@/components/ui/Card";
 import { ErrorState } from "@/components/ui/ErrorState";
 import { Skeleton } from "@/components/ui/Skeleton";
 import { api } from "@/lib/api";
+import { useDemoCommands } from "@/lib/demo";
 import { useLanguage } from "@/lib/language";
 
+type Question = keyof typeof QUESTIONS;
+
+/** Resolves once Bridge has finished: nothing working for a moment. */
+async function untilIdle(busy: { current: boolean }, timeoutMs = 30000): Promise<void> {
+  const started = Date.now();
+  let quietSince = 0;
+  for (;;) {
+    await new Promise((resolve) => setTimeout(resolve, 100));
+    if (busy.current) quietSince = 0;
+    else if (quietSince === 0) quietSince = Date.now();
+    else if (Date.now() - quietSince >= 300) return;
+    if (Date.now() - started > timeoutMs) throw new Error("Bridge took too long to answer.");
+  }
+}
+
 // Three columns from 1400px wide; below that the suggestions sit in a row above the conversation.
-// The height is the window minus the header (6rem and its 1px border) and the page padding (4rem).
+// The height is the window minus the header (6rem and its 1px border), the demo bar when it shows
+// (--demo-bar, set by the bar) and the page padding (4rem).
 const LAYOUT =
-  "grid h-[calc(100vh-10rem-1px)] min-h-[480px] gap-x-6 gap-y-4 " +
+  "grid h-[calc(100vh_-_10rem_-_1px_-_var(--demo-bar,0px))] min-h-[480px] gap-x-6 gap-y-4 " +
   "grid-cols-[minmax(0,1fr)_320px] grid-rows-[auto_minmax(0,1fr)] [grid-template-areas:'next_context'_'chat_context'] " +
   "min-[1400px]:grid-cols-[260px_minmax(0,1fr)_360px] min-[1400px]:grid-rows-[minmax(0,1fr)] min-[1400px]:[grid-template-areas:'next_chat_context']";
 
@@ -31,6 +48,36 @@ export function Assistant() {
   const [pasting, setPasting] = useState(false);
   const [readingPaste, setReadingPaste] = useState(false);
   const { initial, loaded, live, working } = assistant;
+  const busy = useRef(false);
+  useEffect(() => {
+    busy.current = working !== null || assistant.turns.some((turn) => turn.state === "streaming");
+  });
+
+  // What the presenter's demo bar can do here, once the screen has loaded. The questions are
+  // asked in the header language, the same words as the chips.
+  const ready = loaded !== null && live !== null && language !== null;
+  useDemoCommands(
+    ready
+      ? {
+          "assistant:share": async (key) => void (await assistant.share(() => api.ingestDemoDocument(key ?? ""))),
+          "assistant:paste": async (key) => void (await assistant.share(() => api.ingestDemoDocument(key ?? "", true))),
+          "assistant:stranger": async () =>
+            void (await assistant.share(async () => (await api.strangerTransfer()).document)),
+          "assistant:ask": (question) => assistant.ask(QUESTIONS[question as Question][language]),
+          "assistant:idle": () => untilIdle(busy),
+          "assistant:openPlan": (planId) => {
+            const waiting = live.actions.find((action) => action.status === "awaiting_confirm" || action.status === "awaiting_otp");
+            assistant.setOpenPlan(planId ?? waiting?.plan_id ?? null);
+          },
+          "assistant:reasoning": () => {
+            const panel = [...document.querySelectorAll("section[aria-label='Payment blocked']")].at(-1);
+            const details = panel?.querySelector("details");
+            if (details) details.open = true;
+            panel?.scrollIntoView({ block: "start", behavior: "smooth" });
+          },
+        }
+      : {},
+  );
 
   if (initial.state.status === "error") {
     return (
@@ -50,7 +97,7 @@ export function Assistant() {
     );
   }
 
-  const busy = working !== null;
+  const inUse = working !== null;
   const suggestions = suggestNext({ ...live, demos: loaded.demos, language });
 
   function useDemo(key: string) {
@@ -77,7 +124,7 @@ export function Assistant() {
   return (
     <div className={LAYOUT}>
       <div className="[grid-area:next]">
-        <SuggestedNext suggestions={suggestions} disabled={busy} onPick={pick} />
+        <SuggestedNext suggestions={suggestions} disabled={inUse} onPick={pick} />
       </div>
 
       <div className="flex min-h-0 flex-col rounded-card border border-line bg-surface [grid-area:chat]">
@@ -91,7 +138,7 @@ export function Assistant() {
           emptyAction={<Button onClick={() => useDemo("tuition_invoice")}>Use demo: tuition invoice</Button>}
         />
         <Composer
-          disabled={busy}
+          disabled={inUse}
           onSend={assistant.ask}
           onUpload={(file) => void assistant.share(() => api.uploadDocument(file))}
           onPaste={() => setPasting(true)}

@@ -1,5 +1,6 @@
-import { CircleUserRound, Info, Play } from "lucide-react";
-import { Button } from "@/components/ui/Button";
+import { CircleUserRound, Info } from "lucide-react";
+import { DemoBar } from "@/components/features/demo/DemoBar";
+import { DemoToggle } from "@/components/features/demo/DemoToggle";
 import { HeaderStatus } from "./HeaderStatus";
 import { LanguageSwitcher } from "./LanguageSwitcher";
 
@@ -14,15 +15,14 @@ export function Header() {
         <HeaderStatus />
         <div className="ml-auto flex items-center gap-4">
           <LanguageSwitcher />
-          <Button variant="secondary" icon={Play} disabled>
-            Demo
-          </Button>
+          <DemoToggle />
           <span className="flex items-center gap-2 text-15 font-medium text-ink">
             <CircleUserRound aria-hidden className="size-5 text-muted" strokeWidth={1.75} />
             Ahmad Faris
           </span>
         </div>
       </div>
+      <DemoBar />
     </header>
   );
 }

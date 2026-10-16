@@ -3,6 +3,7 @@ import { IBM_Plex_Sans, Space_Grotesk } from "next/font/google";
 import type { ReactNode } from "react";
 import { Header } from "@/components/features/shell/Header";
 import { Sidebar } from "@/components/features/shell/Sidebar";
+import { DemoProvider } from "@/lib/demo";
 import { LanguageProvider } from "@/lib/language";
 import "./globals.css";
 
@@ -36,13 +37,15 @@ export default function RootLayout({ children }: { children: ReactNode }) {
           Skip to content
         </a>
         <LanguageProvider>
-          <Sidebar />
-          <div className="pl-60">
-            <Header />
-            <main id="main" className="max-w-[1200px] px-8 py-8">
-              {children}
-            </main>
-          </div>
+          <DemoProvider>
+            <Sidebar />
+            <div className="pl-60">
+              <Header />
+              <main id="main" className="max-w-[1200px] px-8 py-8">
+                {children}
+              </main>
+            </div>
+          </DemoProvider>
         </LanguageProvider>
       </body>
     </html>

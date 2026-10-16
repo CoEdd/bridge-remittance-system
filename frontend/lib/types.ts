@@ -668,3 +668,16 @@ export interface SourceItemEdit {
   description?: string;
   examples?: string[];
 }
+
+// ---------------------------------------------------------------- the presenter's demo bar
+
+export type DemoStepKey = "upload" | "verify" | "plan" | "pay" | "agent" | "mule" | "audit" | "redteam" | "sources";
+
+export interface DemoStateData {
+  steps: { key: DemoStepKey; done: boolean }[];
+  /** The tuition invoice, once it has been taken in. */
+  invoice_document_id: number | null;
+  /** A plan waiting for approval. */
+  pending_plan_id: string | null;
+}
+

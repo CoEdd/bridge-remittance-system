@@ -245,7 +245,7 @@ function SourceDetail({ id, version, onChanged }: { id: number; version: number;
       {items.length === 0 ? (
         <p className="text-15 text-body">Nothing on this page fits the rule vocabulary.</p>
       ) : (
-        <ul className="flex flex-col gap-3">
+        <ul data-demo="source-items" className="flex flex-col gap-3">
           {items.map((item) => (
             <SourceItemCard
               key={`${item.id}-${item.status}-${item.value}`}

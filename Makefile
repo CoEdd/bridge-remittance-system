@@ -1,4 +1,4 @@
-.PHONY: up down test reset logs demo-docs claims-cache eval-claims
+.PHONY: up down test reset logs demo-docs claims-cache eval-claims e2e check-ui
 
 # Build and start the backend (port 8000) and frontend (port 3000). Ctrl+C stops them.
 up:
@@ -37,4 +37,18 @@ claims-cache:
 # and both. Writes docs/claim-check-eval.md and backend/eval/claims/results.json.
 eval-claims:
 	docker compose run --rm --build -v "$(CURDIR)/docs:/app/docs" -v "$(CURDIR)/backend/eval:/app/eval" backend python -m eval.claims.run
+
+# The end-to-end test of the whole demo (Playwright, frontend/e2e/demo.spec.ts). Starts the
+# app in scripted mode, runs the test with the Chrome on this machine, then starts the app
+# again with the settings in .env. Needs Node on the host: cd frontend && npm install.
+e2e:
+	docker compose -f docker-compose.yml -f docker-compose.scripted.yml up -d --build
+	@until curl -fs http://localhost:8000/health | grep -q '"agent_mode":"scripted"'; do sleep 1; done
+	@until curl -fs -o /dev/null http://localhost:3000/; do sleep 1; done
+	cd frontend && npx playwright test; status=$$?; cd .. && mkdir -p frontend/test-results \
+		&& docker compose logs --no-color backend > frontend/test-results/backend.log; docker compose up -d; exit $$status
+
+# The frontend's design rules and colour contrast (no Docker needed).
+check-ui:
+	cd frontend && npm run check:design && npm run check:contrast
 

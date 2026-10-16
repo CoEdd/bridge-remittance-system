@@ -5,3 +5,5 @@ next-env.d.ts
 npm-debug.log*
 Dockerfile
 .dockerignore
+test-results/
+playwright-report/

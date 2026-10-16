@@ -5,7 +5,7 @@ from fastapi import APIRouter
 from sse_starlette.sse import EventSourceResponse
 from starlette.concurrency import iterate_in_threadpool
 
-from app import redteam
+from app import demo_progress, redteam
 from app.config import get_settings
 from app.policy.describe import describe_limits, describe_safeguards, describe_tiers
 from app.claims.evaluation import load_results
@@ -57,5 +57,6 @@ def run_red_team() -> EventSourceResponse:
     def events() -> Iterator[dict[str, str]]:
         for name, payload in redteam.run_all():
             yield {"event": name, "data": json.dumps(payload, ensure_ascii=False, default=str)}
+        demo_progress.mark("redteam_run")
 
     return EventSourceResponse(iterate_in_threadpool(events()))

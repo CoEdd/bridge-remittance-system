@@ -1,0 +1,6 @@
+# Runs the backend in scripted mode whatever .env says. Used by make e2e:
+#   docker compose -f docker-compose.yml -f docker-compose.scripted.yml up -d --build
+services:
+  backend:
+    environment:
+      AGENT_MODE: scripted

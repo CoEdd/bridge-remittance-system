@@ -2,6 +2,7 @@
 
 import { LoaderCircle, MessageSquare, RefreshCw } from "lucide-react";
 import { useEffect, useRef, useState, type ReactNode } from "react";
+import { useGlosses } from "@/lib/demo";
 import { BlockedPanel } from "@/components/features/assistant/BlockedPanel";
 import { DocumentCard } from "@/components/features/assistant/DocumentCard";
 import { lead, type Turn } from "@/components/features/assistant/model";
@@ -23,7 +24,9 @@ function UserMessage({ text }: { text: string }) {
 
 /** A reply from Bridge: its opening sentences, the rest behind "More", and the English behind a toggle. */
 function AgentMessage({ reply }: { reply: AgentReply }) {
-  const [english, setEnglish] = useState(false);
+  const glosses = useGlosses();
+  const [english, setEnglish] = useState(glosses);
+  useEffect(() => setEnglish(glosses), [glosses]); // the presenter's G key
   const [expanded, setExpanded] = useState(false);
   const hasEnglish = reply.language !== "en" && reply.text_en !== reply.text;
   const opening = lead(reply.text);

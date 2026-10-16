@@ -10,6 +10,7 @@ import type {
   ClaimCheckOverview,
   DemoDocument,
   DemoSettings,
+  DemoStateData,
   DocumentDetail,
   DocumentSummary,
   Health,
@@ -154,7 +155,9 @@ export const api = {
   documents: (signal?: AbortSignal) => request<DocumentSummary[]>("/documents", { signal }),
   document: (id: number, signal?: AbortSignal) => request<DocumentDetail>(`/documents/${id}`, { signal }),
   demoDocuments: (signal?: AbortSignal) => request<DemoDocument[]>("/demo/documents", { signal }),
-  ingestDemoDocument: (key: string) => request<DocumentDetail>(`/demo/documents/${key}`, { method: "POST" }),
+  /** Take in a bundled demo document. `pasted` takes a message in exactly as if its text had been pasted. */
+  ingestDemoDocument: (key: string, pasted = false) =>
+    request<DocumentDetail>(`/demo/documents/${key}${pasted ? "?pasted=true" : ""}`, { method: "POST" }),
   uploadDocument: (file: File) => {
     const form = new FormData();
     form.append("file", file);
@@ -173,6 +176,9 @@ export const api = {
   chatAboutDocument: (id: number) => postJson<ChatStart>(`/chat/document/${id}`),
   chatStreamUrl: (streamId: string) => `${BASE_URL}/chat/stream/${streamId}`,
   demoSettings: (signal?: AbortSignal) => request<DemoSettings>("/demo/settings", { signal }),
+  /** How far the demo has come, for the presenter's demo bar. */
+  demoState: (signal?: AbortSignal) => request<DemoStateData>("/demo/state", { signal }),
+  resetDemo: () => postJson<{ status: "reset" }>("/demo/reset"),
   /** Demo event: a stranger sends money, then their "please forward it" message arrives. */
   strangerTransfer: () => postJson<MuleEvent>("/demo/events/mule"),
   securityPolicy: (signal?: AbortSignal) => request<SecurityPolicy>("/security/policy", { signal }),

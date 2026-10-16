@@ -19,6 +19,8 @@ logger = logging.getLogger(__name__)
 
 # ECB reference rates. api.frankfurter.app redirects here.
 FRANKFURTER_URL = "https://api.frankfurter.dev/v1/latest"
+# Short, so a demo reset stays under 2 seconds; a slow answer falls back to the offline snapshot.
+FETCH_TIMEOUT_SECONDS = 1.5
 HOME_CURRENCY = "MYR"
 QUOTE_CURRENCIES = ("CNY", "USD")
 
@@ -45,7 +47,7 @@ def fetch_frankfurter(client: httpx.Client | None = None) -> Rates:
     """Ask Frankfurter for 1 MYR in CNY and USD. Numbers are parsed straight to Decimal."""
     params = {"from": HOME_CURRENCY, "to": ",".join(QUOTE_CURRENCIES)}
     get = client.get if client else httpx.get
-    response = get(FRANKFURTER_URL, params=params, timeout=5.0, follow_redirects=True)
+    response = get(FRANKFURTER_URL, params=params, timeout=FETCH_TIMEOUT_SECONDS, follow_redirects=True)
     response.raise_for_status()
     body = json.loads(response.text, parse_float=Decimal, parse_int=Decimal)
     if body["base"] != HOME_CURRENCY:

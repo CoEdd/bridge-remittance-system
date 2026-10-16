@@ -17,7 +17,26 @@ Docker Desktop must be running.
 docker compose up --build     # backend on :8000, app on http://localhost:3000
 make test                     # backend tests
 make reset                    # restore the demo data while the app runs
+make e2e                      # the whole demo in a browser (needs Node: cd frontend && npm install)
+make check-ui                 # design rules and colour contrast of the frontend
 ```
+
+## Presenting the demo
+
+Click **Demo** in the header (or press D). A bar under the header shows the nine steps and
+one line to read out for the current step.
+
+| Key | Does |
+|---|---|
+| Right arrow | Run the next step (or move on when it is done) |
+| Left arrow | Go back one step; nothing is undone |
+| R | Reset the demo (Enter confirms) |
+| G | Show English under every answer |
+| D | Hide or show the bar |
+
+The bar never approves anything: at step 4 the presenter clicks Approve and types the
+one-time code shown on screen. Steps done by hand count too; the bar reads the app's state.
+For a live pitch, scripted mode is the safe choice (no network needed).
 
 ## Two agent modes
 

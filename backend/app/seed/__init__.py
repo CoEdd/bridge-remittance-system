@@ -9,7 +9,7 @@ from sqlalchemy.orm import Session
 from app import audit, models  # noqa: F401  (models registers every table on Base.metadata)
 from app.clock import demo_today, now_utc
 from app.config import get_settings
-from app.db import Base, get_engine, write_lock
+from app.db import Base, get_engine, reset_gate, write_lock
 from app.documents.index import index
 from app.fx import freeze_rates
 from app.ledger import SYSTEM_ROLES, income_legs, payment_legs, post, user_account
@@ -263,7 +263,8 @@ def build(engine: Engine, *, offline: bool) -> str:
 
 def reset() -> str:
     """Rebuild the live demo database from scratch. Returns the FX source."""
-    with write_lock:
+    # The gate first: running requests finish and new ones wait, then the writers' lock.
+    with reset_gate.resetting(), write_lock:
         index.reset()
         return build(get_engine(), offline=get_settings().fx_offline)
 

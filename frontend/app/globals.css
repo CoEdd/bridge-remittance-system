@@ -87,3 +87,24 @@
     outline-offset: 2px;
   }
 }
+
+/* The demo bar outlines the panel a finished step is about, for 600 ms. */
+@keyframes demo-flash {
+  from {
+    outline-color: var(--color-teal);
+  }
+  to {
+    outline-color: transparent;
+  }
+}
+.demo-flash {
+  outline: 3px solid var(--color-teal);
+  outline-offset: 4px;
+  animation: demo-flash 600ms ease-out forwards;
+}
+@media (prefers-reduced-motion: reduce) {
+  .demo-flash {
+    animation: none;
+  }
+}
+

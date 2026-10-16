@@ -58,7 +58,7 @@ export function ContextPanel({ live }: { live: Live }) {
         </Section>
 
         <Section title="Wallets">
-          <ul className="flex flex-col gap-1">
+          <ul data-demo="wallets" className="flex flex-col gap-1 rounded-sm">
             {accounts.accounts.map((account) => (
               <li key={account.id} className="flex items-baseline justify-between gap-3">
                 <span className="text-15 text-body">{account.currency}</span>

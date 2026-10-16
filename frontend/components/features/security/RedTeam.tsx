@@ -3,6 +3,7 @@
 import clsx from "clsx";
 import { Check, CircleCheck, CircleX, LoaderCircle, Play, X } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
+import { useDemoCommands } from "@/lib/demo";
 import { Badge } from "@/components/ui/Badge";
 import { Button } from "@/components/ui/Button";
 import { ApiError, api } from "@/lib/api";
@@ -98,6 +99,7 @@ export function RedTeam({ cases }: { cases: RedTeamCase[] }) {
   const stop = useRef<AbortController | null>(null);
 
   useEffect(() => () => stop.current?.abort(), []);
+  useDemoCommands({ "security:run": () => run() });
 
   async function run() {
     const controller = new AbortController();
@@ -125,7 +127,7 @@ export function RedTeam({ cases }: { cases: RedTeamCase[] }) {
         <Button size="lg" icon={Play} loading={running} onClick={() => void run()}>
           Run red-team suite
         </Button>
-        <p role="status" className="text-24 font-semibold text-ink">
+        <p role="status" data-demo="redteam-score" className="text-24 font-semibold text-ink">
           {summary && (
             <>
               <span className="font-heading tabular-nums">

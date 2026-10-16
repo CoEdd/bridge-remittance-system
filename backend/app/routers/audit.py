@@ -3,7 +3,7 @@ from typing import Annotated, Literal
 from fastapi import APIRouter, HTTPException, Query, Response
 from sqlalchemy import func, select
 
-from app import audit
+from app import audit, demo_progress
 from app.audit import EVENT_TYPES, AuditError, Record
 from app.audit.describe import event_label, summarise
 from app.clock import now_utc
@@ -62,6 +62,7 @@ def list_entries(
 @router.get("/verify")
 def verify_chain(session: SessionDep) -> AuditVerifyOut:
     """Recompute the whole hash chain."""
+    demo_progress.mark("chain_verified")
     return AuditVerifyOut(**audit.verify(session))
 
 
@@ -72,6 +73,7 @@ def simulate_tamper(session: SessionDep, body: TamperIn | None = None) -> Tamper
         result = audit.simulate_tamper(session, body.seq if body else None)
     except AuditError as error:
         raise HTTPException(status_code=404, detail=str(error)) from error
+    demo_progress.mark("tamper_simulated")
     return TamperOut(
         seq=result["seq"],
         event_type=result["event_type"],

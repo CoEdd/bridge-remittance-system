@@ -2,11 +2,12 @@
 
 import { ArrowRight, Ban, TriangleAlert } from "lucide-react";
 import Link from "next/link";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { lead } from "@/components/features/assistant/model";
 import { ClaimList, Reasoning } from "@/components/features/claims/Claims";
 import { PolicyQuote } from "@/components/features/documents/PolicyQuote";
 import { Button } from "@/components/ui/Button";
+import { useGlosses } from "@/lib/demo";
 import { LANGUAGE_NAMES } from "@/lib/language";
 import type { BlockedEvent, Language } from "@/lib/types";
 
@@ -16,7 +17,9 @@ import type { BlockedEvent, Language } from "@/lib/types";
  * Otherwise the reasons by name, with "Why?" for the explanation.
  */
 export function BlockedPanel({ blocked, language }: { blocked: BlockedEvent; language: Language }) {
-  const [english, setEnglish] = useState(false);
+  const glosses = useGlosses();
+  const [english, setEnglish] = useState(glosses);
+  useEffect(() => setEnglish(glosses), [glosses]); // the presenter's G key
   const [why, setWhy] = useState(false);
   // The reasons were written in the student's language when the payment was blocked.
   const translated = blocked.reasons.some((reason) => reason.text !== reason.text_en);
