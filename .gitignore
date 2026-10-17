@@ -72,3 +72,6 @@ scripts/video/failed.png
 # In-between demo videos, rebuilt by make demo-video; only the final video is committed.
 evidence/video/bridge-demo-clean.mp4
 evidence/video/bridge-demo-subtitled.mp4
+
+# Working notes for the AI assistant; kept on this machine only.
+CLAUDE.md

@@ -1,4 +1,4 @@
-// Fails if the frontend breaks the design rules in CLAUDE.md: no emoji, no gradients,
+// Fails if the frontend breaks the Bridge design rules: no emoji, no gradients,
 // and none of the banned marketing words. Run: npm run check:design
 import { readdirSync, readFileSync, statSync } from "node:fs";
 import { join, relative } from "node:path";

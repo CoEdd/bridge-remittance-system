@@ -1,5 +1,5 @@
 """
-Non-negotiable rule from CLAUDE.md: only actions/executor.py may post user money to
+Non-negotiable money rule: only actions/executor.py may post user money to
 the ledger; seed and reset code is the only other writer. This scans the source.
 """
 

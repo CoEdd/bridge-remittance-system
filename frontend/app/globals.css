@@ -1,7 +1,7 @@
 @import "tailwindcss";
 
 /*
- * Design tokens from the "Design system" section of CLAUDE.md.
+ * Design tokens of the Bridge design system (palette and type scale).
  * Tailwind's default colours and font sizes are removed, so these are the only ones.
  */
 @theme {
