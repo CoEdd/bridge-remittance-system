@@ -1,57 +1,11 @@
 {
   "model": "claude-sonnet-5-5",
-  "date": "2026-10-12",
+  "date": "2026-10-16",
   "note": "Claims returned by one live run of Claude on the bundled demo documents. Used in scripted mode.",
   "documents": {
-    "0d01ad9420b94947dc7bb4ad65d9fff5ca00d49e0f99d5a64224b0b5d0b7cef8": {
-      "filename": "tuition_invoice.pdf",
-      "claims": [
-        {
-          "type": "represents_institution",
-          "args": {
-            "institution_name": "Shenzhen Polytechnic International University"
-          },
-          "source": "Shenzhen Polytechnic International University · Finance Office"
-        },
-        {
-          "type": "amount",
-          "args": {
-            "value": "12000.00",
-            "currency": "CNY"
-          },
-          "source": "CNY 12,000.00"
-        },
-        {
-          "type": "due",
-          "args": {
-            "date": "2026-11-15"
-          },
-          "source": "15 November 2026"
-        },
-        {
-          "type": "payee_name",
-          "args": {
-            "name": "Shenzhen Polytechnic International University"
-          },
-          "source": "Payee 收款单位: Shenzhen Polytechnic International University 深圳国际理工大学"
-        },
-        {
-          "type": "payee_bank",
-          "args": {
-            "bank": "Shenzhen Bay Commercial Bank"
-          },
-          "source": "Shenzhen Bay Commercial Bank 深圳湾商业银行"
-        },
-        {
-          "type": "payee_account",
-          "args": {
-            "account": "4100 2026 0000 8815"
-          },
-          "source": "4100 2026 0000 8815"
-        }
-      ]
-    },
     "cbf5032ed59dcd2fa8284c43021bf10219eb5865bf2a0462a0c237c4684ce903": {
+      "model": "claude-sonnet-5-5",
+      "date": "2026-10-12",
       "filename": "agent_offer_message_ms.txt",
       "claims": [
         {
@@ -124,60 +78,9 @@
         }
       ]
     },
-    "121fed599e437cdb4eb71213d6d60b61879a8918be303588aa0b6c6ec5367956": {
-      "filename": "changed_details_invoice.pdf",
-      "claims": [
-        {
-          "type": "represents_institution",
-          "args": {
-            "institution_name": "Shenzhen Polytechnic International University"
-          },
-          "source": "Shenzhen Polytechnic International University · Finance Office"
-        },
-        {
-          "type": "amount",
-          "args": {
-            "value": "12000.00",
-            "currency": "CNY"
-          },
-          "source": "CNY 12,000.00"
-        },
-        {
-          "type": "due",
-          "args": {
-            "date": "2026-11-15"
-          },
-          "source": "15 November 2026"
-        },
-        {
-          "type": "payee_name",
-          "args": {
-            "name": "Shenzhen Polytechnic International University"
-          },
-          "source": "Payee 收款单位: Shenzhen Polytechnic International University 深圳国际理工大学"
-        },
-        {
-          "type": "payee_bank",
-          "args": {
-            "bank": "Shenzhen Bay Commercial Bank"
-          },
-          "source": "Shenzhen Bay Commercial Bank 深圳湾商业银行"
-        },
-        {
-          "type": "payee_account",
-          "args": {
-            "account": "4100 2026 0000 9921"
-          },
-          "source": "4100 2026 0000 9921"
-        },
-        {
-          "type": "account_change_notice",
-          "args": {},
-          "source": "Our receiving account has changed. Please pay to the new account."
-        }
-      ]
-    },
     "1c20762d69733e9bd3b7ba9a8d832e2bf723add4ff4bd85505776baba8dc1b50": {
+      "model": "claude-sonnet-5-5",
+      "date": "2026-10-12",
       "filename": "urgent_notice_message_zh.txt",
       "claims": [
         {
@@ -243,6 +146,8 @@
       ]
     },
     "4ac3e43312edda4834add5f243d803596822b2ba345cd4c69563195e074a6453": {
+      "model": "claude-sonnet-5-5",
+      "date": "2026-10-12",
       "filename": "invoice_injection_en.pdf",
       "claims": [
         {
@@ -291,6 +196,8 @@
       ]
     },
     "d4890cc246f0fd0604e8d5cccd381c9fc2505c34aee52c6875376bfe076321ee": {
+      "model": "claude-sonnet-5-5",
+      "date": "2026-10-12",
       "filename": "mule_message_en.txt",
       "claims": [
         {
@@ -321,6 +228,111 @@
             "account": "6230 5511 0042 7788"
           },
           "source": "6230 5511 0042 7788"
+        }
+      ]
+    },
+    "30ac62118fb9f8706d3d27feba6d9cbc0f36f3ea289e419b99ea92fb526c664c": {
+      "filename": "tuition_invoice.pdf",
+      "model": "claude-sonnet-5-5",
+      "date": "2026-10-16",
+      "claims": [
+        {
+          "type": "represents_institution",
+          "args": {
+            "institution_name": "Shenzhen Polytechnic International University"
+          },
+          "source": "Shenzhen Polytechnic International University · Finance Office"
+        },
+        {
+          "type": "payee_name",
+          "args": {
+            "name": "Shenzhen Polytechnic International University"
+          },
+          "source": "Payee 收款单位: Shenzhen Polytechnic International University 深圳国际理工大学"
+        },
+        {
+          "type": "payee_account",
+          "args": {
+            "account": "4100 2026 0000 8815"
+          },
+          "source": "Account 账号: 4100 2026 0000 8815"
+        },
+        {
+          "type": "payee_bank",
+          "args": {
+            "bank": "Shenzhen Bay Commercial Bank"
+          },
+          "source": "Bank 开户银行: Shenzhen Bay Commercial Bank 深圳湾商业银行"
+        },
+        {
+          "type": "amount",
+          "args": {
+            "value": "12000.00",
+            "currency": "CNY"
+          },
+          "source": "Total amount due 应缴总额 CNY 12,000.00"
+        },
+        {
+          "type": "due",
+          "args": {
+            "date": "2026-11-15"
+          },
+          "source": "Due date 缴费截止日期: 15 November 2026 (2026年11月15日)"
+        }
+      ]
+    },
+    "b21d93dab718161232641cc6defdd1bc40b0f8840b3e1ac1decba885b4c044aa": {
+      "filename": "changed_details_invoice.pdf",
+      "model": "claude-sonnet-5-5",
+      "date": "2026-10-16",
+      "claims": [
+        {
+          "type": "represents_institution",
+          "args": {
+            "institution_name": "Shenzhen Polytechnic International University"
+          },
+          "source": "Shenzhen Polytechnic International University · Finance Office"
+        },
+        {
+          "type": "payee_name",
+          "args": {
+            "name": "Shenzhen Polytechnic International University"
+          },
+          "source": "Payee 收款单位: Shenzhen Polytechnic International University 深圳国际理工大学"
+        },
+        {
+          "type": "payee_bank",
+          "args": {
+            "bank": "Shenzhen Bay Commercial Bank"
+          },
+          "source": "Bank 开户银行: Shenzhen Bay Commercial Bank 深圳湾商业银行"
+        },
+        {
+          "type": "payee_account",
+          "args": {
+            "account": "4100 2026 0000 9921"
+          },
+          "source": "Account 账号: 4100 2026 0000 9921"
+        },
+        {
+          "type": "amount",
+          "args": {
+            "value": "12000.00",
+            "currency": "CNY"
+          },
+          "source": "Total amount due 应缴总额 CNY 12,000.00"
+        },
+        {
+          "type": "due",
+          "args": {
+            "date": "2026-11-15"
+          },
+          "source": "Due date 缴费截止日期: 15 November 2026 (2026年11月15日)"
+        },
+        {
+          "type": "account_change_notice",
+          "args": {},
+          "source": "Our receiving account has changed. Please pay to the new account."
         }
       ]
     }

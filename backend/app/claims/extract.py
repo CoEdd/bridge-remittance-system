@@ -181,6 +181,7 @@ def extract(
     if cache and cached:
         candidates = [Claim(item["type"], dict(item["args"]), item["source"]) for item in cached["claims"]]
         claims, dropped = _quoted(candidates, visible_text)
-        return Extraction(claims, "cached", model=cache.get("model"), cached_on=cache.get("date"), dropped=dropped)
+        model, cached_on = cached.get("model", cache.get("model")), cached.get("date", cache.get("date"))
+        return Extraction(claims, "cached", model=model, cached_on=cached_on, dropped=dropped)
     claims, dropped = _quoted(fallback_claims(visible_text, fields), visible_text)
     return Extraction(claims, "regex", dropped=dropped)

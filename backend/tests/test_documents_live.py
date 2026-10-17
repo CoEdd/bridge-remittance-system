@@ -38,13 +38,14 @@ TUITION_FIELDS = {
         "0.05% of the amount due per day after the due date.",
         "0.05% of the amount due per day after the due date.",
     ),
+    "invoice_number": ("SPIU-FIN-2026-104417", "SPIU-FIN-2026-104417"),
 }
 EMPTY = {"value": "", "source": ""}
 
 
 def fields_answer(overrides: dict[str, tuple[str, str]] | None = None, base: dict[str, tuple[str, str]] = TUITION_FIELDS) -> dict[str, Any]:
     merged = {**base, **(overrides or {})}
-    names = ("issuer", "issuer_local_name", "payee_name", "payee_account", "bank_name", "amount", "currency", "due_date", "late_fee_terms")
+    names = ("issuer", "issuer_local_name", "payee_name", "payee_account", "bank_name", "amount", "currency", "due_date", "late_fee_terms", "invoice_number")
     return {name: {"value": merged[name][0], "source": merged[name][1]} if name in merged else EMPTY for name in names}
 
 
@@ -94,7 +95,7 @@ def test_fields_proposed_by_claude_are_located_and_verified(session: Session, li
 
     assert last_audit(session, "document.uploaded").payload["extractor"] == "live"
     assert all(field["verified"] for field in fields.values())
-    assert (fields["amount"]["start"], fields["amount"]["end"]) == (237, 250)  # offsets found by plain code
+    assert (fields["amount"]["start"], fields["amount"]["end"]) == (575, 588)  # offsets found by plain code
     assert document.raw_text[fields["due_date"]["start"] : fields["due_date"]["end"]] == "15 November 2026"
     assert bill_of(session, document) is not None
     assert document.explanation["en"] == "A tuition invoice. Amount: CNY 12,000.00."

@@ -54,19 +54,20 @@ INSTITUTIONS = [(UNIVERSITY_NAME, "深圳国际理工大学")]
 # Every field each document must yield: name -> (value, exact source text, start offset).
 EXPECTED: dict[str, dict[str, tuple[str, str, int]]] = {
     "tuition_invoice": {
-        "issuer": (UNIVERSITY_NAME, UNIVERSITY_NAME, 0),
-        "issuer_local_name": ("深圳国际理工大学", "深圳国际理工大学", 63),
-        "payee_name": (UNIVERSITY_NAME, UNIVERSITY_NAME, 329),
-        "payee_account": ("4100 2026 0000 8815", "4100 2026 0000 8815", 444),
-        "bank_name": ("Shenzhen Bay Commercial Bank", "Shenzhen Bay Commercial Bank", 395),
-        "amount": ("12000.00", "CNY 12,000.00", 237),
-        "currency": ("CNY", "CNY", 237),
-        "due_date": ("2026-11-15", "15 November 2026", 286),
+        "issuer": (UNIVERSITY_NAME, UNIVERSITY_NAME, 5),
+        "issuer_local_name": ("深圳国际理工大学", "深圳国际理工大学", 68),
+        "payee_name": (UNIVERSITY_NAME, UNIVERSITY_NAME, 617),
+        "payee_account": ("4100 2026 0000 8815", "4100 2026 0000 8815", 732),
+        "bank_name": ("Shenzhen Bay Commercial Bank", "Shenzhen Bay Commercial Bank", 683),
+        "amount": ("12000.00", "CNY 12,000.00", 575),  # the total, not a line item
+        "currency": ("CNY", "CNY", 575),
+        "due_date": ("2026-11-15", "15 November 2026", 806),
         "late_fee_terms": (
             "0.05% of the amount due per day after the due date.",
             "0.05% of the amount due per day after the due date.",
-            478,
+            851,
         ),
+        "invoice_number": ("SPIU-FIN-2026-104417", "SPIU-FIN-2026-104417", 203),
     },
     "agent_offer": {
         "issuer": (UNIVERSITY_NAME, UNIVERSITY_NAME, 40),
@@ -77,19 +78,20 @@ EXPECTED: dict[str, dict[str, tuple[str, str, int]]] = {
         "currency": ("CNY", "CNY", 205),
     },
     "changed_details": {
-        "issuer": (UNIVERSITY_NAME, UNIVERSITY_NAME, 0),
-        "issuer_local_name": ("深圳国际理工大学", "深圳国际理工大学", 63),
-        "payee_name": (UNIVERSITY_NAME, UNIVERSITY_NAME, 329),
-        "payee_account": ("4100 2026 0000 9921", "4100 2026 0000 9921", 444),
-        "bank_name": ("Shenzhen Bay Commercial Bank", "Shenzhen Bay Commercial Bank", 395),
-        "amount": ("12000.00", "CNY 12,000.00", 237),
-        "currency": ("CNY", "CNY", 237),
-        "due_date": ("2026-11-15", "15 November 2026", 286),
+        "issuer": (UNIVERSITY_NAME, UNIVERSITY_NAME, 5),
+        "issuer_local_name": ("深圳国际理工大学", "深圳国际理工大学", 68),
+        "payee_name": (UNIVERSITY_NAME, UNIVERSITY_NAME, 617),
+        "payee_account": ("4100 2026 0000 9921", "4100 2026 0000 9921", 732),
+        "bank_name": ("Shenzhen Bay Commercial Bank", "Shenzhen Bay Commercial Bank", 683),
+        "amount": ("12000.00", "CNY 12,000.00", 575),  # the total, not a line item
+        "currency": ("CNY", "CNY", 575),
+        "due_date": ("2026-11-15", "15 November 2026", 891),
         "late_fee_terms": (
             "0.05% of the amount due per day after the due date.",
             "0.05% of the amount due per day after the due date.",
-            563,
+            936,
         ),
+        "invoice_number": ("SPIU-FIN-2026-104417", "SPIU-FIN-2026-104417", 203),
     },
     "urgent_notice": {
         "issuer_local_name": ("深圳国际理工大学", "深圳国际理工大学", 7),
@@ -181,9 +183,9 @@ def test_pdfs_read_back_character_for_character() -> None:
 def test_the_chinese_text_survives_exactly() -> None:
     text = read_demo("tuition_invoice").text
 
-    for phrase in ("深圳国际理工大学 财务处", "2026–2027学年 学费（第二期）", "（人民币 12,000.00 元）".strip("（）"), "逾期缴费将按每日0.05%加收滞纳金。"):
+    for phrase in ("深圳国际理工大学 财务处", "2026–2027学年 学费（第二期）", "应缴总额 CNY 12,000.00", "图书馆及信息技术费", "逾期缴费将按每日0.05%加收滞纳金。"):
         assert phrase in text
-    assert "本校不委托任何代缴机构，也不通过第三方提供学费优惠。" in text
+    assert "本校从不委托任何代缴机构，也从不通过第三方提供学费优惠。" in text
 
 
 def test_pdf_reader_keeps_the_size_and_colour_of_every_character() -> None:
@@ -320,6 +322,25 @@ def test_the_bilingual_invoice_prefers_english_and_accepts_chinese() -> None:
     assert chinese_only["bank_name"].value == "深圳湾商业银行"
     assert chinese_only["payee_account"].value == "4100 2026 0000 8815"
     assert chinese_only["late_fee_terms"].value == "逾期缴费将按每日0.05%加收滞纳金。"
+
+
+def test_an_itemised_invoice_gives_its_total_never_a_line_item() -> None:
+    fields = extract_scripted(
+        "Description Amount\nTuition fee CNY 11,200.00\nLibrary and IT fee CNY 300.00\nTotal amount due CNY 11,500.00",
+        "invoice",
+        INSTITUTIONS,
+    )
+
+    assert (fields["amount"].value, fields["amount"].source) == ("11500.00", "CNY 11,500.00")
+
+
+def test_the_invoice_number_is_read_and_becomes_the_bills_reference(session: Session) -> None:
+    by_label = extract_scripted("Invoice no.: INV-2026-0099\nReference: INV-2026-0099", "invoice", INSTITUTIONS)
+    reference_only = extract_scripted("Payment reference: ABC-123", "invoice", INSTITUTIONS)
+
+    assert (by_label["invoice_number"].value, by_label["invoice_number"].start) == ("INV-2026-0099", 13)
+    assert reference_only["invoice_number"].value == "ABC-123"
+    assert bill_of(session, ingest_demo(session, "tuition_invoice")).reference == "SPIU-FIN-2026-104417"  # type: ignore[union-attr]
 
 
 def test_dates_are_read_in_three_languages() -> None:
@@ -705,7 +726,7 @@ def test_ingestion_is_logged_with_its_source(session: Session) -> None:
     payload = last_audit(session, "document.uploaded").payload
     assert (payload["document_id"], payload["filename"], payload["source"]) == (document.id, "tuition_invoice.pdf", "demo bundle")
     assert (payload["kind"], payload["languages"], payload["extractor"]) == ("invoice", ["en", "zh"], "scripted")
-    assert payload["unverified_fields"] == [] and len(payload["verified_fields"]) == 9
+    assert payload["unverified_fields"] == [] and len(payload["verified_fields"]) == 10
     assert payload["bill_id"] == bill_of(session, document).id  # type: ignore[union-attr]
 
 

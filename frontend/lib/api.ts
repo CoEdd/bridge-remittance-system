@@ -18,6 +18,7 @@ import type {
   MuleEvent,
   OtpResult,
   Payee,
+  Receipt,
   RedTeamCase,
   RedTeamEvent,
   RuleSourceDetail,
@@ -163,12 +164,17 @@ export const api = {
     form.append("file", file);
     return request<DocumentDetail>("/documents", { method: "POST", body: form });
   },
-  pasteMessage: (text: string) => postJson<DocumentDetail>("/documents/message", { text }),
+  /** A pasted message, with who sent it if the student says. */
+  pasteMessage: (text: string, sender?: string) =>
+    postJson<DocumentDetail>("/documents/message", { text, sender: sender?.trim() || undefined }),
   /** Every action the agent proposed that needed the student or was refused, oldest first. */
   actions: (signal?: AbortSignal) => request<Action[]>("/actions", { signal }),
   confirmAction: (id: number) => postJson<Action>(`/actions/${id}/confirm`),
   submitOtp: (id: number, code: string) => postJson<OtpResult>(`/actions/${id}/otp`, { code }),
   cancelAction: (id: number) => postJson<Action>(`/actions/${id}/cancel`),
+  /** The receipt of an executed payment, and the same receipt as a PDF file. */
+  receipt: (id: number, signal?: AbortSignal) => request<Receipt>(`/actions/${id}/receipt`, { signal }),
+  receiptPdfUrl: (id: number) => `${BASE_URL}/actions/${id}/receipt.pdf`,
   chatHistory: (signal?: AbortSignal) => request<ChatMessage[]>("/chat/history", { signal }),
   /** Start a turn. Follow it with `followTurn` from lib/chat. */
   sendChat: (text: string) => postJson<ChatStart>("/chat", { text }),

@@ -558,9 +558,12 @@ def test_a_turn_that_starts_with_a_document_says_how_it_arrived(client: TestClie
     pasted = client.post("/documents/message", json={"text": "Please pay CNY 500.00 to Chen Li, account 6222 0000 1111 2222."}).json()
     received = client.post("/demo/events/mule").json()["document"]
 
-    starts = [client.post(f"/chat/document/{document['id']}").json() for document in (uploaded, pasted, received)]
-    for start in starts:
-        read_events(client, start["stream_id"])
+    # One turn at a time, as on the Assistant screen: each turn runs in its own thread and
+    # stores its lines when it runs, so turns started together could be stored in either order.
+    starts = []
+    for document in (uploaded, pasted, received):
+        starts.append(client.post(f"/chat/document/{document['id']}").json())
+        read_events(client, starts[-1]["stream_id"])
 
     lines = ["Uploaded tuition_invoice.pdf", "Pasted a message", "Received a message: mule_message_en.txt"]
     assert [start["text"] for start in starts] == lines

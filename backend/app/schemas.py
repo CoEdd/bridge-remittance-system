@@ -124,6 +124,7 @@ class BillOut(BaseModel):
     due_date: date | None  # a payment request from a message may have none
     due_in_days: int | None  # counted from the demo date; negative when overdue
     late_fee_terms: str | None
+    reference: str | None = None
     status: Literal["open", "paid", "cancelled"]
     document_id: int | None
     flagged: bool  # its document is untrusted or carries a risk signal
@@ -190,6 +191,24 @@ class ActionOut(BaseModel):
     executed_posting_id: int | None
     closed_at: datetime | None = None  # when it was executed, refused, cancelled or expired
     audit_seq: int | None = None  # the audit entry that recorded that
+
+
+class ReceiptOut(BaseModel):
+    """The receipt of an executed sandbox payment."""
+
+    receipt_number: str
+    business_date: date
+    executed_at: datetime
+    from_account: str
+    payee_name: str
+    payee_account: str
+    payee_verified: str | None
+    amount_minor: int
+    currency: Currency
+    reference: str | None
+    status: str
+    audit_seq: int
+    audit_hash: str
 
 
 class OtpIn(BaseModel):
@@ -263,6 +282,7 @@ class DemoDocumentOut(BaseModel):
 
 class MessageIn(BaseModel):
     text: str = Field(min_length=1, max_length=20_000)
+    sender: str | None = Field(default=None, max_length=80)  # who sent it, if the student says
 
 
 class DocumentSummaryOut(BaseModel):
@@ -272,6 +292,7 @@ class DocumentSummaryOut(BaseModel):
     languages: list[str]
     created_at: datetime
     status: DocumentStatus
+    sender: str | None = None
 
 
 class FieldOut(BaseModel):

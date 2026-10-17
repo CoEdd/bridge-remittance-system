@@ -126,6 +126,8 @@ export interface Bill {
   /** Counted from the demo date; negative when overdue. */
   due_in_days: number | null;
   late_fee_terms: string | null;
+  /** The invoice number, sent with the payment as its reference. */
+  reference: string | null;
   status: "open" | "paid" | "cancelled";
   document_id: number | null;
   /** Its document is untrusted or carries a risk signal. */
@@ -220,6 +222,8 @@ export interface DocumentSummary {
   languages: Language[];
   created_at: string;
   status: DocumentStatus;
+  /** Who sent a message, as the student gave it. */
+  sender: string | null;
 }
 
 export interface DocumentField {
@@ -679,5 +683,24 @@ export interface DemoStateData {
   invoice_document_id: number | null;
   /** A plan waiting for approval. */
   pending_plan_id: string | null;
+}
+
+/** The receipt of an executed sandbox payment. */
+export interface Receipt {
+  receipt_number: string;
+  /** The demo date the payment was booked on. */
+  business_date: string;
+  /** Real time, UTC. */
+  executed_at: string;
+  from_account: string;
+  payee_name: string;
+  payee_account: string;
+  payee_verified: string | null;
+  amount_minor: number;
+  currency: Currency;
+  reference: string | null;
+  status: string;
+  audit_seq: number;
+  audit_hash: string;
 }
 

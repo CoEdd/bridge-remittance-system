@@ -135,7 +135,7 @@ def _create_bill(
         session.add(payee)
         session.flush()
 
-    due, late_fee = fields.get("due_date"), fields.get("late_fee_terms")
+    due, late_fee, number = fields.get("due_date"), fields.get("late_fee_terms"), fields.get("invoice_number")
     bill = Bill(
         user_id=user.id,
         document_id=document.id,
@@ -144,6 +144,7 @@ def _create_bill(
         currency=fields["currency"].value,
         due_date=date.fromisoformat(due.value) if due and due.verified else None,
         late_fee_terms=late_fee.value if late_fee and late_fee.verified else None,
+        reference=number.value if number and number.verified else None,
         status="open",
     )
     session.add(bill)
@@ -216,6 +217,7 @@ def ingest(
     passages: PassageIndex = index,
     scripted: bool = False,
     claims_live: bool | None = None,
+    sender: str | None = None,
 ) -> Document:
     """
     Run the whole pipeline on one document and store the result. `source` says how it arrived.
@@ -245,6 +247,7 @@ def ingest(
             filename=filename,
             kind=kind,
             source=source,
+            sender=sender,
             source_language=",".join(detect_languages(visible)),
             raw_text=read.text,
             chars_meta=read.runs,

@@ -1,0 +1,340 @@
+{
+  "video": "evidence/video/bridge-demo-clean.mp4",
+  "recordedAt": "2026-10-17T07:07:25.008Z",
+  "agentMode": "live",
+  "model": "claude-sonnet-5-5",
+  "duration": 272.967,
+  "note": "Times are seconds from the start of the video. The cursor, zoom, title cards, file picker and PDF viewer tab are drawn by the recorder; everything else is the app.",
+  "scenes": [
+    {
+      "id": "S0",
+      "title": "Opening",
+      "start": 0.035,
+      "end": 4.514,
+      "length": 4.479
+    },
+    {
+      "id": "S1",
+      "title": "Home",
+      "start": 4.514,
+      "end": 20.2,
+      "length": 15.686
+    },
+    {
+      "id": "C1",
+      "title": "Problem 1 · Deadline",
+      "start": 20.2,
+      "end": 22.742,
+      "length": 2.542
+    },
+    {
+      "id": "S2",
+      "title": "Invoice",
+      "start": 22.742,
+      "end": 46.739,
+      "length": 23.997
+    },
+    {
+      "id": "S3",
+      "title": "Read and checked",
+      "start": 46.739,
+      "end": 77.18,
+      "length": 30.441
+    },
+    {
+      "id": "S4",
+      "title": "Plan",
+      "start": 77.18,
+      "end": 110.494,
+      "length": 33.314
+    },
+    {
+      "id": "S5",
+      "title": "Approve",
+      "start": 110.494,
+      "end": 137.134,
+      "length": 26.64
+    },
+    {
+      "id": "S6",
+      "title": "Receipt",
+      "start": 137.134,
+      "end": 153.86,
+      "length": 16.726
+    },
+    {
+      "id": "C2",
+      "title": "Problem 2 · Fake agent",
+      "start": 153.861,
+      "end": 156.413,
+      "length": 2.552
+    },
+    {
+      "id": "S7",
+      "title": "Fake agent",
+      "start": 156.413,
+      "end": 193.247,
+      "length": 36.834
+    },
+    {
+      "id": "C3",
+      "title": "Problem 3 · Money mule",
+      "start": 193.247,
+      "end": 195.792,
+      "length": 2.545
+    },
+    {
+      "id": "S8",
+      "title": "Money mule",
+      "start": 195.792,
+      "end": 227.275,
+      "length": 31.483
+    },
+    {
+      "id": "C4",
+      "title": "The proof",
+      "start": 227.275,
+      "end": 229.818,
+      "length": 2.543
+    },
+    {
+      "id": "S9",
+      "title": "Audit log",
+      "start": 229.818,
+      "end": 250.158,
+      "length": 20.34
+    },
+    {
+      "id": "S10",
+      "title": "Red team",
+      "start": 250.158,
+      "end": 265.005,
+      "length": 14.847
+    },
+    {
+      "id": "S11",
+      "title": "Closing",
+      "start": 265.005,
+      "end": 272.703,
+      "length": 7.698
+    }
+  ],
+  "lines": [
+    {
+      "scene": "S0",
+      "text": "This is Bridge, built by team Malai Ren.",
+      "start": 0.035
+    },
+    {
+      "scene": "S1",
+      "text": "Meet Ahmad, a Malaysian student in Shenzhen.",
+      "start": 4.515
+    },
+    {
+      "scene": "S1",
+      "text": "He gets his scholarship in ringgit, but his bills are in yuan.",
+      "start": 8.161
+    },
+    {
+      "scene": "S1",
+      "text": "Everything you see runs in a sandbox, so no real money moves.",
+      "start": 13.98
+    },
+    {
+      "scene": "S2",
+      "text": "Ahmad has just received his tuition invoice.",
+      "start": 22.865
+    },
+    {
+      "scene": "S2",
+      "text": "Twelve thousand yuan, due on the fifteenth of November.",
+      "start": 28.062
+    },
+    {
+      "scene": "S3",
+      "text": "Bridge reads the amount, the due date and the bank account.",
+      "start": 46.74
+    },
+    {
+      "scene": "S3",
+      "text": "Each one is checked word for word against the invoice.",
+      "start": 53.256
+    },
+    {
+      "scene": "S3",
+      "text": "The account matches the university's registered fee account.",
+      "start": 60.971
+    },
+    {
+      "scene": "S3",
+      "text": "Ahmad reads the summary in Malay, and judges can switch to English.",
+      "start": 69.305
+    },
+    {
+      "scene": "S4",
+      "text": "He asks if he can pay before the deadline.",
+      "start": 78.279
+    },
+    {
+      "scene": "S4",
+      "text": "Bridge checks every bill due before the fifteenth, including rent and his phone bill.",
+      "start": 90.292
+    },
+    {
+      "scene": "S4",
+      "text": "He is short by almost twelve thousand yuan.",
+      "start": 96.981
+    },
+    {
+      "scene": "S4",
+      "text": "So Bridge plans one conversion from ringgit.",
+      "start": 101.062
+    },
+    {
+      "scene": "S4",
+      "text": "It is above his limit, so it needs a one-time code.",
+      "start": 104.708
+    },
+    {
+      "scene": "S5",
+      "text": "Nothing moves until Ahmad approves.",
+      "start": 111.783
+    },
+    {
+      "scene": "S5",
+      "text": "Each step shows its true cost, the fee plus what the exchange rate costs him.",
+      "start": 115.667
+    },
+    {
+      "scene": "S5",
+      "text": "The tuition is above his limit, so it also needs a one-time code.",
+      "start": 130.085
+    },
+    {
+      "scene": "S6",
+      "text": "Paid. Here is the receipt, and his balances update straight away.",
+      "start": 137.134
+    },
+    {
+      "scene": "S7",
+      "text": "Later, Ahmad gets a message from a so-called payment agent.",
+      "start": 156.413
+    },
+    {
+      "scene": "S7",
+      "text": "Fifteen percent off his tuition, if he pays today.",
+      "start": 167.8
+    },
+    {
+      "scene": "S7",
+      "text": "Bridge refuses, and shows him why.",
+      "start": 177.208
+    },
+    {
+      "scene": "S7",
+      "text": "The university's own records contradict the agent and the account.",
+      "start": 181.095
+    },
+    {
+      "scene": "S7",
+      "text": "Show reasoning reveals exactly which facts and rules decided.",
+      "start": 186.043
+    },
+    {
+      "scene": "S8",
+      "text": "Then three thousand yuan arrives from a stranger.",
+      "start": 200.342
+    },
+    {
+      "scene": "S8",
+      "text": "The sender says it was a mistake and asks Ahmad to forward it.",
+      "start": 204.42
+    },
+    {
+      "scene": "S8",
+      "text": "This is how students get pulled into money laundering.",
+      "start": 213.677
+    },
+    {
+      "scene": "S8",
+      "text": "Bridge refuses to move it, and tells him to return it through his bank.",
+      "start": 218.193
+    },
+    {
+      "scene": "S9",
+      "text": "Every step was written to an audit log.",
+      "start": 231.254
+    },
+    {
+      "scene": "S9",
+      "text": "Each record is linked to the one before it, so the chain is intact.",
+      "start": 235.555
+    },
+    {
+      "scene": "S9",
+      "text": "If anyone edits a record, the break shows up straight away.",
+      "start": 242.243
+    },
+    {
+      "scene": "S10",
+      "text": "Finally, we attacked Bridge ourselves with eleven tricks.",
+      "start": 251.734
+    },
+    {
+      "scene": "S10",
+      "text": "It stopped eleven of them.",
+      "start": 255.815
+    },
+    {
+      "scene": "S11",
+      "text": "Bridge. Pay what you owe across borders, and never pay a scammer.",
+      "start": 265.284
+    }
+  ],
+  "spedUp": [
+    {
+      "start": 44.737,
+      "end": 45.937,
+      "factor": 9.6
+    },
+    {
+      "start": 83.792,
+      "end": 84.981,
+      "factor": 3.2
+    },
+    {
+      "start": 165.799,
+      "end": 167,
+      "factor": 18.8
+    },
+    {
+      "start": 175.202,
+      "end": 176.408,
+      "factor": 2.9
+    },
+    {
+      "start": 198.344,
+      "end": 199.542,
+      "factor": 6.7
+    },
+    {
+      "start": 211.672,
+      "end": 212.877,
+      "factor": 2
+    }
+  ],
+  "values": {
+    "agentLabel": "Agent: live",
+    "verifiedFields": "10/10 verified",
+    "shortfall": "CNY 11,978.00",
+    "conversion": "Convert MYR 7,400.49 to CNY",
+    "receipt": "Receipt Close Payment receipt Bridge BRG-20261015-00084 Amount paid CNY 12,000.00 Completed (sandbox) Date 15 Oct 2026 Time 07:03:54 UTC From Ahmad Faris · CNY wallet Payee Shenzhen Polytechnic International University Payee account 4100 2026 0000 8815 Verified: University registry Reference SPIU-FIN-2026-104417 Audit entry #28 hash 5bf8a005144a No real money moved: this payment ran in the Bridge ",
+    "walletsAfterPayment": "MYR MYR 2,441.51 CNY CNY 3,398.00 USD USD 180.00",
+    "discount": "15%",
+    "inbound": "CNY 3,000.00 received from Zhou Wei",
+    "muleBlocked": "Payment blocked: no money was moved Looks like money-mule recruitment Do not forward money from strangers. Ask your bank to return it to the sender. Why? Audit log",
+    "chain": "Chain intact · 55 entries",
+    "tamper": "Chain broken at entry #28",
+    "redteam": "11 / 11"
+  }
+}

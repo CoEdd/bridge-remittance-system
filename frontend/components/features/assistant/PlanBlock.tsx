@@ -1,9 +1,12 @@
 "use client";
 
-import { ArrowRight, CircleCheck } from "lucide-react";
+import { ArrowRight, CircleCheck, ReceiptText } from "lucide-react";
 import Link from "next/link";
+import { useState } from "react";
 import { isWaiting } from "@/components/features/assistant/model";
+import { ReceiptSheet } from "@/components/features/assistant/ReceiptSheet";
 import { Rows } from "@/components/features/assistant/Steps";
+import { Button } from "@/components/ui/Button";
 import type { Row } from "@/components/features/assistant/details";
 import { formatAmount, formatTimestampUtc } from "@/lib/format";
 import { useLanguage } from "@/lib/language";
@@ -37,7 +40,8 @@ function receiptRows(action: Action): Row[] {
 }
 
 /** Proof that an approved action ran, in one line. The posting, the time and the audit entry open on request. */
-function Receipt({ action }: { action: Action }) {
+function Receipt({ action, onView }: { action: Action; onView: (id: number) => void }) {
+  const payment = action.cost_breakdown?.kind === "payment";
   return (
     <details
       data-receipt
@@ -46,7 +50,21 @@ function Receipt({ action }: { action: Action }) {
       <summary className="flex cursor-pointer items-center gap-2 rounded-sm text-15 font-medium text-ink">
         <CircleCheck aria-hidden className="size-5 shrink-0 text-teal" />
         <span className="min-w-0 flex-1">{done(action)}</span>
-        <span className="text-13 font-medium text-teal">Receipt</span>
+        {payment ? (
+          <Button
+            variant="secondary"
+            size="sm"
+            icon={ReceiptText}
+            onClick={(event) => {
+              event.preventDefault(); // open the receipt, not the details below
+              onView(action.id);
+            }}
+          >
+            View receipt
+          </Button>
+        ) : (
+          <span className="text-13 font-medium text-teal">Receipt</span>
+        )}
       </summary>
       <div className="mt-2 border-t border-line pt-2">
         <Rows rows={receiptRows(action)} />
@@ -76,12 +94,14 @@ interface PlanBlockProps {
  */
 export function PlanBlock({ approval, actions }: PlanBlockProps) {
   const { language } = useLanguage();
+  const [viewing, setViewing] = useState<number | null>(null);
   return (
     <>
+      <ReceiptSheet actionId={viewing} onClose={() => setViewing(null)} />
       {approval.actions.map((card) => {
         const action = actions.find((item) => item.id === card.id);
         if (!action || isWaiting(action)) return null;
-        if (action.status === "executed") return <Receipt key={card.id} action={action} />;
+        if (action.status === "executed") return <Receipt key={card.id} action={action} onView={setViewing} />;
         const reason = action.status === "refused" ? action.reasons[0]?.title[language ?? "en"] : undefined;
         return (
           <p key={card.id} className="rounded-card border border-line bg-surface px-4 py-2 text-13 text-body">

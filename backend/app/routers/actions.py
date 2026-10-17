@@ -1,15 +1,15 @@
-from fastapi import APIRouter, HTTPException
+from fastapi import APIRouter, HTTPException, Response
 
 from sqlalchemy import select
 from sqlalchemy.orm import Session
 
 from app import actions, audit
-from app.actions import MAX_OTP_ATTEMPTS, ActionError
+from app.actions import MAX_OTP_ATTEMPTS, ActionError, receipt
 from app.agent import replies
 from app.models import PendingAction
 from app.policy import requires_for
 from app.routers.deps import SessionDep, UserDep
-from app.schemas import ActionOut, OtpIn, OtpOut
+from app.schemas import ActionOut, OtpIn, OtpOut, ReceiptOut
 
 router = APIRouter(prefix="/actions", tags=["actions"])
 
@@ -89,3 +89,31 @@ def cancel_action(action_id: int, session: SessionDep, user: UserDep) -> ActionO
         return action_out(session, actions.cancel(session, user, action_id))
     except ActionError as error:
         raise _http_error(error) from error
+
+
+def _receipt(action_id: int, session: SessionDep, user: UserDep) -> receipt.Receipt:
+    action = session.get(PendingAction, action_id)
+    if action is None or action.user_id != user.id:
+        raise HTTPException(status_code=404, detail="There is no such action.")
+    try:
+        return receipt.build(session, action)
+    except receipt.NoReceipt as error:
+        raise HTTPException(status_code=409, detail=str(error)) from error
+
+
+@router.get("/{action_id}/receipt")
+def get_receipt(action_id: int, session: SessionDep, user: UserDep) -> ReceiptOut:
+    """The receipt of an executed payment."""
+    return ReceiptOut(**_receipt(action_id, session, user).as_json())
+
+
+@router.get("/{action_id}/receipt.pdf")
+def get_receipt_pdf(action_id: int, session: SessionDep, user: UserDep) -> Response:
+    """The same receipt as a PDF file."""
+    found = _receipt(action_id, session, user)
+    return Response(
+        content=receipt.to_pdf(found),
+        media_type="application/pdf",
+        headers={"Content-Disposition": f'attachment; filename="{found.receipt_number}.pdf"'},
+    )
+

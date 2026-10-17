@@ -22,6 +22,7 @@ export const FIELD_LABELS: Record<string, string> = {
   currency: "Currency",
   due_date: "Due date",
   late_fee_terms: "Late fee",
+  invoice_number: "Invoice number",
 };
 
 export function languageList(languages: Language[]): string {

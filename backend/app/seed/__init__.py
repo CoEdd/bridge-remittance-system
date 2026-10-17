@@ -30,7 +30,7 @@ from app.sources.seed import add_seed_sources
 logger = logging.getLogger(__name__)
 
 # Bump whenever a table changes. A database stamped with another number is rebuilt at start-up.
-SCHEMA_VERSION = 8
+SCHEMA_VERSION = 9
 SOURCES_APPROVED_DAYS_AGO = 30
 
 DEMO_USER_ID = 1

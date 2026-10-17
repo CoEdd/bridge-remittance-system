@@ -137,6 +137,7 @@ class Document(Base):
     filename: Mapped[str]
     kind: Mapped[str]  # invoice (a file) or message (pasted text)
     source: Mapped[str] = mapped_column(default="upload")  # how it arrived: upload, paste, demo bundle, demo event
+    sender: Mapped[str | None]  # who sent a message, as the student gave it; shown on its message card
     source_language: Mapped[str]  # every language detected, comma-separated: "en,zh"
     raw_text: Mapped[str] = mapped_column(Text)
     chars_meta: Mapped[Any] = mapped_column(JSON)
@@ -161,6 +162,7 @@ class Bill(Base):
     currency: Mapped[str]
     due_date: Mapped[date | None]  # a payment request in a message may have none
     late_fee_terms: Mapped[str | None] = mapped_column(Text)
+    reference: Mapped[str | None]  # the invoice number, sent with the payment and shown on its receipt
     status: Mapped[str]
 
     payee: Mapped[Payee] = relationship()

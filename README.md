@@ -19,6 +19,7 @@ make test                     # backend tests
 make reset                    # restore the demo data while the app runs
 make e2e                      # the whole demo in a browser (needs Node: cd frontend && npm install)
 make check-ui                 # design rules and colour contrast of the frontend
+make demo-video MODE=live     # record the demo video (MODE=scripted needs no API key)
 ```
 
 ## Presenting the demo
@@ -37,6 +38,15 @@ one line to read out for the current step.
 The bar never approves anything: at step 4 the presenter clicks Approve and types the
 one-time code shown on screen. Steps done by hand count too; the bar reads the app's state.
 For a live pitch, scripted mode is the safe choice (no network needed).
+
+## Demo video
+
+`evidence/video/` holds the demo video (4:33), with and without subtitles, the subtitles as
+`bridge-demo.srt`, and `voiceover-script.md` (every line with its start and end time). It was
+recorded in live mode with Claude by `scripts/video/record_demo.ts`, which uses the app in a
+browser like a person: every click, typed character and screen state is real. The recorder draws
+the cursor, the zoom, the title cards, a file picker in place of the system's own, and a tab
+showing the invoice PDF. Waits for Claude's answers are played faster, with a "Sped up" badge.
 
 ## Two agent modes
 

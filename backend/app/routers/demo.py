@@ -41,7 +41,7 @@ def mule_event(session: SessionDep, user: UserDep) -> MuleEventOut:
     demo = DEMO_DOCUMENTS["mule_message"]
     text = (demo_docs_dir() / demo.filename).read_text(encoding="utf-8")
     document = documents.ingest(
-        session, user, filename=demo.filename, kind="message", read=read_message(text), source="demo event"
+        session, user, filename=demo.filename, kind="message", read=read_message(text), source="demo event", sender=STRANGER_NAME
     )
     return MuleEventOut(
         posting_id=posting.id,

@@ -42,6 +42,7 @@ def bill_out(bill: Bill) -> BillOut:
         due_date=bill.due_date,
         due_in_days=(bill.due_date - demo_today()).days if bill.due_date else None,
         late_fee_terms=bill.late_fee_terms,
+        reference=bill.reference,
         status=bill.status,
         document_id=bill.document_id,
         flagged=documents.bill_is_flagged(bill),
@@ -60,6 +61,7 @@ def _summary(document: Document, has_bill: bool) -> dict:
         "languages": document.source_language.split(","),
         "created_at": document.created_at,
         "status": documents.document_status(document, has_bill),
+        "sender": document.sender,
     }
 
 
@@ -104,8 +106,10 @@ def _read_upload(filename: str, data: bytes) -> tuple[str, ReadResult]:
         raise UnreadableDocument("Upload a PDF, an image or a plain text file.") from error
 
 
-def _ingest(session: Session, user: User, filename: str, kind: str, read: ReadResult, source: str) -> DocumentOut:
-    document = documents.ingest(session, user, filename=filename, kind=kind, read=read, source=source)
+def _ingest(
+    session: Session, user: User, filename: str, kind: str, read: ReadResult, source: str, sender: str | None = None
+) -> DocumentOut:
+    document = documents.ingest(session, user, filename=filename, kind=kind, read=read, source=source, sender=sender)
     return document_out(session, document)
 
 
@@ -130,7 +134,7 @@ def paste_message(body: MessageIn, session: SessionDep, user: UserDep) -> Docume
         read = read_message(body.text)
     except UnreadableDocument as error:
         raise HTTPException(status_code=422, detail=str(error)) from error
-    return _ingest(session, user, "Pasted message", "message", read, "paste")
+    return _ingest(session, user, "Pasted message", "message", read, "paste", (body.sender or "").strip() or None)
 
 
 @router.get("/demo/documents")
@@ -152,7 +156,7 @@ def ingest_demo_document(key: str, session: SessionDep, user: UserDep, pasted: b
     if pasted:
         if demo.kind != "message":
             raise HTTPException(status_code=422, detail="Only a message can be pasted.")
-        return _ingest(session, user, "Pasted message", "message", read_message(data.decode("utf-8")), "paste")
+        return _ingest(session, user, "Pasted message", "message", read_message(data.decode("utf-8")), "paste", demo.sender)
     read = read_pdf(data) if demo.filename.endswith(".pdf") else read_message(data.decode("utf-8"))
     return _ingest(session, user, demo.filename, demo.kind, read, "demo bundle")
 

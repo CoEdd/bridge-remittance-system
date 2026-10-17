@@ -1,5 +1,6 @@
 # Private working files (step prompts, competition forms). Root only; docs/ is committed.
 /doc/
+submission-folder
 
 # Secrets and local config
 .env
@@ -52,3 +53,6 @@ playwright/.cache/
 # Playwright output
 frontend/test-results/
 frontend/playwright-report/
+
+# The demo video recorder leaves a screenshot here when a run stops.
+scripts/video/failed.png

@@ -36,6 +36,13 @@ export function formatDate(isoDate: string): string {
   return `${Number(match[3])} ${month} ${match[1]}`;
 }
 
+/** The time of day in Shenzhen (UTC+8), "22:41", as a chat app shows it. */
+export function formatClock(isoTimestamp: string): string {
+  const instant = new Date(isoTimestamp);
+  if (Number.isNaN(instant.getTime())) throw new RangeError(`Not a timestamp: ${isoTimestamp}`);
+  return new Intl.DateTimeFormat("en-GB", { hour: "2-digit", minute: "2-digit", hour12: false, timeZone: "Asia/Shanghai" }).format(instant);
+}
+
 /** Formats a UTC timestamp as "9 Oct 2026, 03:15:42 UTC", for rates and audit-log entries. */
 export function formatTimestampUtc(isoTimestamp: string): string {
   const instant = new Date(isoTimestamp);

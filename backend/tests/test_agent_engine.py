@@ -548,6 +548,25 @@ def test_live_smoke_claude_answers_a_balance_question(client: TestClient, live_m
 
 
 @live
+def test_live_act_1_the_deadline_question_gets_the_payment_ready(client: TestClient, live_mode: None) -> None:
+    """Asked whether he can pay, Claude proposes the plan's one conversion and the payment; nothing moves yet."""
+    client.post("/demo/documents/tuition_invoice")
+    before = wallet_balances(client)
+
+    events = say(client, "Can I pay this fee before the deadline?")
+
+    assert only(events, "error") == []
+    assert "plan_funding" in [step["tool"] for step in only(events, "step")]
+    [approval] = only(events, "approval_required")
+    assert [(action["tool"], action["tier"]) for action in approval["actions"]] == [
+        ("convert_currency", "T3"),
+        ("pay_bill", "T3"),
+    ]
+    assert approval["actions"][1]["amount"] == 1_200_000
+    assert wallet_balances(client) == before
+
+
+@live
 def test_live_smoke_the_scam_payment_never_goes_through(client: TestClient, live_mode: None) -> None:
     client.post("/demo/documents/agent_offer")
     before = wallet_balances(client)

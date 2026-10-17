@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { ApprovalSheet } from "@/components/features/assistant/ApprovalSheet";
 import { Composer } from "@/components/features/assistant/Composer";
 import { ContextPanel } from "@/components/features/assistant/ContextPanel";
@@ -12,8 +12,10 @@ import { PasteSheet } from "@/components/features/documents/PasteSheet";
 import { Button } from "@/components/ui/Button";
 import { Card } from "@/components/ui/Card";
 import { ErrorState } from "@/components/ui/ErrorState";
+import { Toast } from "@/components/ui/Toast";
 import { Skeleton } from "@/components/ui/Skeleton";
 import { api } from "@/lib/api";
+import { formatAmount } from "@/lib/format";
 import { useDemoCommands } from "@/lib/demo";
 import { useLanguage } from "@/lib/language";
 
@@ -47,6 +49,14 @@ export function Assistant() {
   const fileInput = useRef<HTMLInputElement>(null);
   const [pasting, setPasting] = useState(false);
   const [readingPaste, setReadingPaste] = useState(false);
+  const [toast, setToast] = useState<string | null>(null);
+  const clearToast = useCallback(() => setToast(null), []);
+  /** The stranger's transfer arrives (a demo event): show it like a bank notification, then read their message. */
+  const strangerTransfer = useCallback(async () => {
+    const event = await api.strangerTransfer();
+    setToast(`${formatAmount(event.amount_minor, event.currency)} received from ${event.sender}`);
+    return event.document;
+  }, []);
   const { initial, loaded, live, working } = assistant;
   const busy = useRef(false);
   useEffect(() => {
@@ -61,8 +71,7 @@ export function Assistant() {
       ? {
           "assistant:share": async (key) => void (await assistant.share(() => api.ingestDemoDocument(key ?? ""))),
           "assistant:paste": async (key) => void (await assistant.share(() => api.ingestDemoDocument(key ?? "", true))),
-          "assistant:stranger": async () =>
-            void (await assistant.share(async () => (await api.strangerTransfer()).document)),
+          "assistant:stranger": async () => void (await assistant.share(strangerTransfer)),
           "assistant:ask": (question) => assistant.ask(QUESTIONS[question as Question][language]),
           "assistant:idle": () => untilIdle(busy),
           "assistant:openPlan": (planId) => {
@@ -102,7 +111,7 @@ export function Assistant() {
 
   function useDemo(key: string) {
     // The stranger's transfer is an event: the money arrives first, then the message.
-    if (key === "stranger") void assistant.share(async () => (await api.strangerTransfer()).document);
+    if (key === "stranger") void assistant.share(strangerTransfer);
     else void assistant.share(() => api.ingestDemoDocument(key));
   }
 
@@ -113,9 +122,9 @@ export function Assistant() {
     if (suggestion.kind === "approve") assistant.setOpenPlan(suggestion.planId);
   }
 
-  async function readPaste(text: string): Promise<boolean> {
+  async function readPaste(text: string, sender: string): Promise<boolean> {
     setReadingPaste(true);
-    const started = await assistant.share(() => api.pasteMessage(text));
+    const started = await assistant.share(() => api.pasteMessage(text, sender));
     setReadingPaste(false);
     if (started) setPasting(false);
     return started;
@@ -153,6 +162,7 @@ export function Assistant() {
       </div>
 
       <PasteSheet open={pasting} onClose={() => setPasting(false)} busy={readingPaste} onRead={readPaste} />
+      <Toast message={toast} onDone={clearToast} />
       <ApprovalSheet
         planId={assistant.openPlan}
         actions={live.actions}

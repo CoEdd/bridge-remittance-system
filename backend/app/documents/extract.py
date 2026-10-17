@@ -18,6 +18,7 @@ FIELD_NAMES = (
     "currency",
     "due_date",
     "late_fee_terms",
+    "invoice_number",
 )
 
 # Words for a currency -> ISO 4217 code.
@@ -49,6 +50,8 @@ _CJK = re.compile(r"[一-鿿]")
 
 # In order of preference: English labels first, then Chinese, then Malay, then message wording.
 AMOUNT_PATTERNS = [
+    # An itemised invoice: the total, never one of the line items above it.
+    re.compile(rf"^Total amount due[^\n]*?(?P<span>{_MONEY})", re.I | re.M),
     re.compile(rf"^Amount due{_LABEL_END}(?P<span>{_MONEY})", re.I | re.M),
     re.compile(rf"^(?:应缴金额|金额){_LABEL_END}(?P<span>{_MONEY}(?:[ \t]*元)?)", re.M),
     re.compile(rf"^(?:Jumlah|Amount|Total){_LABEL_END}(?P<span>{_MONEY})", re.I | re.M),
@@ -72,6 +75,11 @@ ACCOUNT_PATTERNS = [
 BANK_PATTERNS = [
     re.compile(rf"^Bank{_LABEL_END}{_REST_OF_LINE}", re.I | re.M),
     re.compile(rf"^开户银行{_LABEL_END}{_REST_OF_LINE}", re.M),
+]
+# The invoice number, which is also the payment reference.
+INVOICE_NUMBER_PATTERNS = [
+    re.compile(rf"^(?:Invoice (?:number|no\.?)|发票号码|缴费单号){_LABEL_END}(?P<span>[A-Z0-9][A-Z0-9/-]{{3,}})", re.I | re.M),
+    re.compile(rf"^(?:Reference|Payment reference|付款附言){_LABEL_END}(?P<span>[A-Z0-9][A-Z0-9/-]{{3,}})", re.I | re.M),
 ]
 LATE_FEE_PATTERNS = [
     re.compile(rf"^Late payment{_LABEL_END}{_REST_OF_LINE}", re.I | re.M),
@@ -183,6 +191,7 @@ def extract_scripted(text: str, kind: str, institutions: list[tuple[str, str]]) 
     keep(_text_field("payee_name", PAYEE_PATTERNS, text))
     keep(_text_field("bank_name", BANK_PATTERNS, text))
     keep(_text_field("late_fee_terms", LATE_FEE_PATTERNS, text))
+    keep(_text_field("invoice_number", INVOICE_NUMBER_PATTERNS, text))
 
     account = _first(ACCOUNT_PATTERNS, text)
     if account:

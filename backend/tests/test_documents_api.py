@@ -21,9 +21,10 @@ def test_loading_the_genuine_invoice_returns_everything_the_page_needs(client: T
 
     assert (document["filename"], document["kind"], document["languages"]) == ("tuition_invoice.pdf", "invoice", ["en", "zh"])
     assert (document["status"], document["trust_flag"]) == ("verified", "trusted")
-    assert document["raw_text"].startswith("Shenzhen Polytechnic International University · Finance Office\n深圳国际理工大学 财务处")
+    assert document["raw_text"].startswith("SPIU\nShenzhen Polytechnic International University · Finance Office\n深圳国际理工大学 财务处")
     assert [field["name"] for field in document["fields"]] == [
         "issuer", "issuer_local_name", "payee_name", "payee_account", "bank_name", "amount", "currency", "due_date", "late_fee_terms",
+        "invoice_number",
     ]  # fmt: skip
     assert all(field["verified"] and field["note"] is None for field in document["fields"])
     # Every field's offsets point at its source text, which is what the page highlights.
@@ -35,6 +36,7 @@ def test_loading_the_genuine_invoice_returns_everything_the_page_needs(client: T
     bill = document["bill"]
     assert (bill["amount_minor"], bill["currency"], bill["due_date"], bill["due_in_days"]) == (cny("12000.00"), "CNY", "2026-11-15", 31)
     assert (bill["payee_name"], bill["flagged"], bill["document_id"]) == ("Shenzhen Polytechnic International University", False, document["id"])
+    assert bill["reference"] == "SPIU-FIN-2026-104417"
 
 
 def test_the_agent_message_shows_three_signals_with_the_policy_clause(client: TestClient) -> None:

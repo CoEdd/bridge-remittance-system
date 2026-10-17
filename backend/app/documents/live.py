@@ -22,7 +22,8 @@ For each field return:
 code such as CNY; due_date as YYYY-MM-DD; payee_account as the digits with their spaces; every \
 other field as the text itself.
 - source: the exact, character-for-character substring of the document that the value comes from. \
-Copy it; do not paraphrase, translate or fix it.
+Copy it; do not paraphrase, translate or fix it. For currency, the source is only the currency code \
+or symbol as written (such as CNY or ¥), never the amount next to it.
 
 If a bilingual document gives a value in English and Chinese, use the English one. If the document \
 does not contain a field, return empty strings for both value and source. Never guess."""

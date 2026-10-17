@@ -1,0 +1,167 @@
+1
+00:00:00,035 --> 00:00:04,113
+This is Bridge, built by team Malai Ren.
+
+2
+00:00:04,515 --> 00:00:08,041
+Meet Ahmad, a Malaysian
+student in Shenzhen.
+
+3
+00:00:08,161 --> 00:00:13,860
+He gets his scholarship in
+ringgit, but his bills are in yuan.
+
+4
+00:00:13,980 --> 00:00:19,797
+Everything you see runs in a
+sandbox, so no real money moves.
+
+5
+00:00:22,865 --> 00:00:26,508
+Ahmad has just received
+his tuition invoice.
+
+6
+00:00:28,062 --> 00:00:32,575
+Twelve thousand yuan, due on
+the fifteenth of November.
+
+7
+00:00:46,740 --> 00:00:52,123
+Bridge reads the amount, the
+due date and the bank account.
+
+8
+00:00:53,256 --> 00:00:58,204
+Each one is checked word for
+word against the invoice.
+
+9
+00:01:00,971 --> 00:01:05,049
+The account matches the
+university's registered fee account.
+
+10
+00:01:09,305 --> 00:01:15,122
+Ahmad reads the summary in Malay,
+and judges can switch to English.
+
+11
+00:01:18,279 --> 00:01:22,792
+He asks if he can pay before the deadline.
+
+12
+00:01:30,292 --> 00:01:34,046
+Bridge checks every bill
+due before the fifteenth,
+
+13
+00:01:34,046 --> 00:01:36,861
+including rent and his phone bill.
+
+14
+00:01:36,981 --> 00:01:40,942
+He is short by almost
+twelve thousand yuan.
+
+15
+00:01:41,062 --> 00:01:44,588
+So Bridge plans one
+conversion from ringgit.
+
+16
+00:01:44,708 --> 00:01:50,091
+It is above his limit, so
+it needs a one-time code.
+
+17
+00:01:51,783 --> 00:01:54,557
+Nothing moves until Ahmad approves.
+
+18
+00:01:55,667 --> 00:02:01,667
+Each step shows its true cost, the fee
+plus what the exchange rate costs him.
+
+19
+00:02:10,085 --> 00:02:16,085
+The tuition is above his limit,
+so it also needs a one-time code.
+
+20
+00:02:17,134 --> 00:02:22,517
+Paid. Here is the receipt, and
+his balances update straight away.
+
+21
+00:02:36,413 --> 00:02:41,361
+Later, Ahmad gets a message
+from a so-called payment agent.
+
+22
+00:02:47,800 --> 00:02:52,313
+Fifteen percent off his
+tuition, if he pays today.
+
+23
+00:02:57,208 --> 00:03:00,417
+Bridge refuses, and shows him why.
+
+24
+00:03:01,095 --> 00:03:05,923
+The university's own records
+contradict the agent and the account.
+
+25
+00:03:06,043 --> 00:03:10,556
+Show reasoning reveals exactly
+which facts and rules decided.
+
+26
+00:03:20,342 --> 00:03:24,300
+Then three thousand yuan
+arrives from a stranger.
+
+27
+00:03:24,420 --> 00:03:30,420
+The sender says it was a mistake
+and asks Ahmad to forward it.
+
+28
+00:03:33,677 --> 00:03:38,073
+This is how students get
+pulled into money laundering.
+
+29
+00:03:38,193 --> 00:03:44,193
+Bridge refuses to move it, and tells
+him to return it through his bank.
+
+30
+00:03:51,254 --> 00:03:55,332
+Every step was written to an audit log.
+
+31
+00:03:55,555 --> 00:04:01,555
+Each record is linked to the one
+before it, so the chain is intact.
+
+32
+00:04:02,243 --> 00:04:07,626
+If anyone edits a record, the
+break shows up straight away.
+
+33
+00:04:11,734 --> 00:04:15,695
+Finally, we attacked Bridge
+ourselves with eleven tricks.
+
+34
+00:04:15,815 --> 00:04:18,589
+It stopped eleven of them.
+
+35
+00:04:25,284 --> 00:04:31,101
+Bridge. Pay what you owe across
+borders, and never pay a scammer.
