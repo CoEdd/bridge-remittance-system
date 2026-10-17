@@ -130,3 +130,8 @@ tampering simulation, every action with its tier and status, the ledger transact
 balances at each stage, the chat history, the payment receipt and the 11 red-team results.
 `summary.md` lists the 13 checks the run makes; all passed. The security self-assessment is in
 `docs/security-self-assessment.md`.
+
+## Licence
+
+MIT, copyright Team Malai Ren (see `LICENSE`). Third-party code, models, fonts and data are
+listed with their licences in `THIRD_PARTY_NOTICES.md`.
