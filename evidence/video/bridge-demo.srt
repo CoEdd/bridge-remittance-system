@@ -13,155 +13,272 @@ He gets his scholarship in
 ringgit, but his bills are in yuan.
 
 4
-00:00:13,980 --> 00:00:19,797
+00:00:13,980 --> 00:00:19,780
 Everything you see runs in a
 sandbox, so no real money moves.
 
 5
+00:00:19,900 --> 00:00:22,745
+Problem one: paying on
+time in another currency.
+
+6
 00:00:22,865 --> 00:00:26,508
 Ahmad has just received
 his tuition invoice.
 
-6
+7
 00:00:28,062 --> 00:00:32,575
 Twelve thousand yuan, due on
 the fifteenth of November.
 
-7
-00:00:46,740 --> 00:00:52,123
+8
+00:00:32,700 --> 00:00:35,580
+The invoice also shows how to pay.
+
+9
+00:00:35,700 --> 00:00:39,480
+Back in Bridge, I switch the language
+to Malay, Ahmad's own language.
+
+10
+00:00:39,600 --> 00:00:43,600
+Then I click Upload an
+invoice and choose the PDF.
+
+11
+00:00:43,800 --> 00:00:46,600
+Bridge reads the file.
+
+12
+00:00:46,740 --> 00:00:50,480
 Bridge reads the amount, the
 due date and the bank account.
 
-8
-00:00:53,256 --> 00:00:58,204
+13
+00:00:50,600 --> 00:00:53,136
+I click Open to see the source.
+
+14
+00:00:53,256 --> 00:00:58,180
 Each one is checked word for
 word against the invoice.
 
-9
-00:01:00,971 --> 00:01:05,049
+15
+00:00:58,300 --> 00:01:00,851
+Now I open the Payees page.
+
+16
+00:01:00,971 --> 00:01:04,980
 The account matches the
 university's registered fee account.
 
-10
-00:01:09,305 --> 00:01:15,122
+17
+00:01:05,100 --> 00:01:08,300
+Its badge says: University registry.
+
+18
+00:01:09,305 --> 00:01:15,080
 Ahmad reads the summary in Malay,
 and judges can switch to English.
 
-11
+19
+00:01:15,200 --> 00:01:18,159
+I switch back to English for everyone.
+
+20
 00:01:18,279 --> 00:01:22,792
 He asks if he can pay before the deadline.
 
-12
+21
+00:01:25,400 --> 00:01:30,172
+Bridge opens an approval sheet. I
+close it first, to see the plan.
+
+22
 00:01:30,292 --> 00:01:34,046
 Bridge checks every bill
 due before the fifteenth,
 
-13
+23
 00:01:34,046 --> 00:01:36,861
 including rent and his phone bill.
 
-14
+24
 00:01:36,981 --> 00:01:40,942
 He is short by almost
 twelve thousand yuan.
 
-15
+25
 00:01:41,062 --> 00:01:44,588
 So Bridge plans one
 conversion from ringgit.
 
-16
+26
 00:01:44,708 --> 00:01:50,091
 It is above his limit, so
 it needs a one-time code.
 
-17
+27
 00:01:51,783 --> 00:01:54,557
 Nothing moves until Ahmad approves.
 
-18
+28
 00:01:55,667 --> 00:02:01,667
 Each step shows its true cost, the fee
 plus what the exchange rate costs him.
 
-19
+29
+00:02:02,000 --> 00:02:08,000
+More details shows the rates. Then
+I type the code and click Approve.
+
+30
 00:02:10,085 --> 00:02:16,085
 The tuition is above his limit,
 so it also needs a one-time code.
 
-20
-00:02:17,134 --> 00:02:22,517
+31
+00:02:17,134 --> 00:02:22,480
 Paid. Here is the receipt, and
 his balances update straight away.
 
-21
+32
+00:02:22,600 --> 00:02:27,280
+The receipt shows the verified
+account and the invoice number.
+
+33
+00:02:27,400 --> 00:02:30,400
+I can also download it as a PDF.
+
+34
+00:02:31,000 --> 00:02:36,293
+That was the first problem. Now
+the second: a fake payment agent.
+
+35
 00:02:36,413 --> 00:02:41,361
 Later, Ahmad gets a message
 from a so-called payment agent.
 
-22
-00:02:47,800 --> 00:02:52,313
+36
+00:02:41,500 --> 00:02:45,500
+I type the sender's name
+and paste the message.
+
+37
+00:02:47,800 --> 00:02:52,280
 Fifteen percent off his
 tuition, if he pays today.
 
-23
+38
+00:02:52,400 --> 00:02:57,088
+I ask Bridge: can I
+pay through this agent?
+
+39
 00:02:57,208 --> 00:03:00,417
 Bridge refuses, and shows him why.
 
-24
+40
 00:03:01,095 --> 00:03:05,923
 The university's own records
 contradict the agent and the account.
 
-25
+41
 00:03:06,043 --> 00:03:10,556
 Show reasoning reveals exactly
 which facts and rules decided.
 
-26
+42
+00:03:10,700 --> 00:03:12,880
+His bill is now marked Blocked.
+
+43
+00:03:13,000 --> 00:03:15,700
+Now the third problem: a money mule.
+
+44
+00:03:15,900 --> 00:03:20,200
+I click the button that
+sends money from a stranger.
+
+45
 00:03:20,342 --> 00:03:24,300
 Then three thousand yuan
 arrives from a stranger.
 
-27
-00:03:24,420 --> 00:03:30,420
+46
+00:03:24,420 --> 00:03:30,380
 The sender says it was a mistake
 and asks Ahmad to forward it.
 
-28
+47
+00:03:30,500 --> 00:03:33,557
+I ask if I can forward the money.
+
+48
 00:03:33,677 --> 00:03:38,073
 This is how students get
 pulled into money laundering.
 
-29
-00:03:38,193 --> 00:03:44,193
+49
+00:03:38,193 --> 00:03:44,180
 Bridge refuses to move it, and tells
 him to return it through his bank.
 
-30
-00:03:51,254 --> 00:03:55,332
+50
+00:03:44,300 --> 00:03:47,180
+I click Why? to read the reason.
+
+51
+00:03:47,300 --> 00:03:51,134
+Last, the proof that
+Bridge can be trusted.
+
+52
+00:03:51,254 --> 00:03:53,780
 Every step was written to an audit log.
 
-31
-00:03:55,555 --> 00:04:01,555
+53
+00:03:53,900 --> 00:03:55,435
+I click Verify chain.
+
+54
+00:03:55,555 --> 00:03:59,680
 Each record is linked to the one
 before it, so the chain is intact.
 
-32
-00:04:02,243 --> 00:04:07,626
+55
+00:03:59,800 --> 00:04:02,100
+I click Simulate tampering.
+
+56
+00:04:02,243 --> 00:04:07,580
 If anyone edits a record, the
 break shows up straight away.
 
-33
+57
+00:04:07,700 --> 00:04:11,600
+I go back to the real log,
+which was never changed.
+
+58
 00:04:11,734 --> 00:04:15,695
 Finally, we attacked Bridge
 ourselves with eleven tricks.
 
-34
+59
 00:04:15,815 --> 00:04:18,589
 It stopped eleven of them.
 
-35
+60
+00:04:20,400 --> 00:04:24,900
+Each card shows the attack, what
+we expected and what happened.
+
+61
 00:04:25,284 --> 00:04:31,101
 Bridge. Pay what you owe across
 borders, and never pay a scammer.

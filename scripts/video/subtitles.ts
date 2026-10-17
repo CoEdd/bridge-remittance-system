@@ -1,5 +1,6 @@
 /**
- * Subtitles for the demo video, made from the narration lines in scripts/video/timeline.json:
+ * Subtitles for the demo video, made from the narration lines in scripts/video/timeline.json and
+ * the lines added after recording in scripts/video/added_lines.json (if it fits this recording):
  *   evidence/video/bridge-demo.srt            the subtitles, to switch on in a player
  *   evidence/video/bridge-demo-subtitled.mp4  the clean video with them burned in
  *   evidence/video/voiceover-script.md        every line with its start and end, by scene
@@ -28,10 +29,11 @@ const MAX_S = 6;
 const GAP_S = 0.12; // between one cue and the next
 const WORDS_PER_SECOND = 2.3; // the pace the recorder left for each line
 
-interface Line { scene: string; text: string; start: number }
+interface Line { scene: string; text: string; start: number; end?: number }
 interface Scene { id: string; title: string; start: number; end: number }
 interface Timeline { recordedAt: string; agentMode: string; model: string | null; duration: number; scenes: Scene[]; lines: Line[]; values: Record<string, string | number> }
 interface Cue { scene: string; rows: string[]; start: number; end: number }
+interface Added { recordedAt: string; lines: Required<Line>[] }
 
 const words = (text: string) => text.trim().split(/\s+/);
 const round = (seconds: number) => Math.round(seconds * 1000) / 1000;
@@ -62,13 +64,30 @@ function split(text: string): string[] {
   return [parts.slice(0, at).join(" "), parts.slice(at).join(" ")];
 }
 
-function cuesFor(timeline: Timeline): Cue[] {
+/** The recorded lines and the added ones, in order. An added line has its own end time. */
+function allLines(timeline: Timeline): Line[] {
+  const file = join(ROOT, "scripts/video/added_lines.json");
+  let added: Added | null = null;
+  try {
+    added = JSON.parse(readFileSync(file, "utf8"));
+  } catch {
+    return timeline.lines;
+  }
+  if (added!.recordedAt !== timeline.recordedAt) {
+    throw new Error("scripts/video/added_lines.json was timed for another recording: place its lines again or delete it");
+  }
+  return [...timeline.lines, ...added!.lines].sort((a, b) => a.start - b.start);
+}
+
+function cuesFor(timeline: Timeline, lines: Line[]): Cue[] {
   const cues: Cue[] = [];
-  timeline.lines.forEach((line, i) => {
+  lines.forEach((line, i) => {
     const scene = timeline.scenes.find((item) => item.id === line.scene)!;
-    const next = timeline.lines[i + 1]?.start ?? Infinity;
+    const next = lines[i + 1]?.start ?? Infinity;
     const spoken = words(line.text).length / WORDS_PER_SECOND + 0.6;
-    const end = Math.min(line.start + Math.min(Math.max(spoken, MIN_S), MAX_S * 2), next - GAP_S, scene.end - 0.05);
+    const end = line.end !== undefined
+      ? Math.min(line.end, next - GAP_S)
+      : Math.min(line.start + Math.min(Math.max(spoken, MIN_S), MAX_S * 2), next - GAP_S, scene.end - 0.05);
     const texts = wrap(line.text) ? [line.text] : split(line.text);
     const total = words(line.text).length;
     let start = line.start;
@@ -116,29 +135,29 @@ function srt(cues: Cue[]): string {
   return cues.map((cue, i) => `${i + 1}\n${clock(cue.start)} --> ${clock(cue.end)}\n${cue.rows.join("\n")}\n`).join("\n");
 }
 
-function voiceover(timeline: Timeline, cues: Cue[]): string {
-  const lines: string[] = [
+function voiceover(timeline: Timeline, lines: Line[], cues: Cue[]): string {
+  const out: string[] = [
     "# Bridge demo video: voice-over script",
     "",
     `Video: bridge-demo-subtitled.mp4 (${short(timeline.duration)}), recorded in ${timeline.agentMode} mode${timeline.model ? ` (${timeline.model})` : ""} on ${timeline.recordedAt.slice(0, 10)}.`,
-    "Read each line from its start time; it should be finished by its end time. Title cards have no voice.",
+    "Read each line from its start time; it should be finished by its end time.",
     "",
   ];
   for (const scene of timeline.scenes) {
-    lines.push(`## ${scene.id} · ${scene.title} (${short(scene.start)} to ${short(scene.end)})`, "");
-    const spoken = timeline.lines.filter((line) => line.scene === scene.id);
+    out.push(`## ${scene.id} · ${scene.title} (${short(scene.start)} to ${short(scene.end)})`, "");
+    const spoken = lines.filter((line) => line.scene === scene.id);
     if (!spoken.length) {
-      lines.push("Title card, no voice.", "");
+      out.push("Title card, no voice.", "");
       continue;
     }
-    lines.push("| Start | End | Line |", "|---|---|---|");
+    out.push("| Start | End | Line |", "|---|---|---|");
     for (const line of spoken) {
       const own = cues.filter((cue) => cue.scene === line.scene && cue.start >= line.start - 0.001 && line.text.includes(cue.rows.join(" ")));
-      lines.push(`| ${short(line.start)} | ${short(own[own.length - 1].end)} | ${line.text} |`);
+      out.push(`| ${short(line.start)} | ${short(own[own.length - 1].end)} | ${line.text} |`);
     }
-    lines.push("");
+    out.push("");
   }
-  return lines.join("\n");
+  return out.join("\n");
 }
 
 /** One transparent PNG per cue: white IBM Plex Sans on a dark see-through box, drawn by the app's page. */
@@ -194,19 +213,20 @@ const duration = (file: string) =>
 async function main(): Promise<void> {
   const timeline: Timeline = JSON.parse(readFileSync(join(ROOT, "scripts/video/timeline.json"), "utf8"));
   const numbers = checkNumbers(timeline);
-  const cues = cuesFor(timeline);
+  const lines = allLines(timeline);
+  const cues = cuesFor(timeline, lines);
   const work = mkdtempSync(join(tmpdir(), "bridge-subtitles-"));
   try {
     const images = await renderCues(cues, work);
     writeFileSync(join(OUT, "bridge-demo.srt"), srt(cues));
-    writeFileSync(join(OUT, "voiceover-script.md"), voiceover(timeline, cues));
+    writeFileSync(join(OUT, "voiceover-script.md"), voiceover(timeline, lines, cues));
     console.log(`Burning ${cues.length} subtitles into the video…`);
     burn(cues, images, join(OUT, "bridge-demo-subtitled.mp4"));
   } finally {
     rmSync(work, { recursive: true, force: true });
   }
   const length = duration(join(OUT, "bridge-demo-subtitled.mp4"));
-  console.log(`${cues.length} subtitles from ${timeline.lines.length} lines; longest row ${Math.max(...cues.flatMap((cue) => cue.rows.map((row) => row.length)))} characters;`);
+  console.log(`${cues.length} subtitles from ${lines.length} lines; longest row ${Math.max(...cues.flatMap((cue) => cue.rows.map((row) => row.length)))} characters;`);
   console.log(`on screen ${Math.min(...cues.map((cue) => cue.end - cue.start)).toFixed(2)} to ${Math.max(...cues.map((cue) => cue.end - cue.start)).toFixed(2)} s each.`);
   console.log(`Numbers checked against the screen: ${numbers.join("; ")}`);
   console.log(`bridge-demo-subtitled.mp4: ${short(length)} (clean: ${short(duration(CLEAN))})`);

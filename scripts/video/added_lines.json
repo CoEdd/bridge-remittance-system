@@ -1,0 +1,162 @@
+{
+  "note": "Narration added after recording, placed at the moments the clicks happen in the recording named here. They only fit that recording; after a new recording, place them again or drop this file.",
+  "recordedAt": "2026-10-17T07:07:25.008Z",
+  "lines": [
+    {
+      "scene": "C1",
+      "start": 19.9,
+      "end": 22.8,
+      "text": "Problem one: paying on time in another currency."
+    },
+    {
+      "scene": "S2",
+      "start": 32.7,
+      "end": 35.6,
+      "text": "The invoice also shows how to pay."
+    },
+    {
+      "scene": "S2",
+      "start": 35.7,
+      "end": 39.5,
+      "text": "Back in Bridge, I switch the language to Malay, Ahmad's own language."
+    },
+    {
+      "scene": "S2",
+      "start": 39.6,
+      "end": 43.6,
+      "text": "Then I click Upload an invoice and choose the PDF."
+    },
+    {
+      "scene": "S2",
+      "start": 43.8,
+      "end": 46.6,
+      "text": "Bridge reads the file."
+    },
+    {
+      "scene": "S3",
+      "start": 50.6,
+      "end": 53.2,
+      "text": "I click Open to see the source."
+    },
+    {
+      "scene": "S3",
+      "start": 58.3,
+      "end": 60.9,
+      "text": "Now I open the Payees page."
+    },
+    {
+      "scene": "S3",
+      "start": 65.1,
+      "end": 68.3,
+      "text": "Its badge says: University registry."
+    },
+    {
+      "scene": "S3",
+      "start": 75.2,
+      "end": 78.2,
+      "text": "I switch back to English for everyone."
+    },
+    {
+      "scene": "S4",
+      "start": 85.4,
+      "end": 90.2,
+      "text": "Bridge opens an approval sheet. I close it first, to see the plan."
+    },
+    {
+      "scene": "S5",
+      "start": 122.0,
+      "end": 128.0,
+      "text": "More details shows the rates. Then I type the code and click Approve."
+    },
+    {
+      "scene": "S6",
+      "start": 142.6,
+      "end": 147.3,
+      "text": "The receipt shows the verified account and the invoice number."
+    },
+    {
+      "scene": "S6",
+      "start": 147.4,
+      "end": 150.4,
+      "text": "I can also download it as a PDF."
+    },
+    {
+      "scene": "S6",
+      "start": 151.0,
+      "end": 156.3,
+      "text": "That was the first problem. Now the second: a fake payment agent."
+    },
+    {
+      "scene": "S7",
+      "start": 161.5,
+      "end": 165.5,
+      "text": "I type the sender's name and paste the message."
+    },
+    {
+      "scene": "S7",
+      "start": 172.4,
+      "end": 177.1,
+      "text": "I ask Bridge: can I pay through this agent?"
+    },
+    {
+      "scene": "S7",
+      "start": 190.7,
+      "end": 192.9,
+      "text": "His bill is now marked Blocked."
+    },
+    {
+      "scene": "S7",
+      "start": 193.0,
+      "end": 195.7,
+      "text": "Now the third problem: a money mule."
+    },
+    {
+      "scene": "S8",
+      "start": 195.9,
+      "end": 200.2,
+      "text": "I click the button that sends money from a stranger."
+    },
+    {
+      "scene": "S8",
+      "start": 210.5,
+      "end": 213.6,
+      "text": "I ask if I can forward the money."
+    },
+    {
+      "scene": "S8",
+      "start": 224.3,
+      "end": 227.2,
+      "text": "I click Why? to read the reason."
+    },
+    {
+      "scene": "S8",
+      "start": 227.3,
+      "end": 231.2,
+      "text": "Last, the proof that Bridge can be trusted."
+    },
+    {
+      "scene": "S9",
+      "start": 233.9,
+      "end": 235.5,
+      "text": "I click Verify chain."
+    },
+    {
+      "scene": "S9",
+      "start": 239.8,
+      "end": 242.1,
+      "text": "I click Simulate tampering."
+    },
+    {
+      "scene": "S9",
+      "start": 247.7,
+      "end": 251.6,
+      "text": "I go back to the real log, which was never changed."
+    },
+    {
+      "scene": "S10",
+      "start": 260.4,
+      "end": 264.9,
+      "text": "Each card shows the attack, what we expected and what happened."
+    }
+  ]
+}
