@@ -56,3 +56,19 @@ frontend/playwright-report/
 
 # The demo video recorder leaves a screenshot here when a run stops.
 scripts/video/failed.png
+
+# Personal workspace files: voice recordings, office documents and their lock files.
+*.m4a
+*.mp3
+*.wav
+*.aac
+*.xlsx
+*.xls
+*.docx
+*.pptx
+*.key
+~$*
+
+# In-between demo videos, rebuilt by make demo-video; only the final video is committed.
+evidence/video/bridge-demo-clean.mp4
+evidence/video/bridge-demo-subtitled.mp4

@@ -44,8 +44,9 @@ For a live pitch, scripted mode is the safe choice (no network needed).
 
 ## Demo video
 
-`evidence/video/` holds the demo video (4:33), with and without subtitles, the subtitles as
-`bridge-demo.srt`, and `voiceover-script.md` (every line with its start and end time). It was
+`evidence/video/` holds the demo video with voice-over and subtitles (`bridge-demo-final.mp4`,
+4:45), the subtitles as `bridge-demo.srt`, and `voiceover-script.md` (every line with its start
+and end time). `make demo-video` also writes the video without subtitles and without voice. It was
 recorded in live mode with Claude by `scripts/video/record_demo.ts`, which uses the app in a
 browser like a person: every click, typed character and screen state is real. The recorder draws
 the cursor, the zoom, the title cards, a file picker in place of the system's own, and a tab
