@@ -6,8 +6,10 @@ sandbox ledger only after the student approves. No real money moves.
 
 Team: Malai Ren. WeBank Fintechathon 2026, International Track, Topic C.
 
-This README is a short start. The full version (deployment, security report, licences)
-comes in a later step.
+Repository: https://github.com/CoEdd/bridge-remittance-system
+
+Security self-assessment: `docs/security-self-assessment.md`. Execution evidence: the demo
+video in `evidence/video/` and the logs of a full sandbox run in `evidence/sandbox-run/`.
 
 ## Run it
 
