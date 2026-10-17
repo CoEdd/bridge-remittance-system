@@ -433,7 +433,10 @@ async function main(): Promise<void> {
     await film.follow(app);
 
     await director.run("S0", "Opening", async () => {
-      await say("This is Bridge, built by team Malai Ren.");
+      await say("Good day, everyone. We are team Malai Ren, from Malaysia.");
+      await say("We built Bridge, an AI money agent for international students.");
+      await say("It plans and pays bills across currencies, only after the student approves.");
+      await say("Today you will see it solve three real problems.");
       await director.until(director.lineEnds);
       await app.evaluate(() => (window as any).__video.closeCard());
       await hand.show(true);
