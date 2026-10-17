@@ -1,0 +1,266 @@
+[
+  {
+    "id": 1,
+    "plan_id": "plan-69feb31964",
+    "tool": "convert_currency",
+    "args": {
+      "from_currency": "MYR",
+      "to_currency": "CNY",
+      "amount_minor": 740049,
+      "provider_id": 1
+    },
+    "tier": "T3",
+    "status": "executed",
+    "requires": [
+      "confirm",
+      "otp"
+    ],
+    "reasons": [
+      {
+        "code": "OVER_TXN_LIMIT",
+        "severity": "info",
+        "title": {
+          "en": "Above your per-payment limit",
+          "ms": "Melebihi had setiap bayaran",
+          "zh": "超出单笔限额"
+        },
+        "text": {
+          "en": "A one-time code is needed because this is above your per-payment limit, counting today's related actions.",
+          "ms": "Kod sekali guna diperlukan kerana jumlah ini melebihi had setiap bayaran anda, termasuk tindakan berkaitan pada hari ini.",
+          "zh": "该金额（含今日相关操作）超过您的单笔限额，需要输入一次性验证码。"
+        }
+      }
+    ],
+    "why": {
+      "ms": "Kod sekali guna diperlukan kerana jumlah ini melebihi had setiap bayaran anda, termasuk tindakan berkaitan pada hari ini.",
+      "en": "A one-time code is needed because this is above your per-payment limit, counting today's related actions.",
+      "zh": "该金额（含今日相关操作）超过您的单笔限额，需要输入一次性验证码。"
+    },
+    "cost_breakdown": {
+      "kind": "conversion",
+      "provider_id": 1,
+      "provider_name": "RemitFast (simulated)",
+      "from_currency": "MYR",
+      "to_currency": "CNY",
+      "amount_minor": 740049,
+      "mid_rate": "1.6382",
+      "offered_rate": "1.6185416",
+      "markup_pct": "1.2",
+      "fee_minor": 800,
+      "markup_cost_minor": 8881,
+      "total_cost_minor": 9681,
+      "total_debit_minor": 740849,
+      "amount_received_minor": 1197800,
+      "received_at_mid_minor": 1212348,
+      "delivery_hours": 4,
+      "arrives_at": "2026-10-17T20:58:35.387734+00:00",
+      "source": "simulated",
+      "quoted_at": "2026-10-17T16:58:35.387734+00:00",
+      "expires_at": "2026-10-17T17:08:35.387734+00:00",
+      "warning": null,
+      "home_currency": "MYR",
+      "home_equivalent_minor": 740049
+    },
+    "otp_attempts": 0,
+    "otp_attempts_left": 3,
+    "created_at": "2026-10-17T16:58:35.387734Z",
+    "expires_at": null,
+    "cooling_off_until": null,
+    "executed_posting_id": 83,
+    "closed_at": "2026-10-17T16:58:38.249253Z",
+    "audit_seq": 20
+  },
+  {
+    "id": 2,
+    "plan_id": "plan-69feb31964",
+    "tool": "pay_bill",
+    "args": {
+      "bill_id": 3,
+      "from_account_id": 2
+    },
+    "tier": "T3",
+    "status": "executed",
+    "requires": [
+      "confirm",
+      "otp"
+    ],
+    "reasons": [
+      {
+        "code": "OVER_TXN_LIMIT",
+        "severity": "info",
+        "title": {
+          "en": "Above your per-payment limit",
+          "ms": "Melebihi had setiap bayaran",
+          "zh": "超出单笔限额"
+        },
+        "text": {
+          "en": "A one-time code is needed because this is above your per-payment limit, counting today's related actions.",
+          "ms": "Kod sekali guna diperlukan kerana jumlah ini melebihi had setiap bayaran anda, termasuk tindakan berkaitan pada hari ini.",
+          "zh": "该金额（含今日相关操作）超过您的单笔限额，需要输入一次性验证码。"
+        }
+      }
+    ],
+    "why": {
+      "ms": "Kod sekali guna diperlukan kerana jumlah ini melebihi had setiap bayaran anda, termasuk tindakan berkaitan pada hari ini.",
+      "en": "A one-time code is needed because this is above your per-payment limit, counting today's related actions.",
+      "zh": "该金额（含今日相关操作）超过您的单笔限额，需要输入一次性验证码。"
+    },
+    "cost_breakdown": {
+      "kind": "payment",
+      "bill_id": 3,
+      "payee_id": 1,
+      "payee_name": "Shenzhen Polytechnic International University",
+      "payee_account_ref": "4100 2026 0000 8815",
+      "amount_minor": 1200000,
+      "currency": "CNY",
+      "fee_minor": 0,
+      "total_minor": 1200000,
+      "home_currency": "MYR",
+      "home_equivalent_minor": 732512
+    },
+    "otp_attempts": 0,
+    "otp_attempts_left": 3,
+    "created_at": "2026-10-17T16:58:35.400902Z",
+    "expires_at": null,
+    "cooling_off_until": null,
+    "executed_posting_id": 84,
+    "closed_at": "2026-10-17T16:58:38.273417Z",
+    "audit_seq": 24
+  },
+  {
+    "id": 3,
+    "plan_id": "plan-922450f4b9",
+    "tool": "pay_bill",
+    "args": {
+      "bill_id": 4,
+      "from_account_id": 2
+    },
+    "tier": "REFUSED",
+    "status": "refused",
+    "requires": [],
+    "reasons": [
+      {
+        "code": "PAYEE_NOT_OFFICIAL",
+        "severity": "block",
+        "title": {
+          "en": "Not the official account",
+          "ms": "Bukan akaun rasmi",
+          "zh": "不是官方账户"
+        },
+        "text": {
+          "en": "This account is not the one the institution has registered for payments.",
+          "ms": "Akaun ini bukan akaun yang didaftarkan oleh institusi tersebut untuk menerima bayaran.",
+          "zh": "该账户不是该机构登记的官方收款账户。"
+        }
+      },
+      {
+        "code": "THIRD_PARTY_DISCOUNT",
+        "severity": "block",
+        "title": {
+          "en": "Discount through a third party",
+          "ms": "Diskaun melalui pihak ketiga",
+          "zh": "第三方折扣"
+        },
+        "text": {
+          "en": "The institution's own policy says it never offers discounts through agents.",
+          "ms": "Dasar institusi itu sendiri menyatakan bahawa ia tidak pernah menawarkan diskaun melalui ejen.",
+          "zh": "该机构的政策明确规定，从不通过代理提供折扣。"
+        }
+      },
+      {
+        "code": "SCAM_PATTERN",
+        "severity": "block",
+        "title": {
+          "en": "Matches a known scam pattern",
+          "ms": "Sepadan dengan corak penipuan",
+          "zh": "符合已知诈骗特征"
+        },
+        "text": {
+          "en": "Pressure to pay today and a request for secrecy match known fee-scam patterns.",
+          "ms": "Desakan untuk membayar hari ini dan permintaan supaya dirahsiakan sepadan dengan corak penipuan yuran.",
+          "zh": "催促当天付款并要求保密，符合已知的学费诈骗特征。"
+        }
+      }
+    ],
+    "why": {
+      "ms": "Ditolak: Bukan akaun rasmi; Diskaun melalui pihak ketiga; Sepadan dengan corak penipuan.",
+      "en": "Refused: Not the official account; Discount through a third party; Matches a known scam pattern.",
+      "zh": "已拒绝: 不是官方账户; 第三方折扣; 符合已知诈骗特征."
+    },
+    "cost_breakdown": {
+      "kind": "payment",
+      "bill_id": 4,
+      "payee_id": 4,
+      "payee_name": "Lim Wei Jie",
+      "payee_account_ref": "6217 9988 2041 5530",
+      "amount_minor": 1020000,
+      "currency": "CNY",
+      "fee_minor": 0,
+      "total_minor": 1020000,
+      "home_currency": "MYR",
+      "home_equivalent_minor": 622635
+    },
+    "otp_attempts": 0,
+    "otp_attempts_left": 3,
+    "created_at": "2026-10-17T16:59:00.303788Z",
+    "expires_at": null,
+    "cooling_off_until": null,
+    "executed_posting_id": null,
+    "closed_at": "2026-10-17T16:59:00.303788Z",
+    "audit_seq": 36
+  },
+  {
+    "id": 4,
+    "plan_id": "plan-ffbdb8d6d4",
+    "tool": "pay_bill",
+    "args": {
+      "bill_id": 5,
+      "from_account_id": 2
+    },
+    "tier": "REFUSED",
+    "status": "refused",
+    "requires": [],
+    "reasons": [
+      {
+        "code": "MONEY_MULE_PATTERN",
+        "severity": "block",
+        "title": {
+          "en": "Looks like money-mule recruitment",
+          "ms": "Menyerupai perekrutan keldai wang",
+          "zh": "疑似招募“钱骡”"
+        },
+        "text": {
+          "en": "Forwarding money a stranger sent you is how students get used as money mules. Return it through your bank, never to an account the sender names.",
+          "ms": "Memindahkan wang yang dihantar oleh orang tidak dikenali ialah cara pelajar dipergunakan sebagai keldai wang. Pulangkan wang itu melalui bank anda, bukan ke akaun yang ditentukan oleh penghantar.",
+          "zh": "替陌生人转走其汇给您的钱，正是学生被利用成为“钱骡”的方式。请通过您的银行退回，不要转到对方指定的账户。"
+        }
+      }
+    ],
+    "why": {
+      "ms": "Ditolak: Menyerupai perekrutan keldai wang.",
+      "en": "Refused: Looks like money-mule recruitment.",
+      "zh": "已拒绝: 疑似招募“钱骡”."
+    },
+    "cost_breakdown": {
+      "kind": "payment",
+      "bill_id": 5,
+      "payee_id": 5,
+      "payee_name": "Zhou Min",
+      "payee_account_ref": "6230 5511 0042 7788",
+      "amount_minor": 290000,
+      "currency": "CNY",
+      "fee_minor": 0,
+      "total_minor": 290000,
+      "home_currency": "MYR",
+      "home_equivalent_minor": 177024
+    },
+    "otp_attempts": 0,
+    "otp_attempts_left": 3,
+    "created_at": "2026-10-17T16:59:21.506926Z",
+    "expires_at": null,
+    "cooling_off_until": null,
+    "executed_posting_id": null,
+    "closed_at": "2026-10-17T16:59:21.506926Z",
+    "audit_seq": 49
+  }
+]

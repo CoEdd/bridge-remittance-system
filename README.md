@@ -20,6 +20,7 @@ make reset                    # restore the demo data while the app runs
 make e2e                      # the whole demo in a browser (needs Node: cd frontend && npm install)
 make check-ui                 # design rules and colour contrast of the frontend
 make demo-video MODE=live     # record the demo video (MODE=scripted needs no API key)
+make evidence MODE=live       # one full sandbox run through the API, logs in evidence/sandbox-run/
 ```
 
 ## Presenting the demo
@@ -120,3 +121,12 @@ regex extractor. The app says which one was used ("Claims: cached from a live ru
 make claims-cache    # ask Claude again for the demo documents' claims (needs a key)
 make eval-claims     # run the evaluation again (live mode only)
 ```
+
+## Execution evidence
+
+`evidence/sandbox-run/` holds the logs of one full sandbox run with the real model, made by
+`make evidence MODE=live`: the hash-chained audit log (JSON and CSV), the chain check and a
+tampering simulation, every action with its tier and status, the ledger transactions, the
+balances at each stage, the chat history, the payment receipt and the 11 red-team results.
+`summary.md` lists the 13 checks the run makes; all passed. The security self-assessment is in
+`docs/security-self-assessment.md`.

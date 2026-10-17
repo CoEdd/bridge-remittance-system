@@ -1,0 +1,1366 @@
+[
+  {
+    "id": 85,
+    "business_date": "2026-10-15",
+    "created_at": "2026-10-17T16:59:03.189038Z",
+    "kind": "income",
+    "category": "transfer_in",
+    "category_label": "Money received",
+    "counterparty": "Zhou Wei",
+    "description": "Inbound transfer",
+    "amounts": [
+      {
+        "currency": "CNY",
+        "amount_minor": 300000
+      }
+    ]
+  },
+  {
+    "id": 84,
+    "business_date": "2026-10-15",
+    "created_at": "2026-10-17T16:58:38.273417Z",
+    "kind": "payment",
+    "category": "bill_payment",
+    "category_label": "Bill payment",
+    "counterparty": "Shenzhen Polytechnic International University",
+    "description": "Bill #3",
+    "amounts": [
+      {
+        "currency": "CNY",
+        "amount_minor": -1200000
+      }
+    ]
+  },
+  {
+    "id": 83,
+    "business_date": "2026-10-15",
+    "created_at": "2026-10-17T16:58:38.249253Z",
+    "kind": "conversion",
+    "category": "conversion",
+    "category_label": "Currency conversion",
+    "counterparty": "RemitFast (simulated)",
+    "description": "Convert MYR to CNY",
+    "amounts": [
+      {
+        "currency": "MYR",
+        "amount_minor": -740849
+      },
+      {
+        "currency": "CNY",
+        "amount_minor": 1197800
+      }
+    ]
+  },
+  {
+    "id": 82,
+    "business_date": "2026-10-15",
+    "created_at": "2026-10-15T04:01:21Z",
+    "kind": "expense",
+    "category": "eating_out",
+    "category_label": "Eating out",
+    "counterparty": "Campus Canteen",
+    "description": "Meal",
+    "amounts": [
+      {
+        "currency": "CNY",
+        "amount_minor": -3500
+      }
+    ]
+  },
+  {
+    "id": 81,
+    "business_date": "2026-10-13",
+    "created_at": "2026-10-13T04:01:20Z",
+    "kind": "expense",
+    "category": "groceries",
+    "category_label": "Groceries",
+    "counterparty": "Campus Mini Mart",
+    "description": "Groceries",
+    "amounts": [
+      {
+        "currency": "CNY",
+        "amount_minor": -11240
+      }
+    ]
+  },
+  {
+    "id": 80,
+    "business_date": "2026-10-12",
+    "created_at": "2026-10-12T04:01:19Z",
+    "kind": "expense",
+    "category": "eating_out",
+    "category_label": "Eating out",
+    "counterparty": "Old Chen Noodle House",
+    "description": "Meal",
+    "amounts": [
+      {
+        "currency": "CNY",
+        "amount_minor": -5760
+      }
+    ]
+  },
+  {
+    "id": 79,
+    "business_date": "2026-10-11",
+    "created_at": "2026-10-11T04:01:18Z",
+    "kind": "expense",
+    "category": "transport",
+    "category_label": "Transport",
+    "counterparty": "Metro card",
+    "description": "Metro card top-up",
+    "amounts": [
+      {
+        "currency": "CNY",
+        "amount_minor": -5000
+      }
+    ]
+  },
+  {
+    "id": 78,
+    "business_date": "2026-10-09",
+    "created_at": "2026-10-09T04:01:17Z",
+    "kind": "expense",
+    "category": "eating_out",
+    "category_label": "Eating out",
+    "counterparty": "Halal Lanzhou Kitchen",
+    "description": "Meal",
+    "amounts": [
+      {
+        "currency": "CNY",
+        "amount_minor": -4450
+      }
+    ]
+  },
+  {
+    "id": 77,
+    "business_date": "2026-10-08",
+    "created_at": "2026-10-08T04:01:16Z",
+    "kind": "expense",
+    "category": "groceries",
+    "category_label": "Groceries",
+    "counterparty": "Nanshan Fresh Market",
+    "description": "Groceries",
+    "amounts": [
+      {
+        "currency": "CNY",
+        "amount_minor": -14560
+      }
+    ]
+  },
+  {
+    "id": 76,
+    "business_date": "2026-10-06",
+    "created_at": "2026-10-06T04:01:15Z",
+    "kind": "expense",
+    "category": "eating_out",
+    "category_label": "Eating out",
+    "counterparty": "Riverside Hotpot",
+    "description": "Meal",
+    "amounts": [
+      {
+        "currency": "CNY",
+        "amount_minor": -7680
+      }
+    ]
+  },
+  {
+    "id": 75,
+    "business_date": "2026-10-05",
+    "created_at": "2026-10-05T04:01:14Z",
+    "kind": "expense",
+    "category": "transport",
+    "category_label": "Transport",
+    "counterparty": "Metro card",
+    "description": "Metro card top-up",
+    "amounts": [
+      {
+        "currency": "CNY",
+        "amount_minor": -5000
+      }
+    ]
+  },
+  {
+    "id": 74,
+    "business_date": "2026-10-05",
+    "created_at": "2026-10-05T04:01:13Z",
+    "kind": "expense",
+    "category": "subscriptions",
+    "category_label": "Subscriptions",
+    "counterparty": "Music streaming",
+    "description": "Monthly subscription",
+    "amounts": [
+      {
+        "currency": "USD",
+        "amount_minor": -599
+      }
+    ]
+  },
+  {
+    "id": 73,
+    "business_date": "2026-10-03",
+    "created_at": "2026-10-03T04:01:12Z",
+    "kind": "expense",
+    "category": "eating_out",
+    "category_label": "Eating out",
+    "counterparty": "Campus Canteen",
+    "description": "Meal",
+    "amounts": [
+      {
+        "currency": "CNY",
+        "amount_minor": -3040
+      }
+    ]
+  },
+  {
+    "id": 72,
+    "business_date": "2026-10-03",
+    "created_at": "2026-10-03T04:01:11Z",
+    "kind": "expense",
+    "category": "groceries",
+    "category_label": "Groceries",
+    "counterparty": "Campus Mini Mart",
+    "description": "Groceries",
+    "amounts": [
+      {
+        "currency": "CNY",
+        "amount_minor": -9980
+      }
+    ]
+  },
+  {
+    "id": 71,
+    "business_date": "2026-10-01",
+    "created_at": "2026-10-01T04:01:10Z",
+    "kind": "payment",
+    "category": "rent",
+    "category_label": "Rent",
+    "counterparty": "Lingnan Student Housing",
+    "description": "Rent for October 2026",
+    "amounts": [
+      {
+        "currency": "CNY",
+        "amount_minor": -280000
+      }
+    ]
+  },
+  {
+    "id": 70,
+    "business_date": "2026-10-01",
+    "created_at": "2026-10-01T04:01:09Z",
+    "kind": "income",
+    "category": "stipend",
+    "category_label": "Stipend",
+    "counterparty": "Monthly stipend",
+    "description": "Stipend for October 2026",
+    "amounts": [
+      {
+        "currency": "MYR",
+        "amount_minor": 250000
+      }
+    ]
+  },
+  {
+    "id": 69,
+    "business_date": "2026-09-30",
+    "created_at": "2026-09-30T04:01:08Z",
+    "kind": "expense",
+    "category": "eating_out",
+    "category_label": "Eating out",
+    "counterparty": "Old Chen Noodle House",
+    "description": "Meal",
+    "amounts": [
+      {
+        "currency": "CNY",
+        "amount_minor": -6490
+      }
+    ]
+  },
+  {
+    "id": 68,
+    "business_date": "2026-09-29",
+    "created_at": "2026-09-29T04:01:07Z",
+    "kind": "expense",
+    "category": "transport",
+    "category_label": "Transport",
+    "counterparty": "Metro card",
+    "description": "Metro card top-up",
+    "amounts": [
+      {
+        "currency": "CNY",
+        "amount_minor": -5000
+      }
+    ]
+  },
+  {
+    "id": 67,
+    "business_date": "2026-09-28",
+    "created_at": "2026-09-28T04:01:06Z",
+    "kind": "expense",
+    "category": "groceries",
+    "category_label": "Groceries",
+    "counterparty": "Nanshan Fresh Market",
+    "description": "Groceries",
+    "amounts": [
+      {
+        "currency": "CNY",
+        "amount_minor": -16350
+      }
+    ]
+  },
+  {
+    "id": 66,
+    "business_date": "2026-09-28",
+    "created_at": "2026-09-28T04:01:05Z",
+    "kind": "payment",
+    "category": "phone",
+    "category_label": "Phone",
+    "counterparty": "PearlTel Mobile",
+    "description": "Phone bill for September 2026",
+    "amounts": [
+      {
+        "currency": "CNY",
+        "amount_minor": -9800
+      }
+    ]
+  },
+  {
+    "id": 65,
+    "business_date": "2026-09-27",
+    "created_at": "2026-09-27T04:01:04Z",
+    "kind": "expense",
+    "category": "eating_out",
+    "category_label": "Eating out",
+    "counterparty": "Halal Lanzhou Kitchen",
+    "description": "Meal",
+    "amounts": [
+      {
+        "currency": "CNY",
+        "amount_minor": -4700
+      }
+    ]
+  },
+  {
+    "id": 64,
+    "business_date": "2026-09-24",
+    "created_at": "2026-09-24T04:01:03Z",
+    "kind": "expense",
+    "category": "eating_out",
+    "category_label": "Eating out",
+    "counterparty": "Riverside Hotpot",
+    "description": "Meal",
+    "amounts": [
+      {
+        "currency": "CNY",
+        "amount_minor": -8850
+      }
+    ]
+  },
+  {
+    "id": 63,
+    "business_date": "2026-09-23",
+    "created_at": "2026-09-23T04:01:02Z",
+    "kind": "expense",
+    "category": "transport",
+    "category_label": "Transport",
+    "counterparty": "Metro card",
+    "description": "Metro card top-up",
+    "amounts": [
+      {
+        "currency": "CNY",
+        "amount_minor": -5000
+      }
+    ]
+  },
+  {
+    "id": 62,
+    "business_date": "2026-09-23",
+    "created_at": "2026-09-23T04:01:01Z",
+    "kind": "expense",
+    "category": "groceries",
+    "category_label": "Groceries",
+    "counterparty": "Campus Mini Mart",
+    "description": "Groceries",
+    "amounts": [
+      {
+        "currency": "CNY",
+        "amount_minor": -11870
+      }
+    ]
+  },
+  {
+    "id": 61,
+    "business_date": "2026-09-21",
+    "created_at": "2026-09-21T04:01:00Z",
+    "kind": "expense",
+    "category": "eating_out",
+    "category_label": "Eating out",
+    "counterparty": "Campus Canteen",
+    "description": "Meal",
+    "amounts": [
+      {
+        "currency": "CNY",
+        "amount_minor": -3920
+      }
+    ]
+  },
+  {
+    "id": 60,
+    "business_date": "2026-09-20",
+    "created_at": "2026-09-20T04:00:59Z",
+    "kind": "expense",
+    "category": "subscriptions",
+    "category_label": "Subscriptions",
+    "counterparty": "Cloud storage",
+    "description": "Monthly subscription",
+    "amounts": [
+      {
+        "currency": "USD",
+        "amount_minor": -299
+      }
+    ]
+  },
+  {
+    "id": 59,
+    "business_date": "2026-09-18",
+    "created_at": "2026-09-18T04:00:58Z",
+    "kind": "expense",
+    "category": "eating_out",
+    "category_label": "Eating out",
+    "counterparty": "Old Chen Noodle House",
+    "description": "Meal",
+    "amounts": [
+      {
+        "currency": "CNY",
+        "amount_minor": -5560
+      }
+    ]
+  },
+  {
+    "id": 58,
+    "business_date": "2026-09-18",
+    "created_at": "2026-09-18T04:00:57Z",
+    "kind": "expense",
+    "category": "groceries",
+    "category_label": "Groceries",
+    "counterparty": "Nanshan Fresh Market",
+    "description": "Groceries",
+    "amounts": [
+      {
+        "currency": "CNY",
+        "amount_minor": -13420
+      }
+    ]
+  },
+  {
+    "id": 57,
+    "business_date": "2026-09-17",
+    "created_at": "2026-09-17T04:00:56Z",
+    "kind": "expense",
+    "category": "transport",
+    "category_label": "Transport",
+    "counterparty": "Metro card",
+    "description": "Metro card top-up",
+    "amounts": [
+      {
+        "currency": "CNY",
+        "amount_minor": -5000
+      }
+    ]
+  },
+  {
+    "id": 56,
+    "business_date": "2026-09-15",
+    "created_at": "2026-09-15T04:00:55Z",
+    "kind": "expense",
+    "category": "eating_out",
+    "category_label": "Eating out",
+    "counterparty": "Halal Lanzhou Kitchen",
+    "description": "Meal",
+    "amounts": [
+      {
+        "currency": "CNY",
+        "amount_minor": -2800
+      }
+    ]
+  },
+  {
+    "id": 55,
+    "business_date": "2026-09-13",
+    "created_at": "2026-09-13T04:00:54Z",
+    "kind": "expense",
+    "category": "groceries",
+    "category_label": "Groceries",
+    "counterparty": "Campus Mini Mart",
+    "description": "Groceries",
+    "amounts": [
+      {
+        "currency": "CNY",
+        "amount_minor": -9640
+      }
+    ]
+  },
+  {
+    "id": 54,
+    "business_date": "2026-09-12",
+    "created_at": "2026-09-12T04:00:53Z",
+    "kind": "expense",
+    "category": "eating_out",
+    "category_label": "Eating out",
+    "counterparty": "Riverside Hotpot",
+    "description": "Meal",
+    "amounts": [
+      {
+        "currency": "CNY",
+        "amount_minor": -4650
+      }
+    ]
+  },
+  {
+    "id": 53,
+    "business_date": "2026-09-11",
+    "created_at": "2026-09-11T04:00:52Z",
+    "kind": "expense",
+    "category": "transport",
+    "category_label": "Transport",
+    "counterparty": "Metro card",
+    "description": "Metro card top-up",
+    "amounts": [
+      {
+        "currency": "CNY",
+        "amount_minor": -5000
+      }
+    ]
+  },
+  {
+    "id": 52,
+    "business_date": "2026-09-09",
+    "created_at": "2026-09-09T04:00:51Z",
+    "kind": "expense",
+    "category": "eating_out",
+    "category_label": "Eating out",
+    "counterparty": "Campus Canteen",
+    "description": "Meal",
+    "amounts": [
+      {
+        "currency": "CNY",
+        "amount_minor": -3580
+      }
+    ]
+  },
+  {
+    "id": 51,
+    "business_date": "2026-09-08",
+    "created_at": "2026-09-08T04:00:50Z",
+    "kind": "expense",
+    "category": "groceries",
+    "category_label": "Groceries",
+    "counterparty": "Nanshan Fresh Market",
+    "description": "Groceries",
+    "amounts": [
+      {
+        "currency": "CNY",
+        "amount_minor": -12875
+      }
+    ]
+  },
+  {
+    "id": 50,
+    "business_date": "2026-09-06",
+    "created_at": "2026-09-06T04:00:49Z",
+    "kind": "expense",
+    "category": "eating_out",
+    "category_label": "Eating out",
+    "counterparty": "Old Chen Noodle House",
+    "description": "Meal",
+    "amounts": [
+      {
+        "currency": "CNY",
+        "amount_minor": -6200
+      }
+    ]
+  },
+  {
+    "id": 49,
+    "business_date": "2026-09-05",
+    "created_at": "2026-09-05T04:00:48Z",
+    "kind": "expense",
+    "category": "transport",
+    "category_label": "Transport",
+    "counterparty": "Metro card",
+    "description": "Metro card top-up",
+    "amounts": [
+      {
+        "currency": "CNY",
+        "amount_minor": -5000
+      }
+    ]
+  },
+  {
+    "id": 48,
+    "business_date": "2026-09-05",
+    "created_at": "2026-09-05T04:00:47Z",
+    "kind": "expense",
+    "category": "subscriptions",
+    "category_label": "Subscriptions",
+    "counterparty": "Music streaming",
+    "description": "Monthly subscription",
+    "amounts": [
+      {
+        "currency": "USD",
+        "amount_minor": -599
+      }
+    ]
+  },
+  {
+    "id": 47,
+    "business_date": "2026-09-03",
+    "created_at": "2026-09-03T04:00:46Z",
+    "kind": "expense",
+    "category": "eating_out",
+    "category_label": "Eating out",
+    "counterparty": "Halal Lanzhou Kitchen",
+    "description": "Meal",
+    "amounts": [
+      {
+        "currency": "CNY",
+        "amount_minor": -2450
+      }
+    ]
+  },
+  {
+    "id": 46,
+    "business_date": "2026-09-03",
+    "created_at": "2026-09-03T04:00:45Z",
+    "kind": "expense",
+    "category": "groceries",
+    "category_label": "Groceries",
+    "counterparty": "Campus Mini Mart",
+    "description": "Groceries",
+    "amounts": [
+      {
+        "currency": "CNY",
+        "amount_minor": -8820
+      }
+    ]
+  },
+  {
+    "id": 45,
+    "business_date": "2026-09-01",
+    "created_at": "2026-09-01T04:00:44Z",
+    "kind": "payment",
+    "category": "rent",
+    "category_label": "Rent",
+    "counterparty": "Lingnan Student Housing",
+    "description": "Rent for September 2026",
+    "amounts": [
+      {
+        "currency": "CNY",
+        "amount_minor": -280000
+      }
+    ]
+  },
+  {
+    "id": 44,
+    "business_date": "2026-09-01",
+    "created_at": "2026-09-01T04:00:43Z",
+    "kind": "income",
+    "category": "stipend",
+    "category_label": "Stipend",
+    "counterparty": "Monthly stipend",
+    "description": "Stipend for September 2026",
+    "amounts": [
+      {
+        "currency": "MYR",
+        "amount_minor": 250000
+      }
+    ]
+  },
+  {
+    "id": 43,
+    "business_date": "2026-08-31",
+    "created_at": "2026-08-31T04:00:42Z",
+    "kind": "expense",
+    "category": "eating_out",
+    "category_label": "Eating out",
+    "counterparty": "Riverside Hotpot",
+    "description": "Meal",
+    "amounts": [
+      {
+        "currency": "CNY",
+        "amount_minor": -5230
+      }
+    ]
+  },
+  {
+    "id": 42,
+    "business_date": "2026-08-30",
+    "created_at": "2026-08-30T04:00:41Z",
+    "kind": "expense",
+    "category": "transport",
+    "category_label": "Transport",
+    "counterparty": "Metro card",
+    "description": "Metro card top-up",
+    "amounts": [
+      {
+        "currency": "CNY",
+        "amount_minor": -5000
+      }
+    ]
+  },
+  {
+    "id": 41,
+    "business_date": "2026-08-29",
+    "created_at": "2026-08-29T04:00:40Z",
+    "kind": "expense",
+    "category": "groceries",
+    "category_label": "Groceries",
+    "counterparty": "Nanshan Fresh Market",
+    "description": "Groceries",
+    "amounts": [
+      {
+        "currency": "CNY",
+        "amount_minor": -14260
+      }
+    ]
+  },
+  {
+    "id": 40,
+    "business_date": "2026-08-28",
+    "created_at": "2026-08-28T04:00:39Z",
+    "kind": "expense",
+    "category": "eating_out",
+    "category_label": "Eating out",
+    "counterparty": "Campus Canteen",
+    "description": "Meal",
+    "amounts": [
+      {
+        "currency": "CNY",
+        "amount_minor": -3800
+      }
+    ]
+  },
+  {
+    "id": 39,
+    "business_date": "2026-08-28",
+    "created_at": "2026-08-28T04:00:38Z",
+    "kind": "payment",
+    "category": "phone",
+    "category_label": "Phone",
+    "counterparty": "PearlTel Mobile",
+    "description": "Phone bill for August 2026",
+    "amounts": [
+      {
+        "currency": "CNY",
+        "amount_minor": -9800
+      }
+    ]
+  },
+  {
+    "id": 38,
+    "business_date": "2026-08-25",
+    "created_at": "2026-08-25T04:00:37Z",
+    "kind": "expense",
+    "category": "eating_out",
+    "category_label": "Eating out",
+    "counterparty": "Old Chen Noodle House",
+    "description": "Meal",
+    "amounts": [
+      {
+        "currency": "CNY",
+        "amount_minor": -7120
+      }
+    ]
+  },
+  {
+    "id": 37,
+    "business_date": "2026-08-24",
+    "created_at": "2026-08-24T04:00:36Z",
+    "kind": "expense",
+    "category": "transport",
+    "category_label": "Transport",
+    "counterparty": "Metro card",
+    "description": "Metro card top-up",
+    "amounts": [
+      {
+        "currency": "CNY",
+        "amount_minor": -5000
+      }
+    ]
+  },
+  {
+    "id": 36,
+    "business_date": "2026-08-24",
+    "created_at": "2026-08-24T04:00:35Z",
+    "kind": "expense",
+    "category": "groceries",
+    "category_label": "Groceries",
+    "counterparty": "Campus Mini Mart",
+    "description": "Groceries",
+    "amounts": [
+      {
+        "currency": "CNY",
+        "amount_minor": -10430
+      }
+    ]
+  },
+  {
+    "id": 35,
+    "business_date": "2026-08-22",
+    "created_at": "2026-08-22T04:00:34Z",
+    "kind": "expense",
+    "category": "eating_out",
+    "category_label": "Eating out",
+    "counterparty": "Halal Lanzhou Kitchen",
+    "description": "Meal",
+    "amounts": [
+      {
+        "currency": "CNY",
+        "amount_minor": -3160
+      }
+    ]
+  },
+  {
+    "id": 34,
+    "business_date": "2026-08-20",
+    "created_at": "2026-08-20T04:00:33Z",
+    "kind": "expense",
+    "category": "subscriptions",
+    "category_label": "Subscriptions",
+    "counterparty": "Cloud storage",
+    "description": "Monthly subscription",
+    "amounts": [
+      {
+        "currency": "USD",
+        "amount_minor": -299
+      }
+    ]
+  },
+  {
+    "id": 33,
+    "business_date": "2026-08-19",
+    "created_at": "2026-08-19T04:00:32Z",
+    "kind": "expense",
+    "category": "eating_out",
+    "category_label": "Eating out",
+    "counterparty": "Riverside Hotpot",
+    "description": "Meal",
+    "amounts": [
+      {
+        "currency": "CNY",
+        "amount_minor": -4490
+      }
+    ]
+  },
+  {
+    "id": 32,
+    "business_date": "2026-08-19",
+    "created_at": "2026-08-19T04:00:31Z",
+    "kind": "expense",
+    "category": "groceries",
+    "category_label": "Groceries",
+    "counterparty": "Nanshan Fresh Market",
+    "description": "Groceries",
+    "amounts": [
+      {
+        "currency": "CNY",
+        "amount_minor": -11890
+      }
+    ]
+  },
+  {
+    "id": 31,
+    "business_date": "2026-08-18",
+    "created_at": "2026-08-18T04:00:30Z",
+    "kind": "expense",
+    "category": "transport",
+    "category_label": "Transport",
+    "counterparty": "Metro card",
+    "description": "Metro card top-up",
+    "amounts": [
+      {
+        "currency": "CNY",
+        "amount_minor": -5000
+      }
+    ]
+  },
+  {
+    "id": 30,
+    "business_date": "2026-08-16",
+    "created_at": "2026-08-16T04:00:29Z",
+    "kind": "expense",
+    "category": "eating_out",
+    "category_label": "Eating out",
+    "counterparty": "Campus Canteen",
+    "description": "Meal",
+    "amounts": [
+      {
+        "currency": "CNY",
+        "amount_minor": -2800
+      }
+    ]
+  },
+  {
+    "id": 29,
+    "business_date": "2026-08-16",
+    "created_at": "2026-08-16T04:00:28Z",
+    "kind": "payment",
+    "category": "tuition",
+    "category_label": "Tuition",
+    "counterparty": "Shenzhen Polytechnic International University",
+    "description": "Tuition, last semester",
+    "amounts": [
+      {
+        "currency": "CNY",
+        "amount_minor": -1150000
+      }
+    ]
+  },
+  {
+    "id": 28,
+    "business_date": "2026-08-14",
+    "created_at": "2026-08-14T04:00:27Z",
+    "kind": "expense",
+    "category": "groceries",
+    "category_label": "Groceries",
+    "counterparty": "Campus Mini Mart",
+    "description": "Groceries",
+    "amounts": [
+      {
+        "currency": "CNY",
+        "amount_minor": -9640
+      }
+    ]
+  },
+  {
+    "id": 27,
+    "business_date": "2026-08-13",
+    "created_at": "2026-08-13T04:00:26Z",
+    "kind": "expense",
+    "category": "eating_out",
+    "category_label": "Eating out",
+    "counterparty": "Old Chen Noodle House",
+    "description": "Meal",
+    "amounts": [
+      {
+        "currency": "CNY",
+        "amount_minor": -4650
+      }
+    ]
+  },
+  {
+    "id": 26,
+    "business_date": "2026-08-12",
+    "created_at": "2026-08-12T04:00:25Z",
+    "kind": "expense",
+    "category": "transport",
+    "category_label": "Transport",
+    "counterparty": "Metro card",
+    "description": "Metro card top-up",
+    "amounts": [
+      {
+        "currency": "CNY",
+        "amount_minor": -5000
+      }
+    ]
+  },
+  {
+    "id": 25,
+    "business_date": "2026-08-10",
+    "created_at": "2026-08-10T04:00:24Z",
+    "kind": "expense",
+    "category": "eating_out",
+    "category_label": "Eating out",
+    "counterparty": "Halal Lanzhou Kitchen",
+    "description": "Meal",
+    "amounts": [
+      {
+        "currency": "CNY",
+        "amount_minor": -3580
+      }
+    ]
+  },
+  {
+    "id": 24,
+    "business_date": "2026-08-09",
+    "created_at": "2026-08-09T04:00:23Z",
+    "kind": "expense",
+    "category": "groceries",
+    "category_label": "Groceries",
+    "counterparty": "Nanshan Fresh Market",
+    "description": "Groceries",
+    "amounts": [
+      {
+        "currency": "CNY",
+        "amount_minor": -12875
+      }
+    ]
+  },
+  {
+    "id": 23,
+    "business_date": "2026-08-07",
+    "created_at": "2026-08-07T04:00:22Z",
+    "kind": "expense",
+    "category": "eating_out",
+    "category_label": "Eating out",
+    "counterparty": "Riverside Hotpot",
+    "description": "Meal",
+    "amounts": [
+      {
+        "currency": "CNY",
+        "amount_minor": -6200
+      }
+    ]
+  },
+  {
+    "id": 22,
+    "business_date": "2026-08-06",
+    "created_at": "2026-08-06T04:00:21Z",
+    "kind": "expense",
+    "category": "transport",
+    "category_label": "Transport",
+    "counterparty": "Metro card",
+    "description": "Metro card top-up",
+    "amounts": [
+      {
+        "currency": "CNY",
+        "amount_minor": -5000
+      }
+    ]
+  },
+  {
+    "id": 21,
+    "business_date": "2026-08-05",
+    "created_at": "2026-08-05T04:00:20Z",
+    "kind": "expense",
+    "category": "subscriptions",
+    "category_label": "Subscriptions",
+    "counterparty": "Music streaming",
+    "description": "Monthly subscription",
+    "amounts": [
+      {
+        "currency": "USD",
+        "amount_minor": -599
+      }
+    ]
+  },
+  {
+    "id": 20,
+    "business_date": "2026-08-04",
+    "created_at": "2026-08-04T04:00:19Z",
+    "kind": "expense",
+    "category": "eating_out",
+    "category_label": "Eating out",
+    "counterparty": "Campus Canteen",
+    "description": "Meal",
+    "amounts": [
+      {
+        "currency": "CNY",
+        "amount_minor": -2450
+      }
+    ]
+  },
+  {
+    "id": 19,
+    "business_date": "2026-08-04",
+    "created_at": "2026-08-04T04:00:18Z",
+    "kind": "expense",
+    "category": "groceries",
+    "category_label": "Groceries",
+    "counterparty": "Campus Mini Mart",
+    "description": "Groceries",
+    "amounts": [
+      {
+        "currency": "CNY",
+        "amount_minor": -8820
+      }
+    ]
+  },
+  {
+    "id": 18,
+    "business_date": "2026-08-01",
+    "created_at": "2026-08-01T04:00:17Z",
+    "kind": "expense",
+    "category": "eating_out",
+    "category_label": "Eating out",
+    "counterparty": "Old Chen Noodle House",
+    "description": "Meal",
+    "amounts": [
+      {
+        "currency": "CNY",
+        "amount_minor": -5230
+      }
+    ]
+  },
+  {
+    "id": 17,
+    "business_date": "2026-08-01",
+    "created_at": "2026-08-01T04:00:16Z",
+    "kind": "payment",
+    "category": "rent",
+    "category_label": "Rent",
+    "counterparty": "Lingnan Student Housing",
+    "description": "Rent for August 2026",
+    "amounts": [
+      {
+        "currency": "CNY",
+        "amount_minor": -280000
+      }
+    ]
+  },
+  {
+    "id": 16,
+    "business_date": "2026-08-01",
+    "created_at": "2026-08-01T04:00:15Z",
+    "kind": "income",
+    "category": "stipend",
+    "category_label": "Stipend",
+    "counterparty": "Monthly stipend",
+    "description": "Stipend for August 2026",
+    "amounts": [
+      {
+        "currency": "MYR",
+        "amount_minor": 250000
+      }
+    ]
+  },
+  {
+    "id": 15,
+    "business_date": "2026-07-31",
+    "created_at": "2026-07-31T04:00:14Z",
+    "kind": "expense",
+    "category": "transport",
+    "category_label": "Transport",
+    "counterparty": "Metro card",
+    "description": "Metro card top-up",
+    "amounts": [
+      {
+        "currency": "CNY",
+        "amount_minor": -5000
+      }
+    ]
+  },
+  {
+    "id": 14,
+    "business_date": "2026-07-30",
+    "created_at": "2026-07-30T04:00:13Z",
+    "kind": "expense",
+    "category": "groceries",
+    "category_label": "Groceries",
+    "counterparty": "Nanshan Fresh Market",
+    "description": "Groceries",
+    "amounts": [
+      {
+        "currency": "CNY",
+        "amount_minor": -14260
+      }
+    ]
+  },
+  {
+    "id": 13,
+    "business_date": "2026-07-29",
+    "created_at": "2026-07-29T04:00:12Z",
+    "kind": "expense",
+    "category": "eating_out",
+    "category_label": "Eating out",
+    "counterparty": "Halal Lanzhou Kitchen",
+    "description": "Meal",
+    "amounts": [
+      {
+        "currency": "CNY",
+        "amount_minor": -3800
+      }
+    ]
+  },
+  {
+    "id": 12,
+    "business_date": "2026-07-28",
+    "created_at": "2026-07-28T04:00:11Z",
+    "kind": "payment",
+    "category": "phone",
+    "category_label": "Phone",
+    "counterparty": "PearlTel Mobile",
+    "description": "Phone bill for July 2026",
+    "amounts": [
+      {
+        "currency": "CNY",
+        "amount_minor": -9800
+      }
+    ]
+  },
+  {
+    "id": 11,
+    "business_date": "2026-07-26",
+    "created_at": "2026-07-26T04:00:10Z",
+    "kind": "expense",
+    "category": "eating_out",
+    "category_label": "Eating out",
+    "counterparty": "Riverside Hotpot",
+    "description": "Meal",
+    "amounts": [
+      {
+        "currency": "CNY",
+        "amount_minor": -7120
+      }
+    ]
+  },
+  {
+    "id": 10,
+    "business_date": "2026-07-25",
+    "created_at": "2026-07-25T04:00:09Z",
+    "kind": "expense",
+    "category": "transport",
+    "category_label": "Transport",
+    "counterparty": "Metro card",
+    "description": "Metro card top-up",
+    "amounts": [
+      {
+        "currency": "CNY",
+        "amount_minor": -5000
+      }
+    ]
+  },
+  {
+    "id": 9,
+    "business_date": "2026-07-25",
+    "created_at": "2026-07-25T04:00:08Z",
+    "kind": "expense",
+    "category": "groceries",
+    "category_label": "Groceries",
+    "counterparty": "Campus Mini Mart",
+    "description": "Groceries",
+    "amounts": [
+      {
+        "currency": "CNY",
+        "amount_minor": -10430
+      }
+    ]
+  },
+  {
+    "id": 8,
+    "business_date": "2026-07-23",
+    "created_at": "2026-07-23T04:00:07Z",
+    "kind": "expense",
+    "category": "eating_out",
+    "category_label": "Eating out",
+    "counterparty": "Campus Canteen",
+    "description": "Meal",
+    "amounts": [
+      {
+        "currency": "CNY",
+        "amount_minor": -3160
+      }
+    ]
+  },
+  {
+    "id": 7,
+    "business_date": "2026-07-20",
+    "created_at": "2026-07-20T04:00:06Z",
+    "kind": "expense",
+    "category": "eating_out",
+    "category_label": "Eating out",
+    "counterparty": "Old Chen Noodle House",
+    "description": "Meal",
+    "amounts": [
+      {
+        "currency": "CNY",
+        "amount_minor": -4490
+      }
+    ]
+  },
+  {
+    "id": 6,
+    "business_date": "2026-07-20",
+    "created_at": "2026-07-20T04:00:05Z",
+    "kind": "expense",
+    "category": "groceries",
+    "category_label": "Groceries",
+    "counterparty": "Nanshan Fresh Market",
+    "description": "Groceries",
+    "amounts": [
+      {
+        "currency": "CNY",
+        "amount_minor": -11890
+      }
+    ]
+  },
+  {
+    "id": 5,
+    "business_date": "2026-07-20",
+    "created_at": "2026-07-20T04:00:04Z",
+    "kind": "expense",
+    "category": "subscriptions",
+    "category_label": "Subscriptions",
+    "counterparty": "Cloud storage",
+    "description": "Monthly subscription",
+    "amounts": [
+      {
+        "currency": "USD",
+        "amount_minor": -299
+      }
+    ]
+  },
+  {
+    "id": 4,
+    "business_date": "2026-07-19",
+    "created_at": "2026-07-19T04:00:03Z",
+    "kind": "expense",
+    "category": "transport",
+    "category_label": "Transport",
+    "counterparty": "Metro card",
+    "description": "Metro card top-up",
+    "amounts": [
+      {
+        "currency": "CNY",
+        "amount_minor": -5000
+      }
+    ]
+  },
+  {
+    "id": 3,
+    "business_date": "2026-07-18",
+    "created_at": "2026-07-18T04:00:02Z",
+    "kind": "seed",
+    "category": "opening_balance",
+    "category_label": "Opening balance",
+    "counterparty": null,
+    "description": "Opening balance",
+    "amounts": [
+      {
+        "currency": "USD",
+        "amount_minor": 20694
+      }
+    ]
+  },
+  {
+    "id": 2,
+    "business_date": "2026-07-18",
+    "created_at": "2026-07-18T04:00:01Z",
+    "kind": "seed",
+    "category": "opening_balance",
+    "category_label": "Opening balance",
+    "counterparty": null,
+    "description": "Opening balance",
+    "amounts": [
+      {
+        "currency": "CNY",
+        "amount_minor": 2790560
+      }
+    ]
+  },
+  {
+    "id": 1,
+    "business_date": "2026-07-18",
+    "created_at": "2026-07-18T04:00:00Z",
+    "kind": "seed",
+    "category": "opening_balance",
+    "category_label": "Opening balance",
+    "counterparty": null,
+    "description": "Opening balance",
+    "amounts": [
+      {
+        "currency": "MYR",
+        "amount_minor": 235000
+      }
+    ]
+  }
+]

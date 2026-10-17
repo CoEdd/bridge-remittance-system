@@ -1,0 +1,151 @@
+{
+  "seq": 24,
+  "event_type": "action.executed",
+  "field": "receipt.amount_minor",
+  "original": 1200000,
+  "tampered": 1300000,
+  "verification": {
+    "ok": false,
+    "entries": null,
+    "broken_at": 24,
+    "expected_hash": "dc7a04fd55d9f0805b715b1b9d85b69f686f46b5f89ed795e5f0926ffd130340",
+    "stored_hash": "f3d88e8e0ee545e15191c71a69cceb365777117042253c935fb3f37667e012ad"
+  },
+  "entries": [
+    {
+      "seq": 26,
+      "created_at": "2026-10-17T16:58:38.401475Z",
+      "event_type": "claims.checked",
+      "label": "Claims checked",
+      "actor": "policy",
+      "summary": "10 claims · R1, R2, R3, R4, R7, R8",
+      "payload": {
+        "document_id": 2,
+        "origin": "live",
+        "model": "claude-sonnet-5-5",
+        "claims": 10,
+        "dropped": 0,
+        "conclusions": [
+          {
+            "rule": "R1",
+            "severity": "block",
+            "raises": "PAYEE_NOT_OFFICIAL"
+          },
+          {
+            "rule": "R2",
+            "severity": "block",
+            "raises": "THIRD_PARTY_DISCOUNT"
+          },
+          {
+            "rule": "R3",
+            "severity": "block",
+            "raises": "THIRD_PARTY_DISCOUNT"
+          },
+          {
+            "rule": "R4",
+            "severity": "block",
+            "raises": "THIRD_PARTY_DISCOUNT"
+          },
+          {
+            "rule": "R7",
+            "severity": "block",
+            "raises": "SCAM_PATTERN"
+          },
+          {
+            "rule": "R8",
+            "severity": "warn",
+            "raises": "NEW_PAYEE"
+          }
+        ]
+      },
+      "prev_hash": "88c5eb8e6ecbf5d45f946464bba422bc3f6169333e3bb89c5a393d81ba93461c",
+      "hash": "8432e03493453557947ca20eec5245593b3d8ec515bafc1344e7d6ef9de8d5e1"
+    },
+    {
+      "seq": 25,
+      "created_at": "2026-10-17T16:58:38.401475Z",
+      "event_type": "document.uploaded",
+      "label": "Document uploaded",
+      "actor": "user",
+      "summary": "Pasted message · paste",
+      "payload": {
+        "document_id": 2,
+        "filename": "Pasted message",
+        "kind": "message",
+        "languages": [
+          "ms"
+        ],
+        "source": "paste",
+        "extractor": "live",
+        "verified_fields": [
+          "amount",
+          "bank_name",
+          "currency",
+          "payee_account",
+          "payee_name"
+        ],
+        "unverified_fields": [],
+        "bill_id": 4
+      },
+      "prev_hash": "f3d88e8e0ee545e15191c71a69cceb365777117042253c935fb3f37667e012ad",
+      "hash": "88c5eb8e6ecbf5d45f946464bba422bc3f6169333e3bb89c5a393d81ba93461c"
+    },
+    {
+      "seq": 24,
+      "created_at": "2026-10-17T16:58:38.273417Z",
+      "event_type": "action.executed",
+      "label": "Executed",
+      "actor": "system",
+      "summary": "Action #2 · Pay bill · CNY 13,000.00",
+      "payload": {
+        "action_id": 2,
+        "tool": "pay_bill",
+        "posting_id": 84,
+        "receipt": {
+          "kind": "payment",
+          "bill_id": 3,
+          "payee_name": "Shenzhen Polytechnic International University",
+          "payee_account_ref": "4100 2026 0000 8815",
+          "amount_minor": 1300000,
+          "currency": "CNY",
+          "business_date": "2026-10-15"
+        }
+      },
+      "prev_hash": "b72da403dc69aabc0cd0cd06aca46564d82a401b2d3b8b85a77046f884e69d1c",
+      "hash": "f3d88e8e0ee545e15191c71a69cceb365777117042253c935fb3f37667e012ad"
+    },
+    {
+      "seq": 23,
+      "created_at": "2026-10-17T16:58:38.273417Z",
+      "event_type": "policy.verdict",
+      "label": "Policy verdict",
+      "actor": "policy",
+      "summary": "Action #2 · Pay bill · Tier 3 · OVER_TXN_LIMIT",
+      "payload": {
+        "action_id": 2,
+        "tool": "pay_bill",
+        "tier": "T3",
+        "reasons": [
+          "OVER_TXN_LIMIT"
+        ],
+        "stage": "execution"
+      },
+      "prev_hash": "c4bd8f7d1a5bafd270078a2ef246d4325428fce287127673ac98c08b3f1a61d6",
+      "hash": "b72da403dc69aabc0cd0cd06aca46564d82a401b2d3b8b85a77046f884e69d1c"
+    },
+    {
+      "seq": 22,
+      "created_at": "2026-10-17T16:58:38.273417Z",
+      "event_type": "user.otp_verified",
+      "label": "Code verified",
+      "actor": "user",
+      "summary": "Action #2 · Pay bill",
+      "payload": {
+        "action_id": 2,
+        "tool": "pay_bill"
+      },
+      "prev_hash": "e50865a77186c033bd6803ff44d7d52ff72927adbffe096b434a1f9475a37d4a",
+      "hash": "c4bd8f7d1a5bafd270078a2ef246d4325428fce287127673ac98c08b3f1a61d6"
+    }
+  ]
+}

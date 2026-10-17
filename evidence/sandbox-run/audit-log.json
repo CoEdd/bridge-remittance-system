@@ -1,0 +1,958 @@
+[
+  {
+    "seq": 1,
+    "created_at": "2026-10-17T16:58:15.109145+00:00",
+    "event_type": "system.genesis",
+    "actor": "system",
+    "payload": {
+      "chain": "bridge-audit",
+      "version": 1
+    },
+    "prev_hash": "0000000000000000000000000000000000000000000000000000000000000000",
+    "hash": "6a7e9b1f2e92bfd86842520fb5c7deb6e6454a88147f43917ddd91c3cd243dd7"
+  },
+  {
+    "seq": 2,
+    "created_at": "2026-10-17T16:58:15.109942+00:00",
+    "event_type": "system.reset",
+    "actor": "system",
+    "payload": {
+      "demo_today": "2026-10-15",
+      "fx_source": "frankfurter"
+    },
+    "prev_hash": "6a7e9b1f2e92bfd86842520fb5c7deb6e6454a88147f43917ddd91c3cd243dd7",
+    "hash": "804511dcbd5394225dddd1a4178286c90df52df7b91171bbae99c8d441edbc6e"
+  },
+  {
+    "seq": 3,
+    "created_at": "2026-10-17T16:58:15.199738+00:00",
+    "event_type": "document.uploaded",
+    "actor": "user",
+    "payload": {
+      "document_id": 1,
+      "filename": "tuition_invoice.pdf",
+      "kind": "invoice",
+      "languages": [
+        "en",
+        "zh"
+      ],
+      "source": "demo bundle",
+      "extractor": "live",
+      "verified_fields": [
+        "amount",
+        "bank_name",
+        "currency",
+        "due_date",
+        "invoice_number",
+        "issuer",
+        "issuer_local_name",
+        "late_fee_terms",
+        "payee_account",
+        "payee_name"
+      ],
+      "unverified_fields": [],
+      "bill_id": 3
+    },
+    "prev_hash": "804511dcbd5394225dddd1a4178286c90df52df7b91171bbae99c8d441edbc6e",
+    "hash": "4eba79fffd5918fc23418f12490ebf90eea7ec3acd5b0b0f4bb59f78f6ec8018"
+  },
+  {
+    "seq": 4,
+    "created_at": "2026-10-17T16:58:15.199738+00:00",
+    "event_type": "claims.checked",
+    "actor": "policy",
+    "payload": {
+      "document_id": 1,
+      "origin": "live",
+      "model": "claude-sonnet-5-5",
+      "claims": 6,
+      "dropped": 0,
+      "conclusions": []
+    },
+    "prev_hash": "4eba79fffd5918fc23418f12490ebf90eea7ec3acd5b0b0f4bb59f78f6ec8018",
+    "hash": "4b8972bc76f44a1b85f64d8eecbf6d2ba7f719684faa57895bff54030241d1eb"
+  },
+  {
+    "seq": 5,
+    "created_at": "2026-10-17T16:58:27.333910+00:00",
+    "event_type": "agent.proposed",
+    "actor": "agent",
+    "payload": {
+      "tool": "read_document",
+      "args": {
+        "document_id": 1
+      },
+      "plan_id": null
+    },
+    "prev_hash": "4b8972bc76f44a1b85f64d8eecbf6d2ba7f719684faa57895bff54030241d1eb",
+    "hash": "841fec117eb822c17055c87440b46f68f3f48213604b35677ee478a4f5398000"
+  },
+  {
+    "seq": 6,
+    "created_at": "2026-10-17T16:58:27.333910+00:00",
+    "event_type": "policy.verdict",
+    "actor": "policy",
+    "payload": {
+      "tool": "read_document",
+      "tier": "T0",
+      "requires": [],
+      "reasons": [],
+      "stage": "proposal"
+    },
+    "prev_hash": "841fec117eb822c17055c87440b46f68f3f48213604b35677ee478a4f5398000",
+    "hash": "9180a33844385431afcb019054e91d95687e92808bcc4eac28fc040ac718cb1b"
+  },
+  {
+    "seq": 7,
+    "created_at": "2026-10-17T16:58:31.707534+00:00",
+    "event_type": "agent.proposed",
+    "actor": "agent",
+    "payload": {
+      "tool": "respond_to_user",
+      "args": {
+        "text": "This is a tuition invoice (no. SPIU-FIN-2026-104417) from Shenzhen Polytechnic International University for CNY 12,000.00, due 15 Nov 2026. It's verified and trusted, with no risk signals or hidden text. The payee account matches the university's official account at Shenzhen Bay Commercial Bank. A late fee of 0.05% of the amount per day applies after the due date. Want me to prepare the payment?",
+        "text_en": "This is a tuition invoice (no. SPIU-FIN-2026-104417) from Shenzhen Polytechnic International University for CNY 12,000.00, due 15 Nov 2026. It's verified and trusted, with no risk signals or hidden text. The payee account matches the university's official account at Shenzhen Bay Commercial Bank. A late fee of 0.05% of the amount per day applies after the due date. Want me to prepare the payment?"
+      },
+      "plan_id": null
+    },
+    "prev_hash": "9180a33844385431afcb019054e91d95687e92808bcc4eac28fc040ac718cb1b",
+    "hash": "e35a26b606a742fb913b039780affeaff2710396e3e2536b4dfa9907eb734367"
+  },
+  {
+    "seq": 8,
+    "created_at": "2026-10-17T16:58:31.707534+00:00",
+    "event_type": "policy.verdict",
+    "actor": "policy",
+    "payload": {
+      "tool": "respond_to_user",
+      "tier": "T0",
+      "requires": [],
+      "reasons": [],
+      "stage": "proposal"
+    },
+    "prev_hash": "e35a26b606a742fb913b039780affeaff2710396e3e2536b4dfa9907eb734367",
+    "hash": "bdcc08c752627596097731fd50d499cfb2010aeefe1ae1032b31137d8b7cc0fb"
+  },
+  {
+    "seq": 9,
+    "created_at": "2026-10-17T16:58:33.339790+00:00",
+    "event_type": "agent.proposed",
+    "actor": "agent",
+    "payload": {
+      "tool": "plan_funding",
+      "args": {
+        "bill_id": 3
+      },
+      "plan_id": null
+    },
+    "prev_hash": "bdcc08c752627596097731fd50d499cfb2010aeefe1ae1032b31137d8b7cc0fb",
+    "hash": "66a067d489a2c78984ad8915a6a61fc0298d6d0b7d2d8f89bd375f0f6c7e973a"
+  },
+  {
+    "seq": 10,
+    "created_at": "2026-10-17T16:58:33.339790+00:00",
+    "event_type": "policy.verdict",
+    "actor": "policy",
+    "payload": {
+      "tool": "plan_funding",
+      "tier": "T1",
+      "requires": [],
+      "reasons": [],
+      "stage": "proposal"
+    },
+    "prev_hash": "66a067d489a2c78984ad8915a6a61fc0298d6d0b7d2d8f89bd375f0f6c7e973a",
+    "hash": "72734cf4c768bdca4e0eb66b680d6e08bfbc7853b6ebc25beeb753e8382dc9d4"
+  },
+  {
+    "seq": 11,
+    "created_at": "2026-10-17T16:58:35.387734+00:00",
+    "event_type": "agent.proposed",
+    "actor": "agent",
+    "payload": {
+      "tool": "convert_currency",
+      "args": {
+        "from_currency": "MYR",
+        "to_currency": "CNY",
+        "amount_minor": 740049,
+        "provider_id": 1
+      },
+      "plan_id": "plan-69feb31964"
+    },
+    "prev_hash": "72734cf4c768bdca4e0eb66b680d6e08bfbc7853b6ebc25beeb753e8382dc9d4",
+    "hash": "83f365832eda3cc919916b72da2ad2af03079f2e4b099f6c4a0e4259e8ab6fa8"
+  },
+  {
+    "seq": 12,
+    "created_at": "2026-10-17T16:58:35.387734+00:00",
+    "event_type": "policy.verdict",
+    "actor": "policy",
+    "payload": {
+      "tool": "convert_currency",
+      "tier": "T3",
+      "requires": [
+        "confirm",
+        "otp"
+      ],
+      "reasons": [
+        "OVER_TXN_LIMIT"
+      ],
+      "stage": "proposal",
+      "action_id": 1,
+      "cost_breakdown": {
+        "kind": "conversion",
+        "provider_id": 1,
+        "provider_name": "RemitFast (simulated)",
+        "from_currency": "MYR",
+        "to_currency": "CNY",
+        "amount_minor": 740049,
+        "mid_rate": "1.6382",
+        "offered_rate": "1.6185416",
+        "markup_pct": "1.2",
+        "fee_minor": 800,
+        "markup_cost_minor": 8881,
+        "total_cost_minor": 9681,
+        "total_debit_minor": 740849,
+        "amount_received_minor": 1197800,
+        "received_at_mid_minor": 1212348,
+        "delivery_hours": 4,
+        "arrives_at": "2026-10-17T20:58:35.387734+00:00",
+        "source": "simulated",
+        "quoted_at": "2026-10-17T16:58:35.387734+00:00",
+        "expires_at": "2026-10-17T17:08:35.387734+00:00",
+        "warning": null,
+        "home_currency": "MYR",
+        "home_equivalent_minor": 740049
+      }
+    },
+    "prev_hash": "83f365832eda3cc919916b72da2ad2af03079f2e4b099f6c4a0e4259e8ab6fa8",
+    "hash": "8f4e47dcba02a8f81141045afc33da33c9e337bc3bd8a94244fcda844ab2089b"
+  },
+  {
+    "seq": 13,
+    "created_at": "2026-10-17T16:58:35.400902+00:00",
+    "event_type": "agent.proposed",
+    "actor": "agent",
+    "payload": {
+      "tool": "pay_bill",
+      "args": {
+        "bill_id": 3,
+        "from_account_id": 2
+      },
+      "plan_id": "plan-69feb31964"
+    },
+    "prev_hash": "8f4e47dcba02a8f81141045afc33da33c9e337bc3bd8a94244fcda844ab2089b",
+    "hash": "bbde48d4e30a4dbe99c10d86df5c49a24dc3416c8ca8eb93b791242d09a3ff45"
+  },
+  {
+    "seq": 14,
+    "created_at": "2026-10-17T16:58:35.400902+00:00",
+    "event_type": "policy.verdict",
+    "actor": "policy",
+    "payload": {
+      "tool": "pay_bill",
+      "tier": "T3",
+      "requires": [
+        "confirm",
+        "otp"
+      ],
+      "reasons": [
+        "OVER_TXN_LIMIT"
+      ],
+      "stage": "proposal",
+      "action_id": 2,
+      "cost_breakdown": {
+        "kind": "payment",
+        "bill_id": 3,
+        "payee_id": 1,
+        "payee_name": "Shenzhen Polytechnic International University",
+        "payee_account_ref": "4100 2026 0000 8815",
+        "amount_minor": 1200000,
+        "currency": "CNY",
+        "fee_minor": 0,
+        "total_minor": 1200000,
+        "home_currency": "MYR",
+        "home_equivalent_minor": 732512
+      }
+    },
+    "prev_hash": "bbde48d4e30a4dbe99c10d86df5c49a24dc3416c8ca8eb93b791242d09a3ff45",
+    "hash": "d5b4790ba9bd2ec5046e424453b6440317cf9cc6dc8b4936bf3edb63dfa41eb2"
+  },
+  {
+    "seq": 15,
+    "created_at": "2026-10-17T16:58:38.205604+00:00",
+    "event_type": "agent.proposed",
+    "actor": "agent",
+    "payload": {
+      "tool": "respond_to_user",
+      "args": {
+        "text": "Yes, you can pay before 15 Nov 2026. I've prepared two steps, both pending your approval (each needs confirmation and an OTP because they're over the transaction limit):\n1. Convert MYR 7,400.49 to CNY via RemitFast (simulated). Total cost is MYR 96.81, and it arrives in about 4 hours.\n2. Pay CNY 12,000.00 to the university.\nNothing has moved yet. The quote expires in 10 minutes.",
+        "text_en": "Yes, you can pay before 15 Nov 2026. I've prepared two steps, both pending your approval (each needs confirmation and an OTP because they're over the transaction limit):\n1. Convert MYR 7,400.49 to CNY via RemitFast (simulated). Total cost is MYR 96.81, and it arrives in about 4 hours.\n2. Pay CNY 12,000.00 to the university.\nNothing has moved yet. The quote expires in 10 minutes."
+      },
+      "plan_id": null
+    },
+    "prev_hash": "d5b4790ba9bd2ec5046e424453b6440317cf9cc6dc8b4936bf3edb63dfa41eb2",
+    "hash": "cf6ee4ddbcd13e46b7d774c264cabb5d5442f105b26e3d2231f72ac33a13cf85"
+  },
+  {
+    "seq": 16,
+    "created_at": "2026-10-17T16:58:38.205604+00:00",
+    "event_type": "policy.verdict",
+    "actor": "policy",
+    "payload": {
+      "tool": "respond_to_user",
+      "tier": "T0",
+      "requires": [],
+      "reasons": [],
+      "stage": "proposal"
+    },
+    "prev_hash": "cf6ee4ddbcd13e46b7d774c264cabb5d5442f105b26e3d2231f72ac33a13cf85",
+    "hash": "fd139bf47cdf0dc0dd7256af5524d84295c60352feae5369a6697feb31f54fd3"
+  },
+  {
+    "seq": 17,
+    "created_at": "2026-10-17T16:58:38.238098+00:00",
+    "event_type": "user.confirmed",
+    "actor": "user",
+    "payload": {
+      "action_id": 1,
+      "tool": "convert_currency"
+    },
+    "prev_hash": "fd139bf47cdf0dc0dd7256af5524d84295c60352feae5369a6697feb31f54fd3",
+    "hash": "dd010488b46b9db7e06505a6f1b1242a415eef7527f75672721e7f863c0cfa6a"
+  },
+  {
+    "seq": 18,
+    "created_at": "2026-10-17T16:58:38.249253+00:00",
+    "event_type": "user.otp_verified",
+    "actor": "user",
+    "payload": {
+      "action_id": 1,
+      "tool": "convert_currency"
+    },
+    "prev_hash": "dd010488b46b9db7e06505a6f1b1242a415eef7527f75672721e7f863c0cfa6a",
+    "hash": "1ca0f191258f5a84a1b8ab29dd61a9c6387b912ce5ee78449e749a0da25a2743"
+  },
+  {
+    "seq": 19,
+    "created_at": "2026-10-17T16:58:38.249253+00:00",
+    "event_type": "policy.verdict",
+    "actor": "policy",
+    "payload": {
+      "action_id": 1,
+      "tool": "convert_currency",
+      "tier": "T3",
+      "reasons": [
+        "OVER_TXN_LIMIT"
+      ],
+      "stage": "execution"
+    },
+    "prev_hash": "1ca0f191258f5a84a1b8ab29dd61a9c6387b912ce5ee78449e749a0da25a2743",
+    "hash": "dc93d9c1390299f6307140f33feb1b0161beb7335db27da39253459e8f5d2af6"
+  },
+  {
+    "seq": 20,
+    "created_at": "2026-10-17T16:58:38.249253+00:00",
+    "event_type": "action.executed",
+    "actor": "system",
+    "payload": {
+      "action_id": 1,
+      "tool": "convert_currency",
+      "posting_id": 83,
+      "receipt": {
+        "kind": "conversion",
+        "provider_name": "RemitFast (simulated)",
+        "from_currency": "MYR",
+        "to_currency": "CNY",
+        "amount_minor": 740049,
+        "fee_minor": 800,
+        "markup_cost_minor": 8881,
+        "amount_received_minor": 1197800,
+        "mid_rate": "1.6382",
+        "offered_rate": "1.6185416",
+        "business_date": "2026-10-15",
+        "requoted": false
+      }
+    },
+    "prev_hash": "dc93d9c1390299f6307140f33feb1b0161beb7335db27da39253459e8f5d2af6",
+    "hash": "2dba756c7673409ca194208b9fcd6a0ca54392b8f7deef21703ecb4a67ccd745"
+  },
+  {
+    "seq": 21,
+    "created_at": "2026-10-17T16:58:38.263892+00:00",
+    "event_type": "user.confirmed",
+    "actor": "user",
+    "payload": {
+      "action_id": 2,
+      "tool": "pay_bill"
+    },
+    "prev_hash": "2dba756c7673409ca194208b9fcd6a0ca54392b8f7deef21703ecb4a67ccd745",
+    "hash": "e50865a77186c033bd6803ff44d7d52ff72927adbffe096b434a1f9475a37d4a"
+  },
+  {
+    "seq": 22,
+    "created_at": "2026-10-17T16:58:38.273417+00:00",
+    "event_type": "user.otp_verified",
+    "actor": "user",
+    "payload": {
+      "action_id": 2,
+      "tool": "pay_bill"
+    },
+    "prev_hash": "e50865a77186c033bd6803ff44d7d52ff72927adbffe096b434a1f9475a37d4a",
+    "hash": "c4bd8f7d1a5bafd270078a2ef246d4325428fce287127673ac98c08b3f1a61d6"
+  },
+  {
+    "seq": 23,
+    "created_at": "2026-10-17T16:58:38.273417+00:00",
+    "event_type": "policy.verdict",
+    "actor": "policy",
+    "payload": {
+      "action_id": 2,
+      "tool": "pay_bill",
+      "tier": "T3",
+      "reasons": [
+        "OVER_TXN_LIMIT"
+      ],
+      "stage": "execution"
+    },
+    "prev_hash": "c4bd8f7d1a5bafd270078a2ef246d4325428fce287127673ac98c08b3f1a61d6",
+    "hash": "b72da403dc69aabc0cd0cd06aca46564d82a401b2d3b8b85a77046f884e69d1c"
+  },
+  {
+    "seq": 24,
+    "created_at": "2026-10-17T16:58:38.273417+00:00",
+    "event_type": "action.executed",
+    "actor": "system",
+    "payload": {
+      "action_id": 2,
+      "tool": "pay_bill",
+      "posting_id": 84,
+      "receipt": {
+        "kind": "payment",
+        "bill_id": 3,
+        "payee_name": "Shenzhen Polytechnic International University",
+        "payee_account_ref": "4100 2026 0000 8815",
+        "amount_minor": 1200000,
+        "currency": "CNY",
+        "business_date": "2026-10-15"
+      }
+    },
+    "prev_hash": "b72da403dc69aabc0cd0cd06aca46564d82a401b2d3b8b85a77046f884e69d1c",
+    "hash": "f3d88e8e0ee545e15191c71a69cceb365777117042253c935fb3f37667e012ad"
+  },
+  {
+    "seq": 25,
+    "created_at": "2026-10-17T16:58:38.401475+00:00",
+    "event_type": "document.uploaded",
+    "actor": "user",
+    "payload": {
+      "document_id": 2,
+      "filename": "Pasted message",
+      "kind": "message",
+      "languages": [
+        "ms"
+      ],
+      "source": "paste",
+      "extractor": "live",
+      "verified_fields": [
+        "amount",
+        "bank_name",
+        "currency",
+        "payee_account",
+        "payee_name"
+      ],
+      "unverified_fields": [],
+      "bill_id": 4
+    },
+    "prev_hash": "f3d88e8e0ee545e15191c71a69cceb365777117042253c935fb3f37667e012ad",
+    "hash": "88c5eb8e6ecbf5d45f946464bba422bc3f6169333e3bb89c5a393d81ba93461c"
+  },
+  {
+    "seq": 26,
+    "created_at": "2026-10-17T16:58:38.401475+00:00",
+    "event_type": "claims.checked",
+    "actor": "policy",
+    "payload": {
+      "document_id": 2,
+      "origin": "live",
+      "model": "claude-sonnet-5-5",
+      "claims": 10,
+      "dropped": 0,
+      "conclusions": [
+        {
+          "rule": "R1",
+          "severity": "block",
+          "raises": "PAYEE_NOT_OFFICIAL"
+        },
+        {
+          "rule": "R2",
+          "severity": "block",
+          "raises": "THIRD_PARTY_DISCOUNT"
+        },
+        {
+          "rule": "R3",
+          "severity": "block",
+          "raises": "THIRD_PARTY_DISCOUNT"
+        },
+        {
+          "rule": "R4",
+          "severity": "block",
+          "raises": "THIRD_PARTY_DISCOUNT"
+        },
+        {
+          "rule": "R7",
+          "severity": "block",
+          "raises": "SCAM_PATTERN"
+        },
+        {
+          "rule": "R8",
+          "severity": "warn",
+          "raises": "NEW_PAYEE"
+        }
+      ]
+    },
+    "prev_hash": "88c5eb8e6ecbf5d45f946464bba422bc3f6169333e3bb89c5a393d81ba93461c",
+    "hash": "8432e03493453557947ca20eec5245593b3d8ec515bafc1344e7d6ef9de8d5e1"
+  },
+  {
+    "seq": 27,
+    "created_at": "2026-10-17T16:58:38.401475+00:00",
+    "event_type": "document.flagged",
+    "actor": "policy",
+    "payload": {
+      "document_id": 2,
+      "filename": "Pasted message",
+      "trust_flag": "trusted",
+      "signals": [
+        "PAYEE_NOT_OFFICIAL",
+        "THIRD_PARTY_DISCOUNT",
+        "SCAM_PATTERN"
+      ],
+      "hidden_text": []
+    },
+    "prev_hash": "8432e03493453557947ca20eec5245593b3d8ec515bafc1344e7d6ef9de8d5e1",
+    "hash": "e953de7b1261390c8f563db55e4ffee4926e84107bf9b66a2f062c9baa5d3053"
+  },
+  {
+    "seq": 28,
+    "created_at": "2026-10-17T16:58:54.382531+00:00",
+    "event_type": "agent.proposed",
+    "actor": "agent",
+    "payload": {
+      "tool": "read_document",
+      "args": {
+        "document_id": 2
+      },
+      "plan_id": null
+    },
+    "prev_hash": "e953de7b1261390c8f563db55e4ffee4926e84107bf9b66a2f062c9baa5d3053",
+    "hash": "220f2e20265acba763a10905d90e52c56e4144cceff2de4483c4e6467ef48c84"
+  },
+  {
+    "seq": 29,
+    "created_at": "2026-10-17T16:58:54.382531+00:00",
+    "event_type": "policy.verdict",
+    "actor": "policy",
+    "payload": {
+      "tool": "read_document",
+      "tier": "T0",
+      "requires": [],
+      "reasons": [],
+      "stage": "proposal"
+    },
+    "prev_hash": "220f2e20265acba763a10905d90e52c56e4144cceff2de4483c4e6467ef48c84",
+    "hash": "013b5d0b774a7280e3d1e3d23bab9eaccbe3aaf462e129d8ea49d59c6e82b7d7"
+  },
+  {
+    "seq": 30,
+    "created_at": "2026-10-17T16:58:54.394296+00:00",
+    "event_type": "agent.proposed",
+    "actor": "agent",
+    "payload": {
+      "tool": "check_claims",
+      "args": {
+        "document_id": 2
+      },
+      "plan_id": null
+    },
+    "prev_hash": "013b5d0b774a7280e3d1e3d23bab9eaccbe3aaf462e129d8ea49d59c6e82b7d7",
+    "hash": "eaec70134d8dc97dd2fc285549a101a2b7950000c819438d006591ef06a153a4"
+  },
+  {
+    "seq": 31,
+    "created_at": "2026-10-17T16:58:54.394296+00:00",
+    "event_type": "policy.verdict",
+    "actor": "policy",
+    "payload": {
+      "tool": "check_claims",
+      "tier": "T0",
+      "requires": [],
+      "reasons": [],
+      "stage": "proposal"
+    },
+    "prev_hash": "eaec70134d8dc97dd2fc285549a101a2b7950000c819438d006591ef06a153a4",
+    "hash": "8d9a93dc32d7df948e783f4c40996be73ca44ad7265d7b77b2aca2069c0e46fb"
+  },
+  {
+    "seq": 32,
+    "created_at": "2026-10-17T16:58:57.544503+00:00",
+    "event_type": "agent.proposed",
+    "actor": "agent",
+    "payload": {
+      "tool": "respond_to_user",
+      "args": {
+        "text": "Document 2 is a message, not a real invoice, and it looks like a scam. It offers 15% off your tuition if you pay CNY 10,200 to an individual, Lim Wei Jie. The university says it never uses payment agents or third-party discounts. The account isn't the university's, whose registered account ends in 8815. The message also pushes you to pay today and keep it secret. Don't pay it. Use the official invoice and contact the finance office directly.",
+        "text_en": "Document 2 is a message, not a real invoice, and it looks like a scam. It offers 15% off your tuition if you pay CNY 10,200 to an individual, Lim Wei Jie. The university says it never uses payment agents or third-party discounts. The account isn't the university's, whose registered account ends in 8815. The message also pushes you to pay today and keep it secret. Don't pay it. Use the official invoice and contact the finance office directly."
+      },
+      "plan_id": null
+    },
+    "prev_hash": "8d9a93dc32d7df948e783f4c40996be73ca44ad7265d7b77b2aca2069c0e46fb",
+    "hash": "dc2d0e911ecdd85ea92e4d59ee459c8de16a532e9579ffdac2048066ecf0c67e"
+  },
+  {
+    "seq": 33,
+    "created_at": "2026-10-17T16:58:57.544503+00:00",
+    "event_type": "policy.verdict",
+    "actor": "policy",
+    "payload": {
+      "tool": "respond_to_user",
+      "tier": "T0",
+      "requires": [],
+      "reasons": [],
+      "stage": "proposal"
+    },
+    "prev_hash": "dc2d0e911ecdd85ea92e4d59ee459c8de16a532e9579ffdac2048066ecf0c67e",
+    "hash": "dd3a8b1c7eff47a320557b6ee0fe730e4d3b900a93d1ae78bbb69eff7f7c5e58"
+  },
+  {
+    "seq": 34,
+    "created_at": "2026-10-17T16:59:00.303788+00:00",
+    "event_type": "agent.proposed",
+    "actor": "agent",
+    "payload": {
+      "tool": "pay_bill",
+      "args": {
+        "bill_id": 4,
+        "from_account_id": 2
+      },
+      "plan_id": "plan-922450f4b9"
+    },
+    "prev_hash": "dd3a8b1c7eff47a320557b6ee0fe730e4d3b900a93d1ae78bbb69eff7f7c5e58",
+    "hash": "afdb894aa4f4961e6dc306ce941e0c936d1ba8ded8be4794b5a509fe2fe8c36c"
+  },
+  {
+    "seq": 35,
+    "created_at": "2026-10-17T16:59:00.303788+00:00",
+    "event_type": "policy.verdict",
+    "actor": "policy",
+    "payload": {
+      "tool": "pay_bill",
+      "tier": "REFUSED",
+      "requires": [],
+      "reasons": [
+        "PAYEE_NOT_OFFICIAL",
+        "THIRD_PARTY_DISCOUNT",
+        "SCAM_PATTERN"
+      ],
+      "stage": "proposal",
+      "action_id": 3,
+      "cost_breakdown": {
+        "kind": "payment",
+        "bill_id": 4,
+        "payee_id": 4,
+        "payee_name": "Lim Wei Jie",
+        "payee_account_ref": "6217 9988 2041 5530",
+        "amount_minor": 1020000,
+        "currency": "CNY",
+        "fee_minor": 0,
+        "total_minor": 1020000,
+        "home_currency": "MYR",
+        "home_equivalent_minor": 622635
+      }
+    },
+    "prev_hash": "afdb894aa4f4961e6dc306ce941e0c936d1ba8ded8be4794b5a509fe2fe8c36c",
+    "hash": "63c8a837df43956adb74311e00e0441bddde4c876185afad6eafd4b7d341b187"
+  },
+  {
+    "seq": 36,
+    "created_at": "2026-10-17T16:59:00.303788+00:00",
+    "event_type": "action.refused",
+    "actor": "policy",
+    "payload": {
+      "action_id": 3,
+      "tool": "pay_bill",
+      "reasons": [
+        "PAYEE_NOT_OFFICIAL",
+        "THIRD_PARTY_DISCOUNT",
+        "SCAM_PATTERN"
+      ],
+      "stage": "proposal"
+    },
+    "prev_hash": "63c8a837df43956adb74311e00e0441bddde4c876185afad6eafd4b7d341b187",
+    "hash": "87b5f9594eb9c780d2b49b11da936c64a0f07a09780e621bb9fa3588e3109143"
+  },
+  {
+    "seq": 37,
+    "created_at": "2026-10-17T16:59:03.151441+00:00",
+    "event_type": "agent.proposed",
+    "actor": "agent",
+    "payload": {
+      "tool": "respond_to_user",
+      "args": {
+        "text": "No. I tried to prepare that payment to Lim Wei Jie (CNY 10,200.00), and the policy engine refused it. The payee isn't the university's official account. The offer is a third-party discount, and it matches a known scam pattern. No money moved. Please pay only the official invoice. If you have doubts, contact the university finance office through a channel you already know, such as its official website or phone number.",
+        "text_en": "No. I tried to prepare that payment to Lim Wei Jie (CNY 10,200.00), and the policy engine refused it. The payee isn't the university's official account. The offer is a third-party discount, and it matches a known scam pattern. No money moved. Please pay only the official invoice. If you have doubts, contact the university finance office through a channel you already know, such as its official website or phone number."
+      },
+      "plan_id": null
+    },
+    "prev_hash": "87b5f9594eb9c780d2b49b11da936c64a0f07a09780e621bb9fa3588e3109143",
+    "hash": "5c0ac39071489363f6421b58dbadae72b96260620cad49ca9f6cdeadbd2bc7a7"
+  },
+  {
+    "seq": 38,
+    "created_at": "2026-10-17T16:59:03.151441+00:00",
+    "event_type": "policy.verdict",
+    "actor": "policy",
+    "payload": {
+      "tool": "respond_to_user",
+      "tier": "T0",
+      "requires": [],
+      "reasons": [],
+      "stage": "proposal"
+    },
+    "prev_hash": "5c0ac39071489363f6421b58dbadae72b96260620cad49ca9f6cdeadbd2bc7a7",
+    "hash": "faeda50141552346b8ae4df09dc374ddc43a9b940b2e4b04daddf42a856bd4cd"
+  },
+  {
+    "seq": 39,
+    "created_at": "2026-10-17T16:59:03.195449+00:00",
+    "event_type": "document.uploaded",
+    "actor": "user",
+    "payload": {
+      "document_id": 3,
+      "filename": "mule_message_en.txt",
+      "kind": "message",
+      "languages": [
+        "en"
+      ],
+      "source": "demo event",
+      "extractor": "live",
+      "verified_fields": [
+        "amount",
+        "bank_name",
+        "currency",
+        "payee_account",
+        "payee_name"
+      ],
+      "unverified_fields": [],
+      "bill_id": 5
+    },
+    "prev_hash": "faeda50141552346b8ae4df09dc374ddc43a9b940b2e4b04daddf42a856bd4cd",
+    "hash": "9eb9c900d8630420ad5a2394f38bde485d20c0e53d6be6fa1d90fc0dae786bbd"
+  },
+  {
+    "seq": 40,
+    "created_at": "2026-10-17T16:59:03.195449+00:00",
+    "event_type": "claims.checked",
+    "actor": "policy",
+    "payload": {
+      "document_id": 3,
+      "origin": "live",
+      "model": "claude-sonnet-5-5",
+      "claims": 4,
+      "dropped": 0,
+      "conclusions": [
+        {
+          "rule": "R8",
+          "severity": "warn",
+          "raises": "NEW_PAYEE"
+        }
+      ]
+    },
+    "prev_hash": "9eb9c900d8630420ad5a2394f38bde485d20c0e53d6be6fa1d90fc0dae786bbd",
+    "hash": "22b5f2112b1f12cdbc69439f610adc5fc13106f5ac964763a36d59f9a8dd240f"
+  },
+  {
+    "seq": 41,
+    "created_at": "2026-10-17T16:59:14.942943+00:00",
+    "event_type": "agent.proposed",
+    "actor": "agent",
+    "payload": {
+      "tool": "read_document",
+      "args": {
+        "document_id": 3
+      },
+      "plan_id": null
+    },
+    "prev_hash": "22b5f2112b1f12cdbc69439f610adc5fc13106f5ac964763a36d59f9a8dd240f",
+    "hash": "1b268539fabd16e436583f3c21b69110e4eb27b275e8269cc968ad16469c24f9"
+  },
+  {
+    "seq": 42,
+    "created_at": "2026-10-17T16:59:14.942943+00:00",
+    "event_type": "policy.verdict",
+    "actor": "policy",
+    "payload": {
+      "tool": "read_document",
+      "tier": "T0",
+      "requires": [],
+      "reasons": [],
+      "stage": "proposal"
+    },
+    "prev_hash": "1b268539fabd16e436583f3c21b69110e4eb27b275e8269cc968ad16469c24f9",
+    "hash": "a6cc4704519960ba78780c30422224f8ea06877cf4c3e0b44fd5165eae229230"
+  },
+  {
+    "seq": 43,
+    "created_at": "2026-10-17T16:59:14.956307+00:00",
+    "event_type": "agent.proposed",
+    "actor": "agent",
+    "payload": {
+      "tool": "check_claims",
+      "args": {
+        "document_id": 3
+      },
+      "plan_id": null
+    },
+    "prev_hash": "a6cc4704519960ba78780c30422224f8ea06877cf4c3e0b44fd5165eae229230",
+    "hash": "7d08d565d330f33ba0fd279abbf9c3f93b6ea358f704c376f0bfb9f95c148281"
+  },
+  {
+    "seq": 44,
+    "created_at": "2026-10-17T16:59:14.956307+00:00",
+    "event_type": "policy.verdict",
+    "actor": "policy",
+    "payload": {
+      "tool": "check_claims",
+      "tier": "T0",
+      "requires": [],
+      "reasons": [],
+      "stage": "proposal"
+    },
+    "prev_hash": "7d08d565d330f33ba0fd279abbf9c3f93b6ea358f704c376f0bfb9f95c148281",
+    "hash": "2bcb260bf5467a7f7fcb03cde98ea6994b49ca1330d03b346dcfaddf3e9befd5"
+  },
+  {
+    "seq": 45,
+    "created_at": "2026-10-17T16:59:18.461665+00:00",
+    "event_type": "agent.proposed",
+    "actor": "agent",
+    "payload": {
+      "tool": "respond_to_user",
+      "args": {
+        "text": "Document 3 is a message, not an invoice. It asks you to forward CNY 2,900.00 to \"my cousin's\" account: Zhou Min, Shenzhen Bay Commercial Bank, 6230 5511 0042 7788. \"Verified\" only means the file was read correctly. I couldn't verify any of these details, and the payee is new. Forwarding money to a stranger's account is a common mule scam pattern. I haven't proposed any payment. Please confirm with the sender through a channel you already know.",
+        "text_en": "Document 3 is a message, not an invoice. It asks you to forward CNY 2,900.00 to \"my cousin's\" account: Zhou Min, Shenzhen Bay Commercial Bank, 6230 5511 0042 7788. \"Verified\" only means the file was read correctly. I couldn't verify any of these details, and the payee is new. Forwarding money to a stranger's account is a common mule scam pattern. I haven't proposed any payment. Please confirm with the sender through a channel you already know."
+      },
+      "plan_id": null
+    },
+    "prev_hash": "2bcb260bf5467a7f7fcb03cde98ea6994b49ca1330d03b346dcfaddf3e9befd5",
+    "hash": "a9e0615185e2a85e60778987972a904deb36141251db9f820e3cfd8a3c03656c"
+  },
+  {
+    "seq": 46,
+    "created_at": "2026-10-17T16:59:18.461665+00:00",
+    "event_type": "policy.verdict",
+    "actor": "policy",
+    "payload": {
+      "tool": "respond_to_user",
+      "tier": "T0",
+      "requires": [],
+      "reasons": [],
+      "stage": "proposal"
+    },
+    "prev_hash": "a9e0615185e2a85e60778987972a904deb36141251db9f820e3cfd8a3c03656c",
+    "hash": "6d1fb060701f65f0a05b4347307f5e421c888dbf5b2e07c578a1c5efa9348028"
+  },
+  {
+    "seq": 47,
+    "created_at": "2026-10-17T16:59:21.506926+00:00",
+    "event_type": "agent.proposed",
+    "actor": "agent",
+    "payload": {
+      "tool": "pay_bill",
+      "args": {
+        "bill_id": 5,
+        "from_account_id": 2
+      },
+      "plan_id": "plan-ffbdb8d6d4"
+    },
+    "prev_hash": "6d1fb060701f65f0a05b4347307f5e421c888dbf5b2e07c578a1c5efa9348028",
+    "hash": "600ac3c3c9cb12c89373b2b458eb822e019a1f1f1bdf0728698f2e29e8218a93"
+  },
+  {
+    "seq": 48,
+    "created_at": "2026-10-17T16:59:21.506926+00:00",
+    "event_type": "policy.verdict",
+    "actor": "policy",
+    "payload": {
+      "tool": "pay_bill",
+      "tier": "REFUSED",
+      "requires": [],
+      "reasons": [
+        "MONEY_MULE_PATTERN"
+      ],
+      "stage": "proposal",
+      "action_id": 4,
+      "cost_breakdown": {
+        "kind": "payment",
+        "bill_id": 5,
+        "payee_id": 5,
+        "payee_name": "Zhou Min",
+        "payee_account_ref": "6230 5511 0042 7788",
+        "amount_minor": 290000,
+        "currency": "CNY",
+        "fee_minor": 0,
+        "total_minor": 290000,
+        "home_currency": "MYR",
+        "home_equivalent_minor": 177024
+      }
+    },
+    "prev_hash": "600ac3c3c9cb12c89373b2b458eb822e019a1f1f1bdf0728698f2e29e8218a93",
+    "hash": "6bab2714e46bd7a50019e38cac8371fd730214bf47963e94f981dfe078f4c921"
+  },
+  {
+    "seq": 49,
+    "created_at": "2026-10-17T16:59:21.506926+00:00",
+    "event_type": "action.refused",
+    "actor": "policy",
+    "payload": {
+      "action_id": 4,
+      "tool": "pay_bill",
+      "reasons": [
+        "MONEY_MULE_PATTERN"
+      ],
+      "stage": "proposal"
+    },
+    "prev_hash": "6bab2714e46bd7a50019e38cac8371fd730214bf47963e94f981dfe078f4c921",
+    "hash": "e7ac429c0dd15ef12828b375d060358a633de8cdd80564b0caef75190c0f78cb"
+  },
+  {
+    "seq": 50,
+    "created_at": "2026-10-17T16:59:28.619163+00:00",
+    "event_type": "agent.proposed",
+    "actor": "agent",
+    "payload": {
+      "tool": "respond_to_user",
+      "args": {
+        "text": "No. I prepared the CNY 2,900.00 payment to Zhou Min, and the policy engine refused it. The reason is a money-mule pattern: you'd be forwarding money to an unverified stranger's account. No money moved. Please don't send it. Contact the sender through a channel you already know, and report the message if it's unsolicited.",
+        "text_en": "No. I prepared the CNY 2,900.00 payment to Zhou Min, and the policy engine refused it. The reason is a money-mule pattern: you'd be forwarding money to an unverified stranger's account. No money moved. Please don't send it. Contact the sender through a channel you already know, and report the message if it's unsolicited."
+      },
+      "plan_id": null
+    },
+    "prev_hash": "e7ac429c0dd15ef12828b375d060358a633de8cdd80564b0caef75190c0f78cb",
+    "hash": "2108c45659666e4541bb9691b4ad779fed5032e807838dbfb87d018804c0ff34"
+  },
+  {
+    "seq": 51,
+    "created_at": "2026-10-17T16:59:28.619163+00:00",
+    "event_type": "policy.verdict",
+    "actor": "policy",
+    "payload": {
+      "tool": "respond_to_user",
+      "tier": "T0",
+      "requires": [],
+      "reasons": [],
+      "stage": "proposal"
+    },
+    "prev_hash": "2108c45659666e4541bb9691b4ad779fed5032e807838dbfb87d018804c0ff34",
+    "hash": "0a8dbb992bd538dc8b66e654c6203c743a640a3798daa5e095573bcc2decb016"
+  }
+]

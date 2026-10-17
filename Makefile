@@ -1,4 +1,4 @@
-.PHONY: up down test reset logs demo-docs claims-cache eval-claims e2e check-ui demo-video demo-subtitles
+.PHONY: up down test reset logs demo-docs claims-cache eval-claims e2e check-ui demo-video demo-subtitles evidence
 
 # Build and start the backend (port 8000) and frontend (port 3000). Ctrl+C stops them.
 up:
@@ -71,3 +71,13 @@ demo-video:
 # bridge-demo-subtitled.mp4 and voiceover-script.md in evidence/video/. The app must be running.
 demo-subtitles:
 	node scripts/video/subtitles.ts
+
+# Sandbox operation logs (scripts/evidence/sandbox_run.py): one full demo run through the API,
+# from a reset, with every log in evidence/sandbox-run/. MODE as for demo-video. Needs python3.
+evidence:
+	@if [ "$(MODE)" = "live" ]; then docker compose up -d --build; \
+		else docker compose -f docker-compose.yml -f docker-compose.scripted.yml up -d --build; fi
+	@for i in $$(seq 120); do curl -fs http://localhost:8000/health | grep -q '"agent_mode":"$(MODE)"' && break; sleep 1; done; \
+		curl -fs http://localhost:8000/health | grep -q '"agent_mode":"$(MODE)"' \
+		|| { echo "The backend is not in $(MODE) mode (for live, set AGENT_MODE=live and ANTHROPIC_API_KEY in .env)."; exit 1; }
+	python3 scripts/evidence/sandbox_run.py; status=$$?; docker compose up -d; exit $$status
